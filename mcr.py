@@ -14,18 +14,21 @@ class MCRPlanner():
 
     def discreteMCR(self, N_raise = 1000):
         #setup stuff
-        s_min = self.cc.edgeCover(self.start, self.goal)
-        k = self.cc.cover(self.start).union(cc.cover(self.goal))
+        startCover = self.cc.cover(self.start)
+        goalCover = self.cc.cover(self.goal)
+        startGoalEdgeCover = self.cc.edgeCover(self.start, self.goal)
+        s_min =  startCover.mergeWith(startGoalEdgeCover).score
+        k = startCover.score + goalCover.score
         G = initializeGraph()
         N = 1
         while True:
             self.expandRoadmap(G, k)
             self.computeMinExplanations(G)
-            sMin = G.goal.cover
+            s_min = G.covers[goal].score
             if N % N_raise == 0:
                 k += 1
-            if k >= size(s_min):
-                k = size(s_min) - 1
+            if k >= s_min:
+                k = s_min - 1
             N += 1
 
     def initializeGraph(self):
@@ -37,7 +40,7 @@ class MCRPlanner():
         E[goal] = [self.start]
         graph = Graph(V,E)
         graph.covers[self.start] = self.cc.cover(start)
-        graph.covers[self.start] = self.cc.edgeCover(start, goal)
+        graph.covers[self.goal] = graph.covers[self.start].mergeWith(self.cc.edgeCover(start, goal))  # do i need to set this
         return graph
 
     def expandRoadmap(self, G, k, delta = 1):
@@ -53,7 +56,7 @@ class MCRPlanner():
     def closest(self, G, k, sampleConfig):
         GKReachableNodes = []
         for node in G.V:
-            if size(G.covers[node]) <= k:
+            if G.covers[node].score <= k:
                 GKReachableNodes.append(node)
         minIndex = np.argmin([self.robot.distance(q, sampleConfig) for q in GKReachableNodes])
         return GKReachableNodes[minIndex]
@@ -64,8 +67,10 @@ class MCRPlanner():
                     np.array(sample) - np.array(closest))
         bisectionCount = 0
         while True:
-            qPrimeCover = G.covers[closest].union(self.cc.edgeCover(closest, qPrime))
-            if size(qPrimeCover) <= k:
+            closestCover = G.covers[closest]
+            edgeCover = self.cc.edgeCover(closest, qPrime)
+            qPrimeCover = closestCover.mergeWith(edgeCover)
+            if qPrimeCover.score <= k:
                 break
             elif bisectionCount < bisectionLimit:
                 bisectionCount += 1 
@@ -88,14 +93,14 @@ class MCRPlanner():
             raise NotImplementedError()
 
     def greedySearch(self, G, start):
-        def coverSize(entry):
+        def coverScore(entry):
             return entry[0]
-        def coverSet(entry):
+        def coverObj(entry):
             return entry[1]
         def entryId(entry):
             return entry[2]
-        def makeEntry(coverSet, entryId):
-            return [size(coverSet), coverSet, entryId]
+        def makeEntry(coverObj, entryId):
+            return [coverObj.score, coverObj, entryId]
 
         finalCovers = {}
         cameFrom = {}
@@ -122,13 +127,13 @@ class MCRPlanner():
                 # only manipulate those not in finalCovers
                 if neighbor not in finalCovers:
                     # solve neighbor cover with edge cover from vertexName
-                    neighborCover = vertexCover.union(self.cc.edgeCover(vertexName, neighbor))
+                    neighborCover = vertexCover.mergeWith(self.cc.edgeCover(vertexName, neighbor))
                     neighborEntry = makeEntry(neighborCover, neighbor)
                     if neighbor not in coversSoFar:
                         coversSoFar[neighbor] = neighborEntry
                         heapq.heappush(heap, neighborEntry)
                         cameFrom[neighbor] = vertexName
-                    elif coverSize(neighborEntry) < coverSize(coversSoFar[neighbor]):
+                    elif neighborCover.score < coversSoFar[neighbor].score:
                         # mark existing entry in heap as removed. Can just use the reference to the entry in the hashmap
                         coversSoFar[neighbor][2] = "REMOVED"
                         # override the value in dict of neighbor to new one

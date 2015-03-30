@@ -1,5 +1,6 @@
 import polygonhelper
 import numpy as np
+import cover
 
 class CoverCalculator():
     def __init__(self, robot, world):
@@ -9,21 +10,22 @@ class CoverCalculator():
 
     #check that they are in bounds elsewhere, here we assume they are
     def edgeCover(self, q_from, q_to):
-        edgeCover = set()
+        #make empty cover and build it up
+        edgeCover = Cover(set())
         configurationsToCheck = self.buildInBetweenConfigurations(q_from, q_to)
         for q in configurationsToCheck:
-            edgeCover = edgeCover.union(cover(q))
-                        
+            coverQ = cover(q)
+            edgeCover = edgeCover.mergeWith(coverQ)         
         return edgeCover
 
     def cover(self, q):
-        cover = set()
+        coverQ = set()
         self.robot.moveToConfiguration(q)
         for polygon in self.robot.position:
             for obstacle in self.world.obstacles:
                 if polygon.doesIntersect(obstacle.polygon):
-                    cover.add(obstacle.id)
-        return cover
+                    coverQ.add(obstacle)
+        return Cover(coverQ)
 
     def buildInBetweenConfigurations(self, q_from, q_to):
         # print 'q_from', q_from

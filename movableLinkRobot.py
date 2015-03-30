@@ -99,3 +99,17 @@ class MovableLinkRobot(Robot):
                 if not self.world.inRange(point.x, point.y):
                     return False
         return True
+
+    def distance(self, q1, q2):
+        assert(len(q1) == len(q2))
+        angleFactor = 0.2
+        # get euclidean distance for the origin of the two configurations
+        euclideanDistance += math.sqrt((q1[0] - q2[0]) ** 2 + (q1[1] - q2[1]) ** 2)
+        # get angle distance for the joint angles 
+        jointAngleSum = 0
+        for i in range(2, len(q1)):
+            jointAngleSum += (q1[i] - q2[i]) ** 2
+        jointAngleDistance = math.sqrt(jointAngleSum)
+        distance = euclideanDistance + jointAngleDistance * angleFactor
+        return distance
+
