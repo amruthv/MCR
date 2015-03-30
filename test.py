@@ -6,6 +6,39 @@ import pprint
 from collisionchecker import *
 from Tkinter import *
 from simulator import *
+from movableLinkRobot import MovableLinkRobot
+
+
+def testMoveableLinkArm():
+    master = Tk()
+    canvas = Canvas(master, width=500, height=500)
+    canvas.pack()
+    sim = Simulator(500, 500)
+    # print canvas.winfo_height()
+    world = World(500,500, [])
+    links = []
+    links.append([0, [(50,50), (90,50), (90,70), (50,70)]])
+    links.append([0, [(90,50), (130,50), (130,70), (90,70)]])
+    links.append([0, [(130,50), (170,50), (170,70), (130,70)]])
+    linkRobot = MovableLinkRobot(links, world)
+    sim.drawRobot(linkRobot, canvas)
+    sim.drawPoint([50,50], canvas)
+    sim.drawPoint([100,100], canvas)
+    raw_input()
+    canvas.delete("all")
+    linkRobot.moveToConfiguration([100,100, 0, 0, 0])
+    sim.drawRobot(linkRobot, canvas)
+    sim.drawPoint([50,50], canvas)
+    sim.drawPoint([100,100], canvas)
+    raw_input()
+    canvas.delete("all")
+    linkRobot.moveToConfiguration([200,200, 0, 90, -90])
+    sim.drawRobot(linkRobot, canvas)
+    sim.drawPoint([50,50], canvas)
+    sim.drawPoint([100,100], canvas)
+    raw_input()
+
+
 
 
 def test1():
@@ -133,4 +166,5 @@ def test4():
 # test1()
 # test2()
 # test3()
-test4()
+# test4()
+testMoveableLinkArm()
