@@ -23,7 +23,7 @@ class CoverCalculator():
         self.robot.moveToConfiguration(q)
         for polygon in self.robot.position:
             for obstacle in self.world.obstacles:
-                if polygon.doesIntersect(obstacle.polygon):
+                if polygon.intersects(obstacle.polygon):
                     coverQ.add(obstacle)
         return Cover(coverQ)
 

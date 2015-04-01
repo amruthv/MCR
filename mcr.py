@@ -5,13 +5,14 @@ import heapq
 
 class MCRPlanner():
     # start and goal are both configurations
-    def __init__(self, robot, world, start, goal):
+    def __init__(self, robot, world, start, goal, sim):
         self.robot = robot
         self.world = world
         self.start = start
         self.goal = goal
         self.cc = covercalculator.CoverCalculator(robot, world)
         self.G = self.initializeGraph()
+        self.sim = sim
 
     def discreteMCR(self, N_raise = 10):
         #setup stuff
@@ -36,10 +37,11 @@ class MCRPlanner():
                 print '====================='
             if N % N_raise == 0:
                 k += 1
+                print 'k = ', k
             if k >= s_min:
                 k = s_min - 1
             N += 1
-            if s_min == 1:
+            if s_min == 0:
                 # print 'Got a collision free path'
                 break
             # print G.covers
@@ -62,7 +64,7 @@ class MCRPlanner():
         graph.covers[goal] = graph.covers[start].mergeWith(self.cc.edgeCover(start, goal))  # do i need to set this
         return graph
 
-    def expandRoadmap(self, G, k, delta = 10000):
+    def expandRoadmap(self, G, k, delta = 300):
         sampleConfig = self.robot.generateRandomConfiguration()
         # print 'sampleConfig = ', sampleConfig
         nearestConfig = self.closest(G,k,sampleConfig)
@@ -73,6 +75,7 @@ class MCRPlanner():
             if self.robot.distance(neighbor, q) < delta:
                 if q not in G.V:
                     G.addVertex(q)
+                    self.sim.drawPoint((q[0], q[1]))
                 G.addEdge(neighbor, q)
 
     def closest(self, G, k, sampleConfig):

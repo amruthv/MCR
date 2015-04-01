@@ -28,7 +28,7 @@ def testOneObstacleMiddle():
     canvas.pack()
     sim = Simulator(canvas, 500, 500)
 
-    obstacle1 = Obstacle([Point(200,20), Point(300,20), Point(300,150), Point(200,150)])
+    obstacle1 = Obstacle([(200,20), (300,20), (300,150), (200,150)])
     obstacles = [obstacle1]
     sim.drawObstacles(obstacles)
     world = World(500,500, obstacles)
@@ -52,15 +52,15 @@ def testOneObstacleMiddle():
 
 
 def testTwoDiffWeightObstacles():
-    # master = Tk()
-    # canvas = Canvas(master, width=500, height=500)
-    # canvas.pack()
-    # sim = Simulator(canvas, 500, 500)
+    master = Tk()
+    canvas = Canvas(master, width=500, height=500)
+    canvas.pack()
+    sim = Simulator(canvas, 500, 500)
 
-    obstacle1 = Obstacle([Point(200,20), Point(300,20), Point(300,150), Point(200,150)], 4)
-    obstacle2 = Obstacle([Point(200,150), Point(300,150), Point(300,500), Point(200,500)], 1)
+    obstacle1 = Obstacle([(200,20), (300,20), (300,150), (200,150)], 4)
+    obstacle2 = Obstacle([(200,150), (300,150), (300,500), (200,500)], 1)
     obstacles = [obstacle1, obstacle2]
-    # sim.drawObstacles(obstacles)
+    sim.drawObstacles(obstacles)
     world = World(500,500, obstacles)
 
     links = []
@@ -74,12 +74,11 @@ def testTwoDiffWeightObstacles():
     # linkRobot.moveToConfiguration(goal)
     # sim.drawRobot(linkRobot)
     # raw_input()
-    mcr = MCRPlanner(linkRobot, world, start, goal)
-    # try:
-    mcr.discreteMCR()
-        # cameFrom = 
-    # except KeyboardInterrupt:
-    #     drawGraph(sim, obstacles, mcr.G)
+    mcr = MCRPlanner(linkRobot, world, start, goal, sim)
+    try:
+        cameFrom = mcr.discreteMCR()
+    except KeyboardInterrupt:
+        drawGraph(sim, obstacles, mcr.G)
     # path = searcher.reconstructPath(cameFrom, goal)
     # drawPath(sim, obstacles, linkRobot, path)
 
@@ -88,9 +87,9 @@ def drawGraph(sim, obstacles, G):
     sim.drawObstacles(obstacles)
     for V in G.V:
         sim.drawPoint((V[0], V[1]))
-    for v1 in G.E:
-        for v2 in G.E[v1]:
-            sim.drawLine(v1[0], v1[1], v2[0], v2[1])
+    # for v1 in G.E:
+    #     for v2 in G.E[v1]:
+    #         sim.drawLine(v1[0], v1[1], v2[0], v2[1])
     raw_input()
 
 def drawPath(sim, obstacles, robot, path):
@@ -104,4 +103,5 @@ def drawPath(sim, obstacles, robot, path):
 
 # testNoObstacles()
 # testOneObstacleMiddle()
-cProfile.run('testTwoDiffWeightObstacles()')
+testTwoDiffWeightObstacles()
+# cProfile.run('testTwoDiffWeightObstacles()')

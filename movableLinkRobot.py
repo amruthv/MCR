@@ -1,8 +1,9 @@
-from polygonhelper import *
+# from polygonhelper import *
 from robot import *
 import numpy as np
 import math
 import random
+from shapely.geometry import Polygon
 
 class MovableLinkRobot(Robot):
     #polygonArr is an array of tuples (angle, array of points -- not polygon objects or point objects) e.g [(0,[([1,2],[3,4]]), (20,[[5,5],[6,6]]]) 
@@ -71,7 +72,7 @@ class MovableLinkRobot(Robot):
             for xPoint, yPoint in polygonPosition:
                 transformedPoint = transforms[polygonNumber].dot(np.array([xPoint, yPoint, 1]))
                 # transformedPolygonPoints.append(Point(transformedPoint[0], transformedPoint[1]))
-                transformedPolygonPoints.append(Point(transformedPoint[0] + q[0] - self.initialOrigin[0], transformedPoint[1] + q[1] - self.initialOrigin[1]))
+                transformedPolygonPoints.append((transformedPoint[0] + q[0] - self.initialOrigin[0], transformedPoint[1] + q[1] - self.initialOrigin[1]))
             positionOfRobot.append(Polygon(transformedPolygonPoints))
         self.position = positionOfRobot
 
@@ -95,8 +96,8 @@ class MovableLinkRobot(Robot):
 
     def inBounds(self):
         for polygon in self.position:
-            for point in polygon.points:
-                if not self.world.inRange(point.x, point.y):
+            for point in polygon.exterior.coords[:-1]:
+                if not self.world.inRange(point[0], point[1]):
                     return False
         return True
 

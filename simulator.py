@@ -1,4 +1,4 @@
-from polygonhelper import *
+# from polygonhelper import *
 from DrawingWindowStandalone import *
 from robot import *
 from world import *
@@ -27,9 +27,9 @@ class Simulator():
 
     def drawPolygon(self, polygon, color):
         points = []
-        for point in polygon.points:
-            points.append(point.x)
-            points.append(self.height - point.y)
+        for point in polygon.exterior.coords[:-1]:
+            points.append(point[0])
+            points.append(self.height - point[1])
         self.canvas.create_polygon(points, fill=color, width=1, outline='black')
         self.canvas.update()
 
