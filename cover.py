@@ -6,3 +6,9 @@ class Cover():
     #returns new Cover
     def mergeWith(self, otherCover):
         return Cover(self.cover.union(otherCover.cover))
+
+    def __str__(self):
+        return str(self.score)
+
+    def __repr__(self):
+        return self.__str__()

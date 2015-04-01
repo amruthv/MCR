@@ -16,7 +16,7 @@ class World():
 
 class Obstacle():
     #points is [Point(x1,y1), Point(x2,y2),...]
-    def __init__(self, points, weight):
+    def __init__(self, points, weight = 1):
         self.polygon = Polygon(points)
         self.weight = weight
         self.id = None

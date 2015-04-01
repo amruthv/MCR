@@ -1,4 +1,4 @@
-import mcrGraph
+from mcrGraph import MCRGraph
 import covercalculator
 import numpy as np
 import heapq
@@ -11,46 +11,68 @@ class MCRPlanner():
         self.start = start
         self.goal = goal
         self.cc = covercalculator.CoverCalculator(robot, world)
+        self.G = self.initializeGraph()
 
-    def discreteMCR(self, N_raise = 1000):
+    def discreteMCR(self, N_raise = 10):
         #setup stuff
         startCover = self.cc.cover(self.start)
         goalCover = self.cc.cover(self.goal)
         startGoalEdgeCover = self.cc.edgeCover(self.start, self.goal)
         s_min =  startCover.mergeWith(startGoalEdgeCover).score
+        print 'initial s_min', s_min
         k = startCover.score + goalCover.score
-        G = initializeGraph()
+        print 'initial k =',k 
+        G = self.G
         N = 1
         while True:
             self.expandRoadmap(G, k)
-            self.computeMinExplanations(G)
-            s_min = G.covers[goal].score
+            # print 'G.V', G.V
+            # print 'G.E', G.E
+            cameFrom = self.computeMinExplanations(G)
+            s_min = G.covers[self.goal].score
+            if N % 10 == 0:
+                print '====================='
+                print "s_min = ", s_min
+                print '====================='
             if N % N_raise == 0:
                 k += 1
             if k >= s_min:
                 k = s_min - 1
             N += 1
+            if s_min == 1:
+                # print 'Got a collision free path'
+                break
+            # print G.covers
+        print "took N = {0} iterations".format(N)
+        print 'final covers'
+        print G.covers
+        return cameFrom
 
     def initializeGraph(self):
+        start = self.start
+        goal = self.goal
         V = set()
-        V.add(self.start)
-        V.add(self.goal)
+        V.add(start)
+        V.add(goal)
         E = {}
-        E[start] = [self.goal]
-        E[goal] = [self.start]
-        graph = Graph(V,E)
-        graph.covers[self.start] = self.cc.cover(start)
-        graph.covers[self.goal] = graph.covers[self.start].mergeWith(self.cc.edgeCover(start, goal))  # do i need to set this
+        E[start] = [goal]
+        E[goal] = [start]
+        graph = MCRGraph(V,E)
+        graph.covers[start] = self.cc.cover(start)
+        graph.covers[goal] = graph.covers[start].mergeWith(self.cc.edgeCover(start, goal))  # do i need to set this
         return graph
 
-    def expandRoadmap(self, G, k, delta = 1):
-        sampleConfig = robot.generateRandomConfiguration()
+    def expandRoadmap(self, G, k, delta = 10000):
+        sampleConfig = self.robot.generateRandomConfiguration()
+        # print 'sampleConfig = ', sampleConfig
         nearestConfig = self.closest(G,k,sampleConfig)
         q = self.extendToward(G, nearestConfig, sampleConfig, delta, k)
+        # print 'extendedTowardSample = ', q
         neighborsOfQ = self.neighbors(G, q)
-        G.addVertex(q)
         for neighbor in neighborsOfQ:
             if self.robot.distance(neighbor, q) < delta:
+                if q not in G.V:
+                    G.addVertex(q)
                 G.addEdge(neighbor, q)
 
     def closest(self, G, k, sampleConfig):
@@ -62,19 +84,21 @@ class MCRPlanner():
         return GKReachableNodes[minIndex]
 
     def extendToward(self, G, closest, sample, delta, k, bisectionLimit = 4):
+        # print 'extendToward k= ', k
+        closestCover = G.covers[closest]
         qPrime = tuple(np.array(closest) + 
                 min(float(delta) / self.robot.distance(closest, sample), 1) * 
                     np.array(sample) - np.array(closest))
         bisectionCount = 0
         while True:
-            closestCover = G.covers[closest]
             edgeCover = self.cc.edgeCover(closest, qPrime)
             qPrimeCover = closestCover.mergeWith(edgeCover)
             if qPrimeCover.score <= k:
                 break
             elif bisectionCount < bisectionLimit:
+                # print 'BROKE THE LIMIT FOR K IN EXTENDING with qPrimeCover score = ', qPrimeCover.score
                 bisectionCount += 1 
-                qPrime = 0.5 * (np.array(qPrime) + np.array(closest))
+                qPrime = tuple(0.5 * (np.array(qPrime) + np.array(closest)))
             else:
                 break
         return qPrime
@@ -86,9 +110,9 @@ class MCRPlanner():
         neighbors = [x[1] for x in sortedDistances[:min(m, len(sortedDistances))]]
         return neighbors
 
-    def computeMinExplanations(self, G, start, useGreedy = True):
+    def computeMinExplanations(self, G, useGreedy = True):
         if useGreedy:
-            greedySearch(G, start)
+            return self.greedySearch(G, self.start)
         else:
             raise NotImplementedError()
 
@@ -110,12 +134,12 @@ class MCRPlanner():
         startEntry = makeEntry(startCover, start)
         coversSoFar = {start : startEntry}
         heapq.heappush(heap, startEntry)
-        while (len(finalCovers) < len(G.V)) {
+        while len(finalCovers) < len(G.V):
+            # print 'finalCovers = ', finalCovers
             # find lowest unfinalized cover size node
             while True:
                entry = heapq.heappop(heap)
-               vertexCoverSize = coverSize(entry)
-               vertexCover = coverSet(entry)
+               vertexCover = coverObj(entry)
                vertexName = entryId(entry)
                if vertexName !=  "REMOVED":
                     del coversSoFar[vertexName]
@@ -126,6 +150,9 @@ class MCRPlanner():
             for neighbor in G.E[vertexName]:
                 # only manipulate those not in finalCovers
                 if neighbor not in finalCovers:
+                    # if neighbor == self.goal:
+                        # print 'vertexName = ', vertexName
+                        # print 'vertexName cover score = ', vertexCover.score
                     # solve neighbor cover with edge cover from vertexName
                     neighborCover = vertexCover.mergeWith(self.cc.edgeCover(vertexName, neighbor))
                     neighborEntry = makeEntry(neighborCover, neighbor)
@@ -133,7 +160,7 @@ class MCRPlanner():
                         coversSoFar[neighbor] = neighborEntry
                         heapq.heappush(heap, neighborEntry)
                         cameFrom[neighbor] = vertexName
-                    elif neighborCover.score < coversSoFar[neighbor].score:
+                    elif neighborCover.score < coverScore(coversSoFar[neighbor]):
                         # mark existing entry in heap as removed. Can just use the reference to the entry in the hashmap
                         coversSoFar[neighbor][2] = "REMOVED"
                         # override the value in dict of neighbor to new one

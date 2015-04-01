@@ -104,7 +104,7 @@ class MovableLinkRobot(Robot):
         assert(len(q1) == len(q2))
         angleFactor = 0.2
         # get euclidean distance for the origin of the two configurations
-        euclideanDistance += math.sqrt((q1[0] - q2[0]) ** 2 + (q1[1] - q2[1]) ** 2)
+        euclideanDistance = math.sqrt((q1[0] - q2[0]) ** 2 + (q1[1] - q2[1]) ** 2)
         # get angle distance for the joint angles 
         jointAngleSum = 0
         for i in range(2, len(q1)):

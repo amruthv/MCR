@@ -7,7 +7,10 @@ class MCRGraph():
         self.covers = {}
     
     def addVertex(self, vertex):
+        assert(vertex not in self.V)
+        assert(vertex not in self.E)
         self.V.add(vertex)
+        self.E[vertex] = [] 
 
     #undirected graph so add edge from both points to other point
     def addEdge(self, point1, point2):

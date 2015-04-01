@@ -5,35 +5,37 @@ from world import *
 from Tkinter import *
 
 class Simulator():
-    def __init__(self, canvasWidth, canvasHeight):
+    def __init__(self, canvas, canvasWidth, canvasHeight):
+        self.canvas = canvas
         self.width = canvasWidth
         self.height = canvasHeight
-    def drawPoint(self, point, canvas, width = 5, fill = ''):
+    def drawPoint(self, point, width = 5, fill = ''):
         x = point[0]
         y = point[1]
-        canvas.create_oval([x-width, self.height - (y - width), x + width, self.height - (y + width)], fill = fill)
-        canvas.update()
+        self.canvas.create_oval([x-width, self.height - (y - width), x + width, self.height - (y + width)], fill = fill)
+        self.canvas.update()
 
-    def drawRobot(self, robot, canvas):
+    def drawRobot(self, robot):
         for polygon in robot.position:
-            print polygon
-            self.drawPolygon(polygon, canvas, 'blue')
-        canvas.update()
+            self.drawPolygon(polygon, 'blue')
+        self.canvas.update()
 
-    def drawObstacles(self, obstacles, canvas):
+    def drawObstacles(self, obstacles):
         for obstacle in obstacles:
-            self.drawPolygon(obstacle, canvas, 'red')
-        canvas.update()
+            self.drawPolygon(obstacle.polygon, 'red')
+        self.canvas.update()
 
-    def drawPolygon(self, polygon, canvas, color):
+    def drawPolygon(self, polygon, color):
         points = []
         for point in polygon.points:
             points.append(point.x)
             points.append(self.height - point.y)
-        canvas.create_polygon(points, fill=color, width=1, outline='black')
-        canvas.update()
+        self.canvas.create_polygon(points, fill=color, width=1, outline='black')
+        self.canvas.update()
 
-    def drawAdjacency(self, adjacencyList, canvas):
-        for point in adjacencyList:
-            for otherPoint in adjacencyList[point]:
-                canvas.create_line(point[0], point[1])
+    def drawLine(self, x1, y1, x2, y2):
+        self.canvas.create_line(x1, self.height - y1, x2, self.height - y2)
+        self.canvas.update()
+
+    def clearCanvas(self):
+        self.canvas.delete("all")
