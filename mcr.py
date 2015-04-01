@@ -13,6 +13,7 @@ class MCRPlanner():
         self.cc = covercalculator.CoverCalculator(robot, world)
         self.G = self.initializeGraph()
         self.sim = sim
+        self.cameFrom = {}
 
     def discreteMCR(self, N_raise = 10):
         #setup stuff
@@ -29,7 +30,7 @@ class MCRPlanner():
             self.expandRoadmap(G, k)
             # print 'G.V', G.V
             # print 'G.E', G.E
-            cameFrom = self.computeMinExplanations(G)
+            self.cameFrom = self.computeMinExplanations(G)
             s_min = G.covers[self.goal].score
             if N % 10 == 0:
                 print '====================='
@@ -46,9 +47,6 @@ class MCRPlanner():
                 break
             # print G.covers
         print "took N = {0} iterations".format(N)
-        print 'final covers'
-        print G.covers
-        return cameFrom
 
     def initializeGraph(self):
         start = self.start
