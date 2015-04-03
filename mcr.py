@@ -31,7 +31,7 @@ class MCRPlanner():
             # print 'G.V', G.V
             # print 'G.E', G.E
             self.cameFrom = self.computeMinExplanations(G)
-            s_min = G.covers[self.goal].score
+            s_min = G.getVertexCover(self.goal).score
             if N % 10 == 0:
                 print '====================='
                 print "s_min = ", s_min
@@ -39,12 +39,12 @@ class MCRPlanner():
             if N % N_raise == 0:
                 k += 1
                 print 'k = ', k
-            if k >= s_min:
-                k = s_min - 1
+            # if k >= s_min:
+            #     k = s_min - 1
             N += 1
-            if s_min == 0:
-                # print 'Got a collision free path'
-                break
+            # if s_min == 0:
+            #     # print 'Got a collision free path'
+            #     break
             # print G.covers
         print "took N = {0} iterations".format(N)
 
@@ -58,8 +58,10 @@ class MCRPlanner():
         E[start] = [goal]
         E[goal] = [start]
         graph = MCRGraph(V,E)
-        graph.covers[start] = self.cc.cover(start)
-        graph.covers[goal] = graph.covers[start].mergeWith(self.cc.edgeCover(start, goal))  # do i need to set this
+        graph.setVertexCover(start, self.cc.cover(start))
+        startGoalEdgeCover = self.cc.edgeCover(start, goal)
+        graph.setEdgeCover(start, goal, startGoalEdgeCover)
+        graph.setVertexCover(goal, graph.getVertexCover(start).mergeWith(startGoalEdgeCover))
         return graph
 
     def expandRoadmap(self, G, k, delta = 300):
@@ -69,24 +71,29 @@ class MCRPlanner():
         q = self.extendToward(G, nearestConfig, sampleConfig, delta, k)
         # print 'extendedTowardSample = ', q
         neighborsOfQ = self.neighbors(G, q)
+        if q not in G.V:
+            self.sim.drawPoint((q[0], q[1]))
+        G.addVertex(q)
+        addedEdge = False
         for neighbor in neighborsOfQ:
-            if self.robot.distance(neighbor, q) < delta:
-                if q not in G.V:
-                    G.addVertex(q)
-                    self.sim.drawPoint((q[0], q[1]))
+            neighborEdgeCover = self.cc.edgeCover(q, neighbor)
+            if self.robot.distance(neighbor, q) <= delta and G.getVertexCover(neighbor).mergeWith(neighborEdgeCover).score <= k:
+                addedEdge = True
                 G.addEdge(neighbor, q)
+                G.setEdgeCover(q, neighbor, neighborEdgeCover)
+        assert(addedEdge == True) # should be true since the closestEdge should be within distance of delta
 
     def closest(self, G, k, sampleConfig):
         GKReachableNodes = []
         for node in G.V:
-            if G.covers[node].score <= k:
+            if G.getVertexCover(node).score <= k:
                 GKReachableNodes.append(node)
         minIndex = np.argmin([self.robot.distance(q, sampleConfig) for q in GKReachableNodes])
         return GKReachableNodes[minIndex]
 
     def extendToward(self, G, closest, sample, delta, k, bisectionLimit = 4):
         # print 'extendToward k= ', k
-        closestCover = G.covers[closest]
+        closestCover = G.getVertexCover(closest)
         qPrime = tuple(np.array(closest) + 
                 min(float(delta) / self.robot.distance(closest, sample), 1) * 
                     np.array(sample) - np.array(closest))
@@ -98,7 +105,7 @@ class MCRPlanner():
                 break
             elif bisectionCount < bisectionLimit:
                 # print 'BROKE THE LIMIT FOR K IN EXTENDING with qPrimeCover score = ', qPrimeCover.score
-                bisectionCount += 1 
+                bisectionCount += 1
                 qPrime = tuple(0.5 * (np.array(qPrime) + np.array(closest)))
             else:
                 break
@@ -155,7 +162,11 @@ class MCRPlanner():
                         # print 'vertexName = ', vertexName
                         # print 'vertexName cover score = ', vertexCover.score
                     # solve neighbor cover with edge cover from vertexName
-                    neighborCover = vertexCover.mergeWith(self.cc.edgeCover(vertexName, neighbor))
+                    edgeCover = G.getEdgeCover(vertexName, neighbor)
+                    if edgeCover == None:
+                        edgeCover = self.cc.edgeCover(vertexName, neighbor)
+                        G.setEdgeCover(vertexName, neighbor, edgeCover)
+                    neighborCover = vertexCover.mergeWith(edgeCover)
                     neighborEntry = makeEntry(neighborCover, neighbor)
                     if neighbor not in coversSoFar:
                         coversSoFar[neighbor] = neighborEntry
@@ -172,6 +183,6 @@ class MCRPlanner():
         # now go back through and fill in G.Covers with the final covers
         G.covers = {}
         for node in finalCovers:
-            G.covers[node] = finalCovers[node]
+            G.setVertexCover(node, finalCovers[node])
 
         return cameFrom

@@ -7,10 +7,10 @@ import searcher
 import cProfile
 
 def testNoObstacles():
-    # master = Tk()
-    # canvas = Canvas(master, width=500, height=500)
-    # canvas.pack()
-    # sim = Simulator(canvas, 500, 500)
+    master = Tk()
+    canvas = Canvas(master, width=500, height=500)
+    canvas.pack()
+    sim = Simulator(canvas, 500, 500)
     world = World(500,500, [])
     links = []
     links.append([0, [(50,50), (90,50), (90,70), (50,70)]])
@@ -19,7 +19,7 @@ def testNoObstacles():
     start = (50,50, 0, 0, 0)
     goal = (300, 300, 0, 90, -90)
     linkRobot = MovableLinkRobot(links, world)
-    mcr = MCRPlanner(linkRobot, world, start, goal)
+    mcr = MCRPlanner(linkRobot, world, start, goal, sim)
     mcr.discreteMCR()
 
 def testOneObstacleMiddle():
@@ -133,8 +133,8 @@ def drawPath(sim, obstacles, robot, path):
         raw_input()
 
 
-# testNoObstacles()
+testNoObstacles()
 # testOneObstacleMiddle()
 # testTwoDiffWeightObstacles()
-testManyObstacles()
+# testManyObstacles()
 # cProfile.run('testTwoDiffWeightObstacles()')
