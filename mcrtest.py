@@ -135,8 +135,8 @@ def drawPath(sim, obstacles, robot, path):
         raw_input()
 
 
-# testNoObstacles()
-# testOneObstacleMiddle()
+testNoObstacles()
+testOneObstacleMiddle()
 testTwoDiffWeightObstacles()
-# testManyObstacles()
+testManyObstacles()
 # cProfile.run('testTwoDiffWeightObstacles()')

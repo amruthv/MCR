@@ -34,11 +34,11 @@ class MCRPlanner():
                 print '====================='
                 print "s_min = ", s_min
                 print '====================='
-            if N % N_raise == 0:
                 k += 1
-                print 'k = ', k
             if k >= s_min:
                 k = s_min - 1
+            if N % N_raise == 0:
+                print 'k = ', k
             N += 1
             if s_min == 0:
                 print 'Got a collision free path'
@@ -65,7 +65,7 @@ class MCRPlanner():
         graph.setTotalVertexCover(goal, startCover.mergeWith(startGoalEdgeCover).mergeWith(goalCover))
         return graph
 
-    def expandRoadmap(self, G, k, delta = 300):
+    def expandRoadmap(self, G, k, delta = 300.0):
         sampleConfig = self.robot.generateRandomConfiguration()
         nearestConfig = self.closest(G,k,sampleConfig)
         q = self.extendToward(G, nearestConfig, sampleConfig, delta, k)
@@ -80,13 +80,9 @@ class MCRPlanner():
         G.setLocalVertexCover(q, qCover)
         addedEdge = False
         for neighbor in neighborsOfQ:
-            if self.robot.distance(neighbor, q) <= delta: # and totalCover.score <= k:
+            if round(self.robot.distance(neighbor, q)) <= delta: # and totalCover.score <= k:
                 addedEdge = True
                 G.addEdge(neighbor, q)
-        if addedEdge == False:
-            print 'closest =', nearestConfig
-            print 'q=', q
-            print 'distance from closest to q', self.robot.distance(nearestConfig, q)
         assert(addedEdge == True) # should be true since the closestEdge should be within distance of delta
 
     def closest(self, G, k, sampleConfig):
@@ -98,18 +94,17 @@ class MCRPlanner():
         return GKReachableNodes[minIndex]
 
     def extendToward(self, G, closest, sample, delta, k, bisectionLimit = 4):
-        qPrime = tuple(np.array(closest) + 
-                min(float(delta) / self.robot.distance(closest, sample), 1) * 
-                    np.array(sample) - np.array(closest))
         closestCover = G.getTotalVertexCover(closest)
-        assert(self.robot.distance(qPrime, closest) <= delta)
+        scaleFactor = min(delta / self.robot.distance(closest, sample), 1)
+        scaledVector = scaleFactor * (np.array(sample) - np.array(closest))
+        qPrime = np.array(closest) + scaledVector
         bisectionCount = 0
         while True:
             edgeCover = self.cc.edgeCover(closest, qPrime)
             qPrimeCover = self.cc.cover(qPrime)
             totalCover = closestCover.mergeWith(edgeCover).mergeWith(qPrimeCover)
             if totalCover.score <= k:
-                return qPrime
+                return tuple(qPrime)
             elif bisectionCount < bisectionLimit:
                 bisectionCount += 1
                 qPrime = tuple(0.5 * (np.array(qPrime) + np.array(closest)))
