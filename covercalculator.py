@@ -8,7 +8,7 @@ class CoverCalculator():
         self.stepsToCheck = 10
         self.world = world
 
-    #check that they are in bounds elsewhere, here we assume they are
+    #check that the configurations are in bounds elsewhere, here we assume they are. only checks configurations between the two not the endpoints
     def edgeCover(self, q_from, q_to):
         #make empty cover and build it up
         edge_cover = Cover(set())
@@ -34,7 +34,7 @@ class CoverCalculator():
         q_from_np = np.array(q_from)
         q_to_np = np.array(q_to)
         q_delta = q_to_np - q_from_np
-        for i in range(1, self.stepsToCheck + 1):
+        for i in range(1, self.stepsToCheck):
             q = q_from_np + q_delta * float(i) / self.stepsToCheck
             configurations.append(q)
         return configurations
