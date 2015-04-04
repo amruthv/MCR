@@ -45,9 +45,11 @@ def testOneObstacleMiddle():
     sim.drawRobot(linkRobot)
     raw_input()
 
-    mcr = MCRPlanner(linkRobot, world, start, goal)
-    cameFrom = mcr.discreteMCR()
-    path = searcher.reconstructPath(cameFrom, goal)
+    mcr = MCRPlanner(linkRobot, world, start, goal, sim)
+    sim.drawPoint((start[0], start[1]), fill = 'green')
+    sim.drawPoint((goal[0], goal[1]), fill = 'blue')
+    mcr.discreteMCR()
+    path = searcher.reconstructPath(mcr.cameFrom, goal)
     drawPath(sim, obstacles, linkRobot, path)
 
 
@@ -133,8 +135,8 @@ def drawPath(sim, obstacles, robot, path):
         raw_input()
 
 
-testNoObstacles()
+# testNoObstacles()
 # testOneObstacleMiddle()
-# testTwoDiffWeightObstacles()
+testTwoDiffWeightObstacles()
 # testManyObstacles()
 # cProfile.run('testTwoDiffWeightObstacles()')
