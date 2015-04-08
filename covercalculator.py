@@ -1,4 +1,3 @@
-import polygonhelper
 import numpy as np
 from cover import Cover
 
