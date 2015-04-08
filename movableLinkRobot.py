@@ -81,7 +81,7 @@ class MovableLinkRobot(Robot):
         # [x, y, joint_angles]
         originalPosition = self.position
         while True:
-            q_rand = [random.randint(0,self.world.width - 1), random.randint(0, self.world.height -1)] + [random.randint(-180,180) for i in range(self.numJoints)]
+            q_rand = [random.uniform(0,self.world.width - 1), random.uniform(0, self.world.height -1)] + [random.uniform(-180,180) for i in range(self.numJoints)]
             self.moveToConfiguration(q_rand)
             if self.inBounds():
                 # reset position
