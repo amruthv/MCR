@@ -9,11 +9,12 @@ class Simulator():
         self.canvas = canvas
         self.width = canvasWidth
         self.height = canvasHeight
-    def drawPoint(self, point, width = 5, fill = ''):
+    def drawPoint(self, point, width = 5, fill = '', outline = 'black'):
         x = point[0]
         y = point[1]
-        self.canvas.create_oval([x-width, self.height - (y - width), x + width, self.height - (y + width)], fill = fill)
+        ptId = self.canvas.create_oval([x-width, self.height - (y - width), x + width, self.height - (y + width)], fill = fill, outline = outline)
         self.canvas.update()
+        return ptId
 
     def drawRobot(self, robot):
         for polygon in robot.position:
@@ -36,9 +37,13 @@ class Simulator():
         self.canvas.create_polygon(points, fill=color, width=1, outline='black')
         self.canvas.update()
 
-    def drawLine(self, x1, y1, x2, y2):
-        self.canvas.create_line(x1, self.height - y1, x2, self.height - y2)
+    def drawLine(self, x1, y1, x2, y2, fill = 'black'):
+        lineId = self.canvas.create_line(x1, self.height - y1, x2, self.height - y2, fill = fill)
         self.canvas.update()
+        return lineId
 
     def clearCanvas(self):
         self.canvas.delete("all")
+
+    def deleteObj(self, objId):
+        self.canvas.delete(objId)
