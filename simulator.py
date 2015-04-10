@@ -9,6 +9,7 @@ class Simulator():
         self.canvas = canvas
         self.width = canvasWidth
         self.height = canvasHeight
+
     def drawPoint(self, point, width = 5, fill = '', outline = 'black'):
         x = point[0]
         y = point[1]
@@ -16,10 +17,17 @@ class Simulator():
         self.canvas.update()
         return ptId
 
-    def drawRobot(self, robot):
-        for polygon in robot.position:
-            self.drawPolygon(polygon, 'blue')
+    def changePointFill(self, objId, fill):
+        self.canvas.itemconfig(objId, fill = fill)
         self.canvas.update()
+
+    def drawRobot(self, robot, fill = 'blue'):
+        ids = []
+        for polygon in robot.position:
+            polyId = self.drawPolygon(polygon, fill)
+            ids.append(polyId)
+        self.canvas.update()
+        return ids
 
     def drawObstacles(self, obstacles):
         for obstacle in obstacles:
@@ -34,8 +42,9 @@ class Simulator():
         for point in polygon.exterior.coords[:-1]:
             points.append(point[0])
             points.append(self.height - point[1])
-        self.canvas.create_polygon(points, fill=color, width=1, outline='black')
+        polyId = self.canvas.create_polygon(points, fill=color, width=1, outline='black')
         self.canvas.update()
+        return polyId
 
     def drawLine(self, x1, y1, x2, y2, fill = 'black'):
         lineId = self.canvas.create_line(x1, self.height - y1, x2, self.height - y2, fill = fill)
@@ -44,6 +53,10 @@ class Simulator():
 
     def clearCanvas(self):
         self.canvas.delete("all")
+
+    def deleteManyObj(self, listOfObj):
+        for obj in listOfObj:
+            self.deleteObj(obj)
 
     def deleteObj(self, objId):
         self.canvas.delete(objId)
