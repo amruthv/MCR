@@ -214,7 +214,7 @@ class MCRPlanner():
         G.clearTotalVertexCovers()
         for node in finalCovers:
             G.setTotalVertexCover(node, finalCovers[node])
-        self.updateColors()
+        # self.updateColors()
         return cameFrom
 
     def updateColors(self):
