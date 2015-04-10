@@ -42,13 +42,16 @@ class MCRGraph():
             return self.localVertexCovers[q]
         return None
 
-    # sets the cover for the edge going both ways
+    # sets the cover for the edge going both ways (sets it for (a,b) st a < b)
     def setEdgeCover(self, q1, q2, cover):
-        self.edgeCovers[(q1,q2)] = cover
-        self.edgeCovers[(q2, q1)] = cover
+        if q1 < q2:
+            self.edgeCovers[(q1,q2)] = cover
+        else:
+            self.edgeCovers[(q2, q1)] = cover
 
     def getEdgeCover(self, q1, q2):
-        if (q1,q2) in self.edgeCovers:
-            return self.edgeCovers[(q1, q2)]
-        return None
+        if q1 < q2:
+            return self.edgeCovers.get((q1, q2), None)
+        else:
+            return self.edgeCovers.get((q2, q1), None)
 
