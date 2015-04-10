@@ -21,3 +21,5 @@ class Obstacle():
         self.polygon = Polygon(points)
         self.weight = weight
         self.id = None
+    def __str__(self):
+        return "id: {0}, weight: {1}".format(self.id, self.weight)
