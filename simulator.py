@@ -31,7 +31,7 @@ class Simulator():
 
     def drawObstacles(self, obstacles):
         for obstacle in obstacles:
-            self.drawPolygon(obstacle.polygon, 'red')
+            self.drawPolygon(obstacle.points, 'red')
             text_id = self.canvas.create_text(obstacle.polygon.centroid.x, self.height - obstacle.polygon.centroid.y)
             self.canvas.itemconfig(text_id, text=obstacle.weight)
 
@@ -39,7 +39,7 @@ class Simulator():
 
     def drawPolygon(self, polygon, color):
         points = []
-        for point in polygon.exterior.coords[:-1]:
+        for point in polygon:
             points.append(point[0])
             points.append(self.height - point[1])
         polyId = self.canvas.create_polygon(points, fill=color, width=1, outline='black')

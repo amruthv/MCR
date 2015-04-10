@@ -71,7 +71,7 @@ class MovableLinkRobot(Robot):
                 transformedPoint = transforms[polygonNumber].dot(np.array([xPoint, yPoint, 1]))
                 # transformedPolygonPoints.append(Point(transformedPoint[0], transformedPoint[1]))
                 transformedPolygonPoints.append((transformedPoint[0] + q[0] - self.initialOrigin[0], transformedPoint[1] + q[1] - self.initialOrigin[1]))
-            positionOfRobot.append(Polygon(transformedPolygonPoints))
+                positionOfRobot.append(transformedPolygonPoints)
         self.position = positionOfRobot
 
     # keep generating them until one is valid
@@ -93,7 +93,7 @@ class MovableLinkRobot(Robot):
 
     def inBounds(self):
         for polygon in self.position:
-            for point in polygon.exterior.coords[:-1]:
+            for point in polygon:
                 if not self.world.inRange(point[0], point[1]):
                     return False
         return True
@@ -108,8 +108,8 @@ class MovableLinkRobot(Robot):
         q2Position = self.position
         distance = 0.0
         for i in range(len(q1Position)):
-            q1Point = q1Position[i].exterior.coords[0]
-            q2Point = q2Position[i].exterior.coords[0]
+            q1Point = q1Position[i][0]
+            q2Point = q2Position[i][0]
             distance += (q1Point[0] - q2Point[0]) ** 2 + (q1Point[1] - q2Point[1]) ** 2
         return math.sqrt(distance)
 

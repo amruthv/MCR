@@ -1,11 +1,14 @@
 import numpy as np
 from cover import Cover
+from shapely.geometry import Polygon
+from bbox import BBox
 
 class CoverCalculator():
-    def __init__(self, robot, world):
+    def __init__(self, robot, world, useBoundingBoxes = True):
         self.robot = robot
         self.stepsToCheck = 10
         self.world = world
+        self.useBB = True
 
     #check that the configurations are in bounds elsewhere, here we assume they are. only checks configurations between the two not the endpoints
     def edgeCover(self, q_from, q_to):
@@ -18,11 +21,42 @@ class CoverCalculator():
         return edge_cover
 
     def cover(self, q):
+        if self.useBB:
+            return self.coverWithBB(q)
+        else:
+            return self.naiiveCover(q)
+
+    def coverWithBB(self, q):
+        coverQ = set()
+        self.robot.moveToConfiguration(q)
+        allRobotPoints = [pt for polyPoints in self.robot.position for pt in polyPoints]
+        allRobotBBox = BBox(allRobotPoints)
+        collisionFree = True
+        for obstacle in self.world.obstacles:
+            if allRobotBBox.intersectsBBox(obstacle.bbox):
+                collisionFree = False
+                break
+        if collisionFree:
+            return Cover(coverQ)
+
+        #else check each robot polygon bbox
+        for polygonPts in self.robot.position:
+            bboxRobotPoly = BBox(polygonPts)
+            polygon = None
+            for obstacle in self.world.obstacles:
+                if bboxRobotPoly.intersectsBBox(obstacle.bbox):
+                    polygon = Polygon(polygonPts)
+                    if polygon.intersects(obstacle.polygon):
+                        coverQ.add(obstacle)
+        return Cover(coverQ)
+
+    def naiiveCover(self, q):
         coverQ = set()
         self.robot.moveToConfiguration(q)
         for polygon in self.robot.position:
+            poly = Polygon(polygon)
             for obstacle in self.world.obstacles:
-                if polygon.intersects(obstacle.polygon):
+                if poly.intersects(obstacle.polygon):
                     coverQ.add(obstacle)
         return Cover(coverQ)
 

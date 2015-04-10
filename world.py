@@ -1,5 +1,6 @@
 # from polygonhelper import *
 from shapely.geometry import Polygon
+from bbox import BBox
 
 class World():
     # obstacles = [Obstacle1, Obstacle2]
@@ -18,7 +19,9 @@ class World():
 class Obstacle():
     #points is [(x1,y1), (x2,y2),...]
     def __init__(self, points, weight = 1):
+        self.points = points
         self.polygon = Polygon(points)
+        self.bbox = BBox(points)
         self.weight = weight
         self.id = None
     def __str__(self):
