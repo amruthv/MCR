@@ -34,9 +34,8 @@ class MovableLinkRobot(Robot):
         inverseReferenceTransforms = []
         for polygonAngle, polygonPoints in polygonInfoArray:
             polygonRotationPoint = polygonPoints[0]
-            radians = math.radians(polygonAngle)
-            cosTheta = math.cos(radians)
-            sinTheta = math.sin(radians)
+            cosTheta = math.cos(polygonAngle)
+            sinTheta = math.sin(polygonAngle)
             transform = np.array([[cosTheta, -sinTheta, polygonRotationPoint[0]], 
                 [sinTheta, cosTheta, polygonRotationPoint[1]],
                 [0, 0, 1]])
@@ -47,9 +46,8 @@ class MovableLinkRobot(Robot):
     def findTransformsForConfiguration(self, configuration):
         transforms = []
         for jointNum, jointAngle in enumerate(configuration):
-            radians = math.radians(jointAngle)
-            cosTheta = math.cos(radians)
-            sinTheta = math.sin(radians)
+            cosTheta = math.cos(jointAngle)
+            sinTheta = math.sin(jointAngle)
             rotationMatrix = np.array([[cosTheta, -sinTheta, 0],
                                 [sinTheta, cosTheta, 0],
                                 [0, 0, 1]])
@@ -81,7 +79,7 @@ class MovableLinkRobot(Robot):
         # [x, y, joint_angles]
         originalPosition = self.position
         while True:
-            q_rand = [random.uniform(0,self.world.width - 1), random.uniform(0, self.world.height -1)] + [random.uniform(-180,180) for i in range(self.numJoints)]
+            q_rand = [random.uniform(0,self.world.width - 1), random.uniform(0, self.world.height -1)] + [random.uniform(-math.pi, math.pi) for i in range(self.numJoints)]
             self.moveToConfiguration(q_rand)
             if self.inBounds():
                 # reset position
@@ -89,9 +87,8 @@ class MovableLinkRobot(Robot):
                 return tuple(q_rand)
 
     def makeRotationMatrix(self, rotationAngle):
-        radians = math.radians(rotationAngle)
-        cosTheta = math.cos(radians)
-        sinTheta = math.sin(radians)
+        cosTheta = math.cos(rotationAngle)
+        sinTheta = math.sin(rotationAngle)
         return np.array([[cosTheta, -sinTheta, 0], [sinTheta, cosTheta, 0], [0, 0, 1]])
 
     def inBounds(self):
@@ -102,6 +99,23 @@ class MovableLinkRobot(Robot):
         return True
 
     def distance(self, q1, q2):
+        return self.forwardKinDistance(q1, q2)
+
+    def forwardKinDistance(self, q1, q2):
+        self.moveToConfiguration(q1)
+        q1Position = self.position
+        self.moveToConfiguration(q2)
+        q2Position = self.position
+        distance = 0.0
+        for i in range(len(q1Position)):
+            q1Point = q1Position[i].exterior.coords[0]
+            q2Point = q2Position[i].exterior.coords[0]
+            distance += (q1Point[0] - q2Point[0]) ** 2 + (q1Point[1] - q2Point[1]) ** 2
+        return math.sqrt(distance)
+
+
+
+    def angleDiscount(self, q1, q2):
         assert(len(q1) == len(q2))
         angleFactor = 0.2
         # get euclidean distance for the origin of the two configurations
