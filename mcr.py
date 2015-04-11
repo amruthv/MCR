@@ -122,11 +122,10 @@ class MCRPlanner():
         return GKReachableNodes[minIndex]
 
     def extendToward(self, G, closest, sample, delta, k, bisectionLimit = 4):
-        # print 'closest = ', closest
-        closestCover = G.getTotalVertexCover(closest)
         scaleFactor = min(delta / self.robot.distance(closest, sample), 1)
         scaledVector = scaleFactor * (np.array(sample) - np.array(closest))
         qPrime = np.array(closest) + scaledVector
+        closestCover = G.getTotalVertexCover(closest)
         bisectionCount = 0
         while True:
             # print 'bisectionCount=', bisectionCount
@@ -138,7 +137,7 @@ class MCRPlanner():
                 return tuple(qPrime)
             elif bisectionCount < bisectionLimit:
                 bisectionCount += 1
-                qPrime = tuple(0.5 * (np.array(qPrime) + np.array(closest)))
+                qPrime = tuple(0.5 * (qPrime + np.array(closest)))
             else:
                 return None
 

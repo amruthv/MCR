@@ -99,7 +99,9 @@ class MovableLinkRobot(Robot):
         return True
 
     def distance(self, q1, q2):
-        return self.forwardKinDistance(q1, q2)
+        # return self.angleDiscount(q1, q2)
+        # return self.forwardKinDistance(q1, q2)
+        return self.l2Norm(q1, q2)
 
     def forwardKinDistance(self, q1, q2):
         self.moveToConfiguration(q1)
@@ -110,10 +112,11 @@ class MovableLinkRobot(Robot):
         for i in range(len(q1Position)):
             q1Point = q1Position[i][0]
             q2Point = q2Position[i][0]
-            distance += (q1Point[0] - q2Point[0]) ** 2 + (q1Point[1] - q2Point[1]) ** 2
-        return math.sqrt(distance)
+            distance += math.sqrt((q1Point[0] - q2Point[0]) ** 2 + (q1Point[1] - q2Point[1]) ** 2)
+        return distance
 
-
+    def l2Norm(self, q1, q2):
+        return np.linalg.norm(np.array(q2) - np.array(q1))
 
     def angleDiscount(self, q1, q2):
         assert(len(q1) == len(q2))
