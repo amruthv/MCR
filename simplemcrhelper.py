@@ -2,11 +2,13 @@ from mcrhelper import MCRHelper
 from shapely.geometry import Polygon
 from bbox import BBox
 import numpy as np
+import random
 
 class SimpleMCRHelper(MCRHelper):
-    def __init__(self, robot, world):
+    def __init__(self, robot, world, goal):
         self.robot = robot
         self.world = world
+        self.goal = goal
         self.useBBoxChecker = True
 
     def collisionsAtQ(self, q):
@@ -51,6 +53,8 @@ class SimpleMCRHelper(MCRHelper):
         return collisions
 
     def sampleConfig(self):
+        if random.random() < 0.1:
+            return self.goal
         return self.robot.generateRandomConfiguration()
 
     def generateInBetweenConfigs(self, q_from, q_to):

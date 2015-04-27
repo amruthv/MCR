@@ -24,7 +24,7 @@ def testNoObstacles():
     start = (50,50, 0, 0, 0)
     goal = (300, 300, 0, piOver2, -piOver2)
     linkRobot = MovableLinkRobot(links, world)
-    mcrhelper = SimpleMCRHelper(linkRobot, world)
+    mcrhelper = SimpleMCRHelper(linkRobot, world, goal)
     mcr = MCRPlanner(start, goal, mcrhelper, sim)
     mcr.discreteMCR()
 
@@ -51,7 +51,7 @@ def testOneObstacleMiddle():
     sim.drawRobot(linkRobot)
     raw_input()
 
-    mcrhelper = SimpleMCRHelper(linkRobot, world)
+    mcrhelper = SimpleMCRHelper(linkRobot, world, goal)
     mcr = MCRPlanner(start, goal, mcrhelper, sim)
     sim.drawPoint((start[0], start[1]), fill = 'green')
     sim.drawPoint((goal[0], goal[1]), fill = 'blue')
@@ -79,7 +79,7 @@ def testTwoDiffWeightObstacles():
     start = (50,50, 0, 0, 0)
     goal = (320, 50, 0, piOver2, -piOver2)
     linkRobot = MovableLinkRobot(links, world)
-    mcrhelper = SimpleMCRHelper(linkRobot, world)
+    mcrhelper = SimpleMCRHelper(linkRobot, world, goal)
     mcr = MCRPlanner(start, goal, mcrhelper, sim)
     try:
         cameFrom = mcr.discreteMCR()
@@ -113,7 +113,7 @@ def testManyObstacles():
     linkRobot.moveToConfiguration(goal)
     sim.drawRobot(linkRobot)
     raw_input()
-    mcrhelper = SimpleMCRHelper(linkRobot, world)
+    mcrhelper = SimpleMCRHelper(linkRobot, world, goal)
     mcr = MCRPlanner(start, goal, mcrhelper, sim)
     try:
         cameFrom = mcr.discreteMCR()
@@ -144,7 +144,7 @@ def testManyObstacles2Links():
     sim.drawRobot(linkRobot)
     linkRobot.moveToConfiguration(goal)
     sim.drawRobot(linkRobot)
-    mcrhelper = SimpleMCRHelper(linkRobot, world)
+    mcrhelper = SimpleMCRHelper(linkRobot, world, goal)
     mcr = MCRPlanner(start, goal, mcrhelper, sim)
     try:
         cameFrom = mcr.discreteMCR()

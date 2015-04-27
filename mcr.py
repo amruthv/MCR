@@ -80,7 +80,8 @@ class MCRPlanner():
         # couldn't find a point to extend towards satisfying k reachability
         if q is None:
             return
-        neighborsOfQ = self.neighbors(G, q)
+        if q == self.goal:
+            return
         if q not in G.V:
             if self.shouldDraw:
                 qId = self.sim.drawPoint((q[0], q[1]))
@@ -89,6 +90,7 @@ class MCRPlanner():
             qCover = self.cc.cover(q)
             G.setLocalVertexCover(q, qCover)
             addedEdge = False
+            neighborsOfQ = self.neighbors(G, q)
             for neighbor in neighborsOfQ:
                 if round(self.mcrhelper.distance(neighbor, q)) <= round(delta): # and totalCover.score <= k:
                     addedEdge = True
@@ -100,7 +102,8 @@ class MCRPlanner():
         for node in G.V:
             if G.getTotalVertexCover(node).score <= k:
                 GKReachableNodes.append(node)
-        minIndex = np.argmin([self.mcrhelper.distance(q, sampleConfig) for q in GKReachableNodes])
+        distances = [self.mcrhelper.distance(q, sampleConfig) if not (sampleConfig == self.goal and q == self.goal) else float('inf') for q in GKReachableNodes]
+        minIndex = np.argmin(distances)
         return GKReachableNodes[minIndex]
 
     def extendToward(self, G, closest, sample, delta, k, bisectionLimit = 4):
