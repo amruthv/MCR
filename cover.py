@@ -1,7 +1,7 @@
 class Cover():
     def __init__(self, coverSet):
         self.cover = coverSet
-        self.score = sum([obj.weight for obj in self.cover])
+        self.score = sum([obj.getWeight() for obj in self.cover])
 
     #returns new Cover
     def mergeWith(self, otherCover):

@@ -1,21 +1,21 @@
 from mcrGraph import MCRGraph
-import covercalculator
+from covercalculator import CoverCalculator
 import numpy as np
 import heapq
 
 class MCRPlanner():
     # start and goal are both configurations
-    def __init__(self, robot, world, start, goal, sim):
-        self.robot = robot
-        self.world = world
+    def __init__(self, start, goal, mcrhelper, sim, shouldDraw = False):
         self.start = start
         self.goal = goal
-        self.cc = covercalculator.CoverCalculator(robot, world)
+        self.mcrhelper = mcrhelper
+        self.cc = CoverCalculator(mcrhelper)
         self.sim = sim
-        self.colorMap = {0: 'white', 1: 'black', 2: 'red', 3: 'green', 4: 'blue', 5: 'cyan', 6: 'purple', 7: 'yellow', 8 : 'orange'}
-        self.nodeIds = {}
+        self.shouldDraw = shouldDraw
         self.G = self.initializeGraph()
         self.cameFrom = {}
+        self.colorMap = {0: 'white', 1: 'black', 2: 'red', 3: 'green', 4: 'blue', 5: 'cyan', 6: 'purple', 7: 'yellow', 8 : 'orange'}
+        self.nodeIds = {}
 
     def discreteMCR(self, N_raise = 10):
         #setup stuff
@@ -66,49 +66,31 @@ class MCRPlanner():
         graph.setEdgeCover(start, goal, startGoalEdgeCover)
         graph.setTotalVertexCover(start, startCover)
         graph.setTotalVertexCover(goal, startCover.mergeWith(startGoalEdgeCover).mergeWith(goalCover))
-
-        startId = self.sim.drawPoint(start)
-        goalId = self.sim.drawPoint(goal)
-        self.nodeIds[start] = startId
-        self.nodeIds[goal] = goalId
+        if self.shouldDraw:
+            startId = self.sim.drawPoint(start)
+            goalId = self.sim.drawPoint(goal)
+            self.nodeIds[start] = startId
+            self.nodeIds[goal] = goalId
         return graph
 
     def expandRoadmap(self, G, k, delta = 400.0):
-        sampleConfig = self.robot.generateRandomConfiguration()
+        sampleConfig = self.mcrhelper.sampleConfig()
         nearestConfig = self.closest(G,k,sampleConfig)
         q = self.extendToward(G, nearestConfig, sampleConfig, delta, k)
         # couldn't find a point to extend towards satisfying k reachability
         if q is None:
             return
-        # print self.robot.distance(q, nearestConfig)
-        # s = self.sim.drawPoint((sampleConfig[0], sampleConfig[1]), fill = 'green')
-        # self.robot.moveToConfiguration(sampleConfig)
-        # ss = self.sim.drawRobot(self.robot, fill = 'green')
-        # # print 'sampleConfig = ', sampleConfig
-        # c = self.sim.drawPoint((nearestConfig[0], nearestConfig[1]), fill = 'black')
-        # self.robot.moveToConfiguration(nearestConfig)
-        # cc = self.sim.drawRobot(self.robot, fill = 'black')
-        # # print 'nearestConfig =', nearestConfig
-        # e = self.sim.drawPoint((q[0], q[1]), fill = 'purple')
-        # self.robot.moveToConfiguration(q)
-        # ee = self.sim.drawRobot(self.robot, fill = 'purple')
-        # # raw_input()
-        # self.sim.deleteObj(s)
-        # self.sim.deleteObj(c)
-        # self.sim.deleteObj(e)
-        # self.sim.deleteManyObj(ss)
-        # self.sim.deleteManyObj(cc)
-        # self.sim.deleteManyObj(ee)
         neighborsOfQ = self.neighbors(G, q)
         if q not in G.V:
-            qId = self.sim.drawPoint((q[0], q[1]))
-            self.nodeIds[q] = qId
+            if self.shouldDraw:
+                qId = self.sim.drawPoint((q[0], q[1]))
+                self.nodeIds[q] = qId
             G.addVertex(q)
             qCover = self.cc.cover(q)
             G.setLocalVertexCover(q, qCover)
             addedEdge = False
             for neighbor in neighborsOfQ:
-                if round(self.robot.distance(neighbor, q)) <= round(delta): # and totalCover.score <= k:
+                if round(self.mcrhelper.distance(neighbor, q)) <= round(delta): # and totalCover.score <= k:
                     addedEdge = True
                     G.addEdge(neighbor, q)
             assert(addedEdge == True) # should be true since the closestEdge should be within distance of delta
@@ -118,18 +100,16 @@ class MCRPlanner():
         for node in G.V:
             if G.getTotalVertexCover(node).score <= k:
                 GKReachableNodes.append(node)
-        minIndex = np.argmin([self.robot.distance(q, sampleConfig) for q in GKReachableNodes])
+        minIndex = np.argmin([self.mcrhelper.distance(q, sampleConfig) for q in GKReachableNodes])
         return GKReachableNodes[minIndex]
 
     def extendToward(self, G, closest, sample, delta, k, bisectionLimit = 4):
-        scaleFactor = min(delta / self.robot.distance(closest, sample), 1)
+        scaleFactor = min(delta / self.mcrhelper.distance(closest, sample), 1)
         scaledVector = scaleFactor * (np.array(sample) - np.array(closest))
         qPrime = np.array(closest) + scaledVector
         closestCover = G.getTotalVertexCover(closest)
         bisectionCount = 0
         while True:
-            # print 'bisectionCount=', bisectionCount
-            # print 'qPrime =', qPrime
             edgeCover = self.cc.edgeCover(closest, qPrime)
             qPrimeCover = self.cc.cover(qPrime)
             totalCover = closestCover.mergeWith(edgeCover).mergeWith(qPrimeCover)
@@ -143,7 +123,7 @@ class MCRPlanner():
 
     def neighbors(self, G, q, m = 10):
         # we choose nearest 10 rather than the ball of radius r approach
-        distances = [(self.robot.distance(q, v), v) for v in G.V]
+        distances = [(self.mcrhelper.distance(q, v), v) for v in G.V]
         sortedDistances = sorted(distances)
         neighbors = [x[1] for x in sortedDistances[:min(m, len(sortedDistances))]]
         return neighbors
@@ -155,8 +135,6 @@ class MCRPlanner():
             raise NotImplementedError()
 
     def greedySearch(self, G):
-        # print "Number of edges to goal: ", len(G.E[self.goal])
-        # raw_input()
         def coverScore(entry):
             return entry[0]
         def coverObj(entry):

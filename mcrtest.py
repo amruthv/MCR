@@ -6,6 +6,7 @@ from simulator import *
 import searcher
 import cProfile
 import math
+from simplemcrhelper import SimpleMCRHelper
 
 pi = math.pi
 piOver2 = math.pi / 2
@@ -23,7 +24,8 @@ def testNoObstacles():
     start = (50,50, 0, 0, 0)
     goal = (300, 300, 0, piOver2, -piOver2)
     linkRobot = MovableLinkRobot(links, world)
-    mcr = MCRPlanner(linkRobot, world, start, goal, sim)
+    mcrhelper = SimpleMCRHelper(linkRobot, world)
+    mcr = MCRPlanner(start, goal, mcrhelper, sim)
     mcr.discreteMCR()
 
 def testOneObstacleMiddle():
@@ -32,7 +34,7 @@ def testOneObstacleMiddle():
     canvas.pack()
     sim = Simulator(canvas, 500, 500)
 
-    obstacle1 = Obstacle([(200,20), (300,20), (300,150), (200,150)])
+    obstacle1 = SimpleObstacle([(200,20), (300,20), (300,150), (200,150)])
     obstacles = [obstacle1]
     sim.drawObstacles(obstacles)
     world = World(500,500, obstacles)
@@ -49,7 +51,8 @@ def testOneObstacleMiddle():
     sim.drawRobot(linkRobot)
     raw_input()
 
-    mcr = MCRPlanner(linkRobot, world, start, goal, sim)
+    mcrhelper = SimpleMCRHelper(linkRobot, world)
+    mcr = MCRPlanner(start, goal, mcrhelper, sim)
     sim.drawPoint((start[0], start[1]), fill = 'green')
     sim.drawPoint((goal[0], goal[1]), fill = 'blue')
     mcr.discreteMCR()
@@ -63,8 +66,8 @@ def testTwoDiffWeightObstacles():
     canvas.pack()
     sim = Simulator(canvas, 500, 500)
 
-    obstacle1 = Obstacle([(200,20), (300,20), (300,150), (200,150)], 4)
-    obstacle2 = Obstacle([(200,150), (300,150), (300,500), (200,500)], 1)
+    obstacle1 = SimpleObstacle([(200,20), (300,20), (300,150), (200,150)], 4)
+    obstacle2 = SimpleObstacle([(200,150), (300,150), (300,500), (200,500)], 1)
     obstacles = [obstacle1, obstacle2]
     sim.drawObstacles(obstacles)
     world = World(500,500, obstacles)
@@ -76,11 +79,8 @@ def testTwoDiffWeightObstacles():
     start = (50,50, 0, 0, 0)
     goal = (320, 50, 0, piOver2, -piOver2)
     linkRobot = MovableLinkRobot(links, world)
-    # sim.drawRobot(linkRobot)
-    # linkRobot.moveToConfiguration(goal)
-    # sim.drawRobot(linkRobot)
-    # raw_input()
-    mcr = MCRPlanner(linkRobot, world, start, goal, sim)
+    mcrhelper = SimpleMCRHelper(linkRobot, world)
+    mcr = MCRPlanner(start, goal, mcrhelper, sim)
     try:
         cameFrom = mcr.discreteMCR()
     except KeyboardInterrupt:
@@ -93,11 +93,11 @@ def testManyObstacles():
     canvas = Canvas(master, width=500, height=500)
     canvas.pack()
     sim = Simulator(canvas, 500, 500)
-    obstacle1 = Obstacle([(70,0), (245,0), (270,100), (160,180), (45, 100)], 4)
-    obstacle2 = Obstacle([(140, 385), (225,425), (140,480), (55,425)], 1)
-    obstacle3 = Obstacle([(280, 200), (350, 200), (350, 375), (280, 375)])
-    obstacle4 = Obstacle([(375, 20), (480, 20), (480, 110), (375, 110)])
-    obstacle5 = Obstacle([(410, 350), (430, 350), (430, 450), (410, 450), (410, 420), (360, 400), (410, 380)])
+    obstacle1 = SimpleObstacle([(70,0), (245,0), (270,100), (160,180), (45, 100)], 4)
+    obstacle2 = SimpleObstacle([(140, 385), (225,425), (140,480), (55,425)], 1)
+    obstacle3 = SimpleObstacle([(280, 200), (350, 200), (350, 375), (280, 375)])
+    obstacle4 = SimpleObstacle([(375, 20), (480, 20), (480, 110), (375, 110)])
+    obstacle5 = SimpleObstacle([(410, 350), (430, 350), (430, 450), (410, 450), (410, 420), (360, 400), (410, 380)])
     obstacles = [obstacle1, obstacle2, obstacle3, obstacle4, obstacle5]
     sim.drawObstacles(obstacles)
     world = World(500,500, obstacles)
@@ -113,7 +113,8 @@ def testManyObstacles():
     linkRobot.moveToConfiguration(goal)
     sim.drawRobot(linkRobot)
     raw_input()
-    mcr = MCRPlanner(linkRobot, world, start, goal, sim)
+    mcrhelper = SimpleMCRHelper(linkRobot, world)
+    mcr = MCRPlanner(start, goal, mcrhelper, sim)
     try:
         cameFrom = mcr.discreteMCR()
     except KeyboardInterrupt:
@@ -124,11 +125,11 @@ def testManyObstacles2Links():
     canvas = Canvas(master, width=500, height=500)
     canvas.pack()
     sim = Simulator(canvas, 500, 500)
-    obstacle1 = Obstacle([(100,0), (275,0), (300,100), (190,180), (75, 100)], 4)
-    obstacle2 = Obstacle([(140, 385), (225,425), (140,480), (55,425)], 1)
-    obstacle3 = Obstacle([(250, 200), (350, 200), (350, 375), (250, 375)])
-    obstacle4 = Obstacle([(375, 50), (480, 50), (480, 140), (375, 140)])
-    obstacle5 = Obstacle([(410, 350), (430, 350), (430, 450), (410, 450), (410, 420), (360, 400), (410, 380)])
+    obstacle1 = SimpleObstacle([(100,0), (275,0), (300,100), (190,180), (75, 100)], 4)
+    obstacle2 = SimpleObstacle([(140, 385), (225,425), (140,480), (55,425)], 1)
+    obstacle3 = SimpleObstacle([(250, 200), (350, 200), (350, 375), (250, 375)])
+    obstacle4 = SimpleObstacle([(375, 50), (480, 50), (480, 140), (375, 140)])
+    obstacle5 = SimpleObstacle([(410, 350), (430, 350), (430, 450), (410, 450), (410, 420), (360, 400), (410, 380)])
     obstacles = [obstacle1, obstacle2, obstacle3, obstacle4, obstacle5]
     sim.drawObstacles(obstacles)
     world = World(500,500, obstacles)
@@ -143,7 +144,8 @@ def testManyObstacles2Links():
     sim.drawRobot(linkRobot)
     linkRobot.moveToConfiguration(goal)
     sim.drawRobot(linkRobot)
-    mcr = MCRPlanner(linkRobot, world, start, goal, sim)
+    mcrhelper = SimpleMCRHelper(linkRobot, world)
+    mcr = MCRPlanner(start, goal, mcrhelper, sim)
     try:
         cameFrom = mcr.discreteMCR()
     except KeyboardInterrupt:
@@ -178,7 +180,7 @@ def prof(test, n=50):
     p = pstats.Stats('prof')
     p.sort_stats('cumulative').print_stats(n)
 
-
+testManyObstacles2Links()
 # obstacle1 = Obstacle([(100,0), (275,0), (300,100), (190,180), (75, 100)], 4)
 # obstacle2 = Obstacle([(140, 385), (225,425), (140,480), (55,425)], 1)
 # obstacle3 = Obstacle([(250, 200), (350, 200), (350, 375), (250, 375)])
@@ -193,5 +195,5 @@ def prof(test, n=50):
 # testTwoDiffWeightObstacles()
 # testManyObstacles()
 # testManyObstacles2Links()
-prof('testManyObstacles()')
+# prof('testManyObstacles()')
 # cProfile.run('testTwoDiffWeightObstacles()')
