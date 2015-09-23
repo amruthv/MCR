@@ -32,6 +32,9 @@ class Obstacle():
     def setId(self, obstacleId):
         raise NotImplementedError()
 
+    def __hash__(self):
+        return self.getId()
+
 class SimpleObstacle(Obstacle):
     def __init__(self, points, weight = 1):
         self.points = points

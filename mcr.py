@@ -2,14 +2,17 @@ from mcrGraph import MCRGraph
 from covercalculator import CoverCalculator
 import numpy as np
 import heapq
+import searcher
 
 class MCRPlanner():
     # start and goal are both configurations
-    def __init__(self, start, goal, mcrhelper, sim, shouldDraw = False):
+    def __init__(self, start, goal, mcrhelper, numIterations = 100, verbose = False, sim = None, shouldDraw = False):
         self.start = start
         self.goal = goal
         self.mcrhelper = mcrhelper
         self.cc = CoverCalculator(mcrhelper)
+        self.numIterations = numIterations
+        self.verbose = verbose
         self.sim = sim
         self.shouldDraw = shouldDraw
         self.G = self.initializeGraph()
@@ -21,32 +24,39 @@ class MCRPlanner():
         #setup stuff
         startCover = self.G.getLocalVertexCover(self.start)
         goalCover = self.G.getLocalVertexCover(self.goal)
+        best_possible_cover = startCover.mergeWith(goalCover)
         startGoalEdgeCover = self.cc.edgeCover(self.start, self.goal)
-        s_min =  startCover.mergeWith(startGoalEdgeCover).mergeWith(goalCover).score
-        print 'initial s_min', s_min
+        s_min =  best_possible_cover.mergeWith(startGoalEdgeCover).score
+        best_possible_score = best_possible_cover.score
         k = startCover.score + goalCover.score
-        print 'initial k =',k 
+        if self.verbose:
+            print 'initial s_min', s_min
+            print 'initial k =', k 
         G = self.G
         N = 1
-        while True:
+        for i in range(self.numIterations):
             self.expandRoadmap(G, k)
             self.cameFrom = self.computeMinExplanations(G)
             s_min = G.getTotalVertexCover(self.goal).score
             if N % N_raise == 0:
-                print '====================='
-                print "s_min = ", s_min
-                print '====================='
+                if self.verbose:
+                    print '====================='
+                    print "s_min = ", s_min
+                    print '====================='
                 k += 1
             if k >= s_min:
                 k = s_min - 1
-            if N % N_raise == 0:
+            if self.verbose and N % N_raise == 0:
                 print 'k = ', k
             N += 1
-            if s_min == 0:
-                print 'Got a collision free path'
+            if s_min == best_possible_score:
                 break
-        print "took N = {0} iterations".format(N)
-        print 'size of G: ', len(G.V)
+        if self.verbose:
+            if s_min == best_possible_score:
+                print 'Got best path possible'
+            print "took N = {0} iterations".format(N)
+            print 'size of G: ', len(G.V)
+        return s_min
 
     def initializeGraph(self):
         start = self.start
@@ -196,6 +206,12 @@ class MCRPlanner():
             G.setTotalVertexCover(node, finalCovers[node])
         # self.updateColors()
         return cameFrom
+
+    def getBestPath(self):
+        return searcher.reconstructPath(self.cameFrom, self.goal)
+
+    def getCoverOfBestPath(self):
+        return self.G.getTotalVertexCover(self.goal).cover
 
     def updateColors(self):
         for node in self.G.V:

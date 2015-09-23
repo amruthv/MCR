@@ -1,4 +1,4 @@
-from mcr import MCRPlanner
+# from mcr import MCRPlanner
 from world import World, Obstacle
 from movableLinkRobot import MovableLinkRobot
 from Tkinter import *
@@ -7,6 +7,10 @@ import searcher
 import cProfile
 import math
 from simplemcrhelper import SimpleMCRHelper
+from mcr import MCRPlanner
+
+import time
+import multiprocessing
 
 pi = math.pi
 piOver2 = math.pi / 2
@@ -30,14 +34,14 @@ def testNoObstacles():
 
 def testOneObstacleMiddle():
     master = Tk()
-    canvas = Canvas(master, width=500, height=500)
+    canvas = Canvas(master, width=500, height=350)
     canvas.pack()
-    sim = Simulator(canvas, 500, 500)
+    sim = Simulator(canvas, 500, 350)
 
     obstacle1 = SimpleObstacle([(200,20), (300,20), (300,150), (200,150)])
     obstacles = [obstacle1]
     sim.drawObstacles(obstacles)
-    world = World(500,500, obstacles)
+    world = World(500,350, obstacles)
 
     links = []
     links.append([0, [(50,50), (90,50), (90,70), (50,70)]])
@@ -89,17 +93,17 @@ def testTwoDiffWeightObstacles():
     # drawPath(sim, obstacles, linkRobot, path)
 
 def testManyObstacles():
-    master = Tk()
-    canvas = Canvas(master, width=500, height=500)
-    canvas.pack()
-    sim = Simulator(canvas, 500, 500)
+    # master = Tk()
+    # canvas = Canvas(master, width=500, height=500)
+    # canvas.pack()
+    # sim = Simulator(canvas, 500, 500)
     obstacle1 = SimpleObstacle([(70,0), (245,0), (270,100), (160,180), (45, 100)], 4)
     obstacle2 = SimpleObstacle([(140, 385), (225,425), (140,480), (55,425)], 1)
     obstacle3 = SimpleObstacle([(280, 200), (350, 200), (350, 375), (280, 375)])
     obstacle4 = SimpleObstacle([(375, 20), (480, 20), (480, 110), (375, 110)])
     obstacle5 = SimpleObstacle([(410, 350), (430, 350), (430, 450), (410, 450), (410, 420), (360, 400), (410, 380)])
     obstacles = [obstacle1, obstacle2, obstacle3, obstacle4, obstacle5]
-    sim.drawObstacles(obstacles)
+    # sim.drawObstacles(obstacles)
     world = World(500,500, obstacles)
 
     links = []
@@ -109,16 +113,20 @@ def testManyObstacles():
     start = (20,200, 0, 0, 0)
     goal = (450, 360, 0, piOver2, piOver2)
     linkRobot = MovableLinkRobot(links, world)
-    sim.drawRobot(linkRobot)
-    linkRobot.moveToConfiguration(goal)
-    sim.drawRobot(linkRobot)
-    raw_input()
+    # sim.drawRobot(linkRobot)
+    # linkRobot.moveToConfiguration(goal)
+    # sim.drawRobot(linkRobot)
+    # raw_input()
     mcrhelper = SimpleMCRHelper(linkRobot, world, goal)
-    mcr = MCRPlanner(start, goal, mcrhelper, sim)
-    try:
-        cameFrom = mcr.discreteMCR()
-    except KeyboardInterrupt:
-        drawGraph(sim, obstacles, mcr.G)
+    mcr = MCRPlanner(start, goal, mcrhelper)
+    # try:
+    s_min = mcr.discreteMCR()
+    print 'best s_min=', s_min
+    print 'path: ' + mcr.getBestPath()
+    print 'best cover: ' + mcr.getBestCover()
+
+    # except KeyboardInterrupt:
+        # drawGraph(sim, obstacles, mcr.G)
 
 def testManyObstacles2Links():
     master = Tk()
@@ -137,20 +145,26 @@ def testManyObstacles2Links():
     links = []
     links.append([0, [(20,200), (60,200), (60,220), (20,220)]])
     links.append([0, [(60,200), (100,200), (100,220), (60,220)]])
-    start = (20,200, 0, 0)
-    goal = (450, 360, 0, piOver2)
+    links.append([0, [(100,200), (140,200), (140,220), (100,220)]])
+    start = (20,200, 0, 0, 0)
+    goal = (450, 360, 0, piOver2, piOver2)
     linkRobot = MovableLinkRobot(links, world)
     linkRobot.moveToConfiguration(start)
     sim.drawRobot(linkRobot)
     linkRobot.moveToConfiguration(goal)
     sim.drawRobot(linkRobot)
+    raw_input()
     mcrhelper = SimpleMCRHelper(linkRobot, world, goal)
-    mcr = MCRPlanner(start, goal, mcrhelper, sim)
-    try:
-        cameFrom = mcr.discreteMCR()
-    except KeyboardInterrupt:
-        raw_input()
-        drawGraph(sim, obstacles, mcr.G)
+    mcr = MCRPlanner(start, goal, mcrhelper, 20, False)
+    # try:
+    s_min = mcr.discreteMCR()
+    print 'best s_min=', s_min
+    print 'path: ', mcr.getCoverOfBestPath()
+    print 'best cover: ', mcr.getCoverOfBestPath()
+
+    # except KeyboardInterrupt:
+    # raw_input()
+        # drawGraph(sim, obstacles, mcr.G)
 
 def drawGraph(sim, obstacles, G):
     sim.clearCanvas()
@@ -180,7 +194,7 @@ def prof(test, n=50):
     p = pstats.Stats('prof')
     p.sort_stats('cumulative').print_stats(n)
 
-testManyObstacles2Links()
+# testManyObstacles2Links()
 # obstacle1 = Obstacle([(100,0), (275,0), (300,100), (190,180), (75, 100)], 4)
 # obstacle2 = Obstacle([(140, 385), (225,425), (140,480), (55,425)], 1)
 # obstacle3 = Obstacle([(250, 200), (350, 200), (350, 375), (250, 375)])
@@ -194,6 +208,28 @@ testManyObstacles2Links()
 # testOneObstacleMiddle()
 # testTwoDiffWeightObstacles()
 # testManyObstacles()
-# testManyObstacles2Links()
+testManyObstacles2Links()
 # prof('testManyObstacles()')
 # cProfile.run('testTwoDiffWeightObstacles()')
+
+def runNTimes(m, n):
+    times = []
+    for i in range(n):
+        a = time.time()
+        p = multiprocessing.Process(target=m)
+        p.start()
+        p.join(120)
+        # If thread is active
+        if p.is_alive():
+            print "m is running... let's kill it..."
+            # Terminate m
+            p.terminate()
+            p.join()
+            times.append(float('inf'))
+        else:
+            b = time.time()
+            times.append(b-a);
+    return times
+
+# print runNTimes(testManyObstacles, 5)
+# print runNTimes(testManyObstacles2Links, 5)
