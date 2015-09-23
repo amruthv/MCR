@@ -123,7 +123,7 @@ def testManyObstacles():
     s_min = mcr.discreteMCR()
     print 'best s_min=', s_min
     print 'path: ' + mcr.getBestPath()
-    print 'best cover: ' + mcr.getBestCover()
+    print 'best cover: ' + mcr.getCoverOfBestPath()
 
     # except KeyboardInterrupt:
         # drawGraph(sim, obstacles, mcr.G)

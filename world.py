@@ -1,4 +1,3 @@
-# from polygonhelper import *
 from shapely.geometry import Polygon
 from bbox import BBox
 

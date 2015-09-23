@@ -1,5 +1,3 @@
-# from polygonhelper import *
-from DrawingWindowStandalone import *
 from robot import *
 from world import *
 from Tkinter import *

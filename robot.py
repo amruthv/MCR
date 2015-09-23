@@ -1,9 +1,3 @@
-from polygonhelper import *
-from robotpolygon import *
-import numpy as np
-from heapq import * 
-import math
-
 class Robot():
     #polygonArr is a array of array of points (not polygon objects or point objects) e.g [[[1,2],[3,4]], [[5,5],[6,6]]] 
     def __init__(self, polygonArr):
