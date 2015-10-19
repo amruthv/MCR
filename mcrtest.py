@@ -176,14 +176,6 @@ def drawGraph(sim, obstacles, G):
     #         sim.drawLine(v1[0], v1[1], v2[0], v2[1])
     raw_input()
 
-def drawPath(sim, obstacles, robot, path):
-    for q in path:
-        sim.clearCanvas()
-        sim.drawObstacles(obstacles)
-        robot.moveToConfiguration(q)
-        sim.drawRobot(robot)
-        raw_input()
-
 def prof(test, n=50):
     import cProfile
     import pstats

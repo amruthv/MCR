@@ -19,7 +19,7 @@ class SimpleMCRHelper(MCRHelper):
 
     def coverWithBBox(self, q):
         self.robot.moveToConfiguration(q)
-        collisions = []
+        collisions = set()
         for obstacle in self.world.obstacles:
             allRobotPoints = [pt for polyPoints in self.robot.position for pt in polyPoints]
             allRobotBBox = BBox(allRobotPoints)
@@ -39,17 +39,17 @@ class SimpleMCRHelper(MCRHelper):
                     if bboxRobotPoly.intersectsBBox(obstacle.bbox):
                         polygon = Polygon(polygonPts)
                         if polygon.intersects(obstacle.polygon):
-                            collisions.append(obstacle)
+                            collisions.add(obstacle)
         return collisions
 
     def naiiveCover(self, q):
         self.robot.moveToConfiguration(q)
-        collisions = []
+        collisions = set()
         for polygon in self.robot.position:
             poly = Polygon(polygon)
             for obstacle in self.world.obstacles:
                 if poly.intersects(obstacle.polygon):
-                    collisions.append(obstacle)
+                    collisions.add(obstacle)
         return collisions
 
     def sampleConfig(self):

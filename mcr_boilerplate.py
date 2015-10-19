@@ -17,7 +17,7 @@ def runMCMR(start, goal, numIterations = 50):
 
 class MyMCRHelper(MCRHelper):
 
-    #return objects that you collides at this configuration q -- must be hashable.
+    #return set objects that you collides at this configuration q -- objects must be hashable.
     def collisionsAtQ(self, q):
         raise NotImplementedError()
 
@@ -25,7 +25,7 @@ class MyMCRHelper(MCRHelper):
     def sampleConfig(self):
         raise NotImplementedError()
 
-    # return a list of configurations (as defined above that exclude qFrom and qTo ie (qFrom... qTo) )
+    # return a list of configurations (as defined above that exclude qFrom and qTo ie (qFrom... qTo) ) excluding endpoints
     def generateInBetweenConfigs(self, qFrom, qTo):
         raise NotImplementedError()
 

@@ -58,3 +58,11 @@ class Simulator():
 
     def deleteObj(self, objId):
         self.canvas.delete(objId)
+
+    def drawPath(self, obstacles, robot, path):
+        for q in path:
+            self.clearCanvas()
+            self.drawObstacles(obstacles)
+            robot.moveToConfiguration(q)
+            self.drawRobot(robot)
+            raw_input()
