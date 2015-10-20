@@ -3,8 +3,8 @@ class MCRHelper():
     def collisionsAtQ(self, q):
         raise NotImplementedError()
 
-    # return a configuration represented as a list
-    def sampleConfig(self):
+    # return a configuration represented as a list, can use the passed goal to do goal biasing in random sampling
+    def sampleConfig(self, goal):
         raise NotImplementedError()
 
     # return a list of configurations (as defined above that exclude qFrom and qTo ie (qFrom... qTo) )

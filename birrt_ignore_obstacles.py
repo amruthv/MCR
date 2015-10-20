@@ -5,12 +5,16 @@ import math
 from new_rrt import RRTSearcher
 import searcher
 
-class BiRRTSearcher(object):
+#bi rrt implementation that ignores obstacles at the start configuration and goal configuration
+class BiRRTIgnoreObstacleSearcher(object):
     def __init__(self, start, goal, helper):
         self.start = start
         self.goal = goal
-        self.RRT1 = RRTSearcher(start, goal, helper)
-        self.RRT2 = RRTSearcher(goal, start, helper)
+        obstaclesAtStart = helper.collisionsAtQ(start)
+        obstaclesAtGoal = helper.collisionsAtQ(goal)
+        obstaclesAtStartAndGoal = obstaclesAtStart.union(obstaclesAtGoal)
+        self.RRT1 = RRTSearcher(start, goal, helper, obstaclesAtStartAndGoal)
+        self.RRT2 = RRTSearcher(goal, start, helper, obstaclesAtStartAndGoal)
 
     def search(self, numIters = 1000):
         for iterNum in range(numIters):
@@ -42,4 +46,3 @@ class BiRRTSearcher(object):
         pathFromStart = searcher.reconstructPath(tree1.cameFrom, meetingPoint)
         pathFromGoal = searcher.reconstructPath(tree2.cameFrom, meetingPoint)
         return pathFromStart + pathFromGoal[::-1]
-

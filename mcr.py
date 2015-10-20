@@ -84,7 +84,7 @@ class MCRPlanner():
         return graph
 
     def expandRoadmap(self, G, k, delta = 400.0):
-        sampleConfig = self.mcrhelper.sampleConfig()
+        sampleConfig = self.mcrhelper.sampleConfig(self.goal)
         nearestConfig = self.closest(G,k,sampleConfig)
         q = self.extendToward(G, nearestConfig, sampleConfig, delta, k)
         # couldn't find a point to extend towards satisfying k reachability

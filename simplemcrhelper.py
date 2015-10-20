@@ -52,9 +52,9 @@ class SimpleMCRHelper(MCRHelper):
                     collisions.add(obstacle)
         return collisions
 
-    def sampleConfig(self):
+    def sampleConfig(self, goal):
         if random.random() < 0.1:
-            return self.goal
+            return goal
         return self.robot.generateRandomConfiguration()
 
     def generateInBetweenConfigs(self, q_from, q_to):

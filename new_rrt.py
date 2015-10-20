@@ -4,7 +4,7 @@ import numpy as np
 import math
 
 class RRTSearcher(object):
-    def __init__(self, start, goal, helper, shouldDraw = False):
+    def __init__(self, start, goal, helper, obstaclesToIgnore = set(), shouldDraw = False):
         self.start = start
         self.goal = goal
         self.helper = helper
@@ -12,17 +12,19 @@ class RRTSearcher(object):
         self.auxillaryArray = []
         self.auxillaryArrayThreshold = 50
         self.cameFrom = {}
+        self.obstaclesToIgnore = obstaclesToIgnore
         self.shouldDraw = shouldDraw
 
     def searchWithRRT(self, numIters = 1000):
         for iterNum in range(numIters):
             qExtended = runIteration()
+            print 'qExtended = ', qExtended
             if qExtended == self.goal:
                 return True
         return False
 
     def runIteration(self):
-        qRand = self.helper.sampleConfig()
+        qRand = self.helper.sampleConfig(self.goal)
         self.rebuildTreeIfNecessary()
         nearestConfig = self.nearestConfig(qRand)
         qExtended = self.extendToward(nearestConfig, qRand)
@@ -84,7 +86,10 @@ class RRTSearcher(object):
         configurationsToCheck.append(qPrime)
         collisions = set()
         for configuration in configurationsToCheck:
-            collisions.update(self.helper.collisionsAtQ(configuration))
+            collisionsAtConfiguration = self.helper.collisionsAtQ(configuration)
+            for obstacle in collisionsAtConfiguration:
+                if obstacle not in self.obstaclesToIgnore:
+                    collisions.add(obstacle)
         if len(collisions) == 0:
             return tuple(qPrime)
         return None

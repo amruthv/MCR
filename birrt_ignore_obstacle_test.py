@@ -1,5 +1,5 @@
 import searcher
-from new_birrt import *
+from birrt_ignore_obstacles import *
 from Tkinter import *
 from simulator import *
 from movableLinkRobot import MovableLinkRobot
@@ -35,7 +35,7 @@ def testOneObstacleMiddle():
     raw_input()
 
     helper = SimpleMCRHelper(linkRobot, world, goal)
-    birrt = BiRRTSearcher(start, goal, helper)
+    birrt = BiRRTIgnoreObstacleSearcher(start, goal, helper)
     sim.drawPoint((start[0], start[1]), fill = 'green')
     sim.drawPoint((goal[0], goal[1]), fill = 'blue')
     found = birrt.search()
