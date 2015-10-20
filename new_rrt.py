@@ -16,22 +16,30 @@ class RRTSearcher(object):
 
     def searchWithRRT(self, numIters = 1000):
         for iterNum in range(numIters):
-            qRand = self.helper.sampleConfig()
-            if len(self.auxillaryArray) > self.auxillaryArrayThreshold:
-                self.rebuildTree()
-            nearestConfig = self.nearestConfig(qRand)
-            qExtended = self.extendToward(nearestConfig, qRand)
-            if qExtended is not None:
-                self.cameFrom[qExtended] = nearestConfig
-                self.auxillaryArray.append(qExtended)
-                if qExtended == self.goal:
-                    return True
+            qExtended = runIteration()
+            if qExtended == self.goal:
+                return True
         return False
 
-    def rebuildTree(self):
-        newData = np.vstack([self.tree.data, self.auxillaryArray])
-        self.auxillaryArray = []
-        self.tree = KDTree(newData)
+    def runIteration(self):
+        qRand = self.helper.sampleConfig()
+        self.rebuildTreeIfNecessary()
+        nearestConfig = self.nearestConfig(qRand)
+        qExtended = self.extendToward(nearestConfig, qRand)
+        self.updateRRTWithNewNode(nearestConfig, qExtended)
+        return qExtended
+
+    def updateRRTWithNewNode(self, qNear, qExtended):
+        if qExtended is not None:
+            self.cameFrom[qExtended] = qNear
+            self.auxillaryArray.append(qExtended)
+
+
+    def rebuildTreeIfNecessary(self):
+        if len(self.auxillaryArray) > self.auxillaryArrayThreshold:
+            newData = np.vstack([self.tree.data, self.auxillaryArray])
+            self.auxillaryArray = []
+            self.tree = KDTree(newData)
 
     def nearestConfig(self, q_rand):
         _, nearestInTreeIndex = self.tree.query(q_rand, 1)
@@ -80,6 +88,9 @@ class RRTSearcher(object):
         if len(collisions) == 0:
             return tuple(qPrime)
         return None
+
+    def treeSize(self):
+        return len(self.tree.data) + len(self.auxillaryArray)
 
 
     def complicatedExtendToward(self, closest, sample, delta, bisectionLimit = 4):
