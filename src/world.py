@@ -56,3 +56,5 @@ class SimpleObstacle(Obstacle):
 
     def __str__(self):
         return "id: {0}, weight: {1}".format(self.id, self.weight)
+    def __repr__(self):
+        return self.__str__()

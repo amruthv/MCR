@@ -15,3 +15,5 @@ class MCRHelper():
     def distance(self, q1, q2):
         raise NotImplementedError()
 
+    # need a way to get the weight of an obstacle (right now its obstacle.getWeight())
+
