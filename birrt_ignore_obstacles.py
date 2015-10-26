@@ -40,9 +40,9 @@ class BiRRTIgnoreObstacleSearcher(object):
             tree2 = self.RRT1
         # find the meeting point of the two trees
         commonKeys = set(tree1.cameFrom.keys()).intersection(set(tree2.cameFrom.keys()))
-        print commonKeys
         assert(len(commonKeys) == 1)
         meetingPoint = commonKeys.pop()
         pathFromStart = searcher.reconstructPath(tree1.cameFrom, meetingPoint)
         pathFromGoal = searcher.reconstructPath(tree2.cameFrom, meetingPoint)
-        return pathFromStart + pathFromGoal[::-1]
+        trajectory = pathFromStart + pathFromGoal[:-1][::-1]
+        return trajectory
