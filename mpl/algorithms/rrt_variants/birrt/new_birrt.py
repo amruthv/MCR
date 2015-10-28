@@ -11,6 +11,7 @@ class BiRRTSearcher(object):
         self.goal = goal
         self.RRT1 = RRTSearcher(start, goal, helper)
         self.RRT2 = RRTSearcher(goal, start, helper)
+        self.foundPath = Fa;se
 
     def run(self):
         return self.search()
@@ -25,12 +26,15 @@ class BiRRTSearcher(object):
                 if qExtendedTree2 is not None:
                     self.RRT2.updateRRTWithNewNode(qNearest, qExtended)
                     if qExtendedTree2 == qExtended:
+                        self.foundPath = True
                         return True
             if self.RRT1.treeSize() > self.RRT2.treeSize():
                 self.RRT1, self.RRT2 = self.RRT2, self.RRT1
         return False
 
     def getPath(self):
+        if not self.foundPath:
+            return []
         if self.RRT1.goal == self.goal:
             tree1 = self.RRT1
             tree2 = self.RRT2

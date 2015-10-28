@@ -15,9 +15,11 @@ class RRTSearcher(object):
         self.cameFrom = {}
         self.obstaclesToIgnore = obstaclesToIgnore
         self.shouldDraw = shouldDraw
+        self.foundPath = False
 
     def run(self):
-        return self.searchWithRRT()
+        if self.searchWithRRT():
+            self.foundPath = True
 
     def searchWithRRT(self, numIters = 1000):
         for iterNum in range(numIters):
@@ -104,7 +106,9 @@ class RRTSearcher(object):
         return set()
 
     def getPath(self):
-        return searcher.reconstructPath(self.cameFrom, self.goal)
+        if self.foundPath:
+            return searcher.reconstructPath(self.cameFrom, self.goal)
+        return []
 
 
     def complicatedExtendToward(self, closest, sample, delta, bisectionLimit = 4):

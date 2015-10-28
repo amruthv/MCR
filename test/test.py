@@ -2,7 +2,7 @@ import packagehelper
 
 import math
 from Tkinter import *
-from mpl.algorithm_runner import runAlgorithm
+from mpl import algorithm_runner
 from mpl.common.simplemcrhelper import SimpleMCRHelper
 from mpl.common.world import World, SimpleObstacle
 from mpl.common.movableLinkRobot import MovableLinkRobot
@@ -37,14 +37,10 @@ def testOneObstacleMiddle():
     raw_input()
 
     helper = SimpleMCRHelper(linkRobot, world, goal)
-    algo = runAlgorithm(start, goal, helper)
+    path, cover = algorithm_runner.runAlgorithm(start, goal, helper, 1)
     sim.drawPoint((start[0], start[1]), fill = 'green')
     sim.drawPoint((goal[0], goal[1]), fill = 'blue')
-    found = birrt.search()
-    print 'found: ', found
-    if found:
-        path = birrt.path()
-        sim.drawPath(obstacles, linkRobot, path)
+    sim.drawPath(obstacles, linkRobot, path)
 
 
 if __name__ == '__main__':
