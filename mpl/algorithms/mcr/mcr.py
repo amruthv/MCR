@@ -1,8 +1,8 @@
-from mcrGraph import MCRGraph
-from covercalculator import CoverCalculator
 import numpy as np
 import heapq
-import searcher
+from mcrGraph import MCRGraph
+from mpl.common.covercalculator import CoverCalculator
+from mpl.common import searcher
 
 class MCRPlanner():
     # start and goal are both configurations

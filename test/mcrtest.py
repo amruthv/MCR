@@ -1,16 +1,16 @@
-# from mcr import MCRPlanner
-from world import World, Obstacle
-from movableLinkRobot import MovableLinkRobot
-from Tkinter import *
-from simulator import *
-import searcher
-import cProfile
-import math
-from simplemcrhelper import SimpleMCRHelper
-from mcr import MCRPlanner
+import packagehelper
 
+import math
 import time
 import multiprocessing
+import cProfile
+from Tkinter import *
+from mpl.common.world import World, SimpleObstacle
+from mpl.common.movableLinkRobot import MovableLinkRobot
+from mpl.common.simulator import Simulator
+from mpl.common import searcher
+from mpl.common.simplemcrhelper import SimpleMCRHelper
+from mpl.algorithms.mcr.mcr import MCRPlanner
 
 pi = math.pi
 piOver2 = math.pi / 2
@@ -185,16 +185,6 @@ def prof(test, n=50):
         print 'Done'
     p = pstats.Stats('prof')
     p.sort_stats('cumulative').print_stats(n)
-
-# testManyObstacles2Links()
-# obstacle1 = Obstacle([(100,0), (275,0), (300,100), (190,180), (75, 100)], 4)
-# obstacle2 = Obstacle([(140, 385), (225,425), (140,480), (55,425)], 1)
-# obstacle3 = Obstacle([(250, 200), (350, 200), (350, 375), (250, 375)])
-# obstacle4 = Obstacle([(375, 90), (480, 90), (480, 180), (375, 180)])
-# obstacle5 = Obstacle([(410, 350), (430, 350), (430, 450), (410, 450), (410, 420), (360, 400), (410, 380)])
-# obstacles = [obstacle1, obstacle2, obstacle3, obstacle4, obstacle5]
-# world = World(500,500, obstacles)
-
 
 # testNoObstacles()
 # testOneObstacleMiddle()
