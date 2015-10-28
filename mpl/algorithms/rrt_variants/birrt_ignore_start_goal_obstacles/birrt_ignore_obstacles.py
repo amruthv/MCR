@@ -12,9 +12,12 @@ class BiRRTIgnoreObstacleSearcher(object):
         self.goal = goal
         obstaclesAtStart = helper.collisionsAtQ(start)
         obstaclesAtGoal = helper.collisionsAtQ(goal)
-        obstaclesAtStartAndGoal = obstaclesAtStart.union(obstaclesAtGoal)
-        self.RRT1 = RRTSearcher(start, goal, helper, obstaclesAtStartAndGoal)
-        self.RRT2 = RRTSearcher(goal, start, helper, obstaclesAtStartAndGoal)
+        self.obstaclesAtStartAndGoal = obstaclesAtStart.union(obstaclesAtGoal)
+        self.RRT1 = RRTSearcher(start, goal, helper, self.obstaclesAtStartAndGoal)
+        self.RRT2 = RRTSearcher(goal, start, helper, self.obstaclesAtStartAndGoal)
+
+    def run(self):
+        return self.search()
 
     def search(self, numIters = 1000):
         for iterNum in range(numIters):
@@ -31,7 +34,7 @@ class BiRRTIgnoreObstacleSearcher(object):
                 self.RRT1, self.RRT2 = self.RRT2, self.RRT1
         return False
 
-    def path(self):
+    def getPath(self):
         if self.RRT1.goal == self.goal:
             tree1 = self.RRT1
             tree2 = self.RRT2
@@ -46,3 +49,6 @@ class BiRRTIgnoreObstacleSearcher(object):
         pathFromGoal = searcher.reconstructPath(tree2.cameFrom, meetingPoint)
         trajectory = pathFromStart + pathFromGoal[:-1][::-1]
         return trajectory
+
+    def getCover(self):
+        return self.obstaclesAtStartAndGoal

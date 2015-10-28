@@ -2,6 +2,7 @@ from scipy.spatial import KDTree
 import heapq
 import numpy as np
 import math
+from mpl.common import searcher
 
 class RRTSearcher(object):
     def __init__(self, start, goal, helper, obstaclesToIgnore = set(), shouldDraw = False):
@@ -14,6 +15,9 @@ class RRTSearcher(object):
         self.cameFrom = {}
         self.obstaclesToIgnore = obstaclesToIgnore
         self.shouldDraw = shouldDraw
+
+    def run(self):
+        return self.searchWithRRT()
 
     def searchWithRRT(self, numIters = 1000):
         for iterNum in range(numIters):
@@ -95,6 +99,12 @@ class RRTSearcher(object):
 
     def treeSize(self):
         return len(self.tree.data) + len(self.auxillaryArray)
+
+    def getCover(self):
+        return set()
+
+    def getPath(self):
+        return searcher.reconstructPath(self.cameFrom, self.goal)
 
 
     def complicatedExtendToward(self, closest, sample, delta, bisectionLimit = 4):

@@ -21,6 +21,9 @@ class BiRRTCollisionRemovalSearcher(object):
         self.RRT2 = RRTSearcher(goal, start, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts)
         self.meetingPoint = None
 
+    def run(self):
+        return self.search()
+
     def search(self, numIters = 1000, obstacleRemovalInterval = 100):
         for iterNum in range(numIters):
             if iterNum > 0 and iterNum % obstacleRemovalInterval == 0:
@@ -50,7 +53,7 @@ class BiRRTCollisionRemovalSearcher(object):
         del self.obstacleCollisionCounts[obstacle]
 
 
-    def path(self):
+    def getPath(self):
         if self.RRT1.goal == self.goal:
             tree1 = self.RRT1
             tree2 = self.RRT2
@@ -64,7 +67,7 @@ class BiRRTCollisionRemovalSearcher(object):
         pathCover = self.getCoverOfPath(trajectory)
         return (trajectory, pathCover)
 
-    def getCoverOfPath(self, trajectory):
+    def getCover(self, trajectory):
         cc = covercalculator.CoverCalculator(self.helper)
         cover = cc.cover(self.start)
         for i in range(len(trajectory) - 1):

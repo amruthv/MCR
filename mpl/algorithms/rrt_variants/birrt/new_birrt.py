@@ -12,6 +12,9 @@ class BiRRTSearcher(object):
         self.RRT1 = RRTSearcher(start, goal, helper)
         self.RRT2 = RRTSearcher(goal, start, helper)
 
+    def run(self):
+        return self.search()
+
     def search(self, numIters = 1000):
         for iterNum in range(numIters):
             qExtended = self.RRT1.runIteration()
@@ -27,7 +30,7 @@ class BiRRTSearcher(object):
                 self.RRT1, self.RRT2 = self.RRT2, self.RRT1
         return False
 
-    def path(self):
+    def getPath(self):
         if self.RRT1.goal == self.goal:
             tree1 = self.RRT1
             tree2 = self.RRT2
@@ -42,4 +45,7 @@ class BiRRTSearcher(object):
         pathFromGoal = searcher.reconstructPath(tree2.cameFrom, meetingPoint)
         trajectory = pathFromStart + pathFromGoal[:-1][::-1]
         return trajectory
+
+    def getCover(self):
+        return set()
 

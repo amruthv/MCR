@@ -20,6 +20,9 @@ class MCRPlanner():
         self.colorMap = {0: 'white', 1: 'black', 2: 'red', 3: 'green', 4: 'blue', 5: 'cyan', 6: 'purple', 7: 'yellow', 8 : 'orange'}
         self.nodeIds = {}
 
+    def run(self):
+        return self.discreteMCR()
+
     def discreteMCR(self, N_raise = 10):
         #setup stuff
         startCover = self.G.getLocalVertexCover(self.start)
@@ -207,10 +210,10 @@ class MCRPlanner():
         # self.updateColors()
         return cameFrom
 
-    def getBestPath(self):
+    def getPath(self):
         return searcher.reconstructPath(self.cameFrom, self.goal)
 
-    def getCoverOfBestPath(self):
+    def getCover(self):
         return self.G.getTotalVertexCover(self.goal).cover
 
     def updateColors(self):
