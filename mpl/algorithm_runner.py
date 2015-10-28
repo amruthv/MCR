@@ -27,3 +27,4 @@ def runAlgorithm(start, goal, helper, algorithmNumber):
     algorithm.run()
     path = algorithm.getPath()
     cover = algorithm.getCover()
+    return (path, cover)
