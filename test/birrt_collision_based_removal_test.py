@@ -1,11 +1,13 @@
+import packagehelper
+
 import math
 from Tkinter import *
-from birrt_collision_based_removal import *
-import searcher
-import simulator
-import movableLinkRobot
-import world
-import simplemcrhelper
+from mpl.algorithms.rrt_variants.birrt_collision_based_removal.birrt_collision_based_removal import BiRRTCollisionRemovalSearcher
+from mpl.common import searcher
+from mpl.common import simulator
+from mpl.common import movableLinkRobot
+from mpl.common.world import World, SimpleObstacle
+from mpl.common.simplemcrhelper import SimpleMCRHelper
 
 pi = math.pi
 piOver2 = math.pi / 2
@@ -16,11 +18,11 @@ def testOneObstacleMiddle():
     canvas.pack()
     sim = simulator.Simulator(canvas, 500, 350)
 
-    obstacle1 = world.SimpleObstacle([(200,20), (300,20), (300,150), (200,150)])
+    obstacle1 = SimpleObstacle([(200,20), (300,20), (300,150), (200,150)])
     obstacles = [] 
     obstacles = [obstacle1]
     sim.drawObstacles(obstacles)
-    world = world.World(500,350, obstacles)
+    world = World(500,350, obstacles)
 
     links = []
     links.append([0, [(50,50), (90,50), (90,70), (50,70)]])
@@ -34,14 +36,14 @@ def testOneObstacleMiddle():
     sim.drawRobot(linkRobot)
     raw_input()
 
-    helper = simplemcrhelper.SimpleMCRHelper(linkRobot, world, goal)
+    helper = SimpleMCRHelper(linkRobot, world, goal)
     birrt = BiRRTCollisionRemovalSearcher(start, goal, helper)
     sim.drawPoint((start[0], start[1]), fill = 'green')
     sim.drawPoint((goal[0], goal[1]), fill = 'blue')
     found = birrt.search()
     print 'found: ', found
     if found:
-        path = birrt.path()
+        path, cover = birrt.path()
         sim.drawPath(obstacles, linkRobot, path)
 
 def testManyObstacles():

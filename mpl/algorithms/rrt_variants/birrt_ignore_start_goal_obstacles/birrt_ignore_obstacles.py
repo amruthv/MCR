@@ -2,8 +2,8 @@ from scipy.spatial import KDTree
 import heapq
 import numpy as np
 import math
+from mpl.common import searcher
 from new_rrt import RRTSearcher
-import searcher
 
 #bi rrt implementation that ignores obstacles at the start configuration and goal configuration
 class BiRRTIgnoreObstacleSearcher(object):

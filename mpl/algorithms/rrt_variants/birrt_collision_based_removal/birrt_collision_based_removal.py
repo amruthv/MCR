@@ -1,10 +1,10 @@
-from scipy.spatial import KDTree
 import heapq
 import numpy as np
 import math
+from scipy.spatial import KDTree
 from new_rrt import RRTSearcher
-import covercalculator
-import searcher
+from mpl.common import covercalculator
+from mpl.common import searcher
 
 #bi rrt implementation that ignores obstacles at the start configuration and goal configuration
 class BiRRTCollisionRemovalSearcher(object):
@@ -23,7 +23,7 @@ class BiRRTCollisionRemovalSearcher(object):
 
     def search(self, numIters = 1000, obstacleRemovalInterval = 100):
         for iterNum in range(numIters):
-            if iterName > 0 and iterNum % obstacleRemovalInterval == 0:
+            if iterNum > 0 and iterNum % obstacleRemovalInterval == 0:
                 self.selectObstacleToRemove()
             qExtended = self.RRT1.runIteration()
             if qExtended is not None:

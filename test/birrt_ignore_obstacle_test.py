@@ -1,11 +1,12 @@
-import searcher
-from birrt_ignore_obstacles import *
+import packagehelper
 from Tkinter import *
-from simulator import *
-from movableLinkRobot import MovableLinkRobot
-from world import World, Obstacle
-from simplemcrhelper import SimpleMCRHelper
 import math
+from mpl.common import searcher
+from mpl.common.simulator import Simulator
+from mpl.common.movableLinkRobot import MovableLinkRobot
+from mpl.algorithms.rrt_variants.birrt_ignore_start_goal_obstacles.birrt_ignore_obstacles import BiRRTIgnoreObstacleSearcher
+from mpl.common.world import World, Obstacle, SimpleObstacle
+from mpl.common.simplemcrhelper import SimpleMCRHelper
 
 pi = math.pi
 piOver2 = math.pi / 2

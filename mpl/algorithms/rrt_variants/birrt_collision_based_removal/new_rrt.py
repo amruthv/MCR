@@ -93,8 +93,8 @@ class RRTSearcher(object):
         if len(collisions) == 0:
             return tuple(qPrime)
         for collision in collisions:
-            currentCollisionCountForObstacle = obstacleCollisionCounts.get(collision, 0)
-            obstacleCollisionCounts[collision] = currentCollisionCountForObstacle + 1
+            currentCollisionCountForObstacle = self.obstacleCollisionCounts.get(collision, 0)
+            self.obstacleCollisionCounts[collision] = currentCollisionCountForObstacle + 1
         return None
 
     def treeSize(self):
