@@ -17,8 +17,7 @@ class RRTSearcher(object):
 
     def searchWithRRT(self, numIters = 1000):
         for iterNum in range(numIters):
-            qExtended = runIteration()
-            print 'qExtended = ', qExtended
+            qExtended = self.runIteration()
             if qExtended == self.goal:
                 return True
         return False

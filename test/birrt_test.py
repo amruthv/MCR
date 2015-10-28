@@ -1,11 +1,13 @@
-import searcher
-from new_birrt import *
-from Tkinter import *
-from simulator import *
-from movableLinkRobot import MovableLinkRobot
-from world import World, Obstacle
-from simplemcrhelper import SimpleMCRHelper
+import packagehelper
+
 import math
+from Tkinter import *
+from mpl.common import searcher
+from mpl.algorithms.rrt_variants.birrt.new_birrt import BiRRTSearcher
+from mpl.common.simulator import Simulator
+from mpl.common.movableLinkRobot import MovableLinkRobot
+from mpl.common.world import World, SimpleObstacle
+from mpl.common.simplemcrhelper import SimpleMCRHelper
 
 pi = math.pi
 piOver2 = math.pi / 2

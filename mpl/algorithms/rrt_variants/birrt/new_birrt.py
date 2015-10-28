@@ -3,7 +3,7 @@ import heapq
 import numpy as np
 import math
 from new_rrt import RRTSearcher
-import searcher
+from mpl.common import searcher
 
 class BiRRTSearcher(object):
     def __init__(self, start, goal, helper):
