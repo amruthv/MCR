@@ -43,7 +43,7 @@ def testOneObstacleMiddle():
     found = birrt.search()
     print 'found: ', found
     if found:
-        path = birrt.path()
+        path = birrt.getPath()
         sim.drawPath(obstacles, linkRobot, path)
 
 

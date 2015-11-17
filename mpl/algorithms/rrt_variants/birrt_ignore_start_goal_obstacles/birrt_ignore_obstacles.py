@@ -18,8 +18,7 @@ class BiRRTIgnoreObstacleSearcher(object):
         self.foundPath = False
 
     def run(self):
-        if self.search():
-            self.foundPath = True
+        self.foundPath = self.search()
 
     def search(self, numIters = 1000):
         for iterNum in range(numIters):
@@ -27,6 +26,8 @@ class BiRRTIgnoreObstacleSearcher(object):
             if qExtended is not None:
                 self.RRT2.rebuildTreeIfNecessary()
                 qNearest = self.RRT2.nearestConfig(qExtended)
+                if qNearest == qExtended:
+                    return True 
                 qExtendedTree2 = self.RRT2.extendToward(qNearest, qExtended)
                 if qExtendedTree2 is not None:
                     self.RRT2.updateRRTWithNewNode(qNearest, qExtended)
@@ -48,7 +49,7 @@ class BiRRTIgnoreObstacleSearcher(object):
             tree2 = self.RRT1
         # find the meeting point of the two trees
         commonKeys = set(tree1.cameFrom.keys()).intersection(set(tree2.cameFrom.keys()))
-        assert(len(commonKeys) == 1)
+        assert(len(commonKeys) >= 1)
         meetingPoint = commonKeys.pop()
         pathFromStart = searcher.reconstructPath(tree1.cameFrom, meetingPoint)
         pathFromGoal = searcher.reconstructPath(tree2.cameFrom, meetingPoint)

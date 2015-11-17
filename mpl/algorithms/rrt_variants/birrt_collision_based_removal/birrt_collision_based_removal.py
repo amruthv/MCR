@@ -32,6 +32,9 @@ class BiRRTCollisionRemovalSearcher(object):
             if qExtended is not None:
                 self.RRT2.rebuildTreeIfNecessary()
                 qNearest = self.RRT2.nearestConfig(qExtended)
+                if qNearest == qExtended:
+                    self.meetingPoint = qExtended
+                    return True 
                 qExtendedTree2 = self.RRT2.extendToward(qNearest, qExtended)
                 if qExtendedTree2 is not None:
                     self.RRT2.updateRRTWithNewNode(qNearest, qExtended)
@@ -54,6 +57,8 @@ class BiRRTCollisionRemovalSearcher(object):
 
 
     def getPath(self):
+        if self.meetingPoint is None:
+            return []
         if self.RRT1.goal == self.goal:
             tree1 = self.RRT1
             tree2 = self.RRT2

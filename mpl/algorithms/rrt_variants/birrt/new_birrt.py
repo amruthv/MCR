@@ -4,6 +4,7 @@ import numpy as np
 import math
 from new_rrt import RRTSearcher
 from mpl.common import searcher
+import pprint
 
 class BiRRTSearcher(object):
     def __init__(self, start, goal, helper):
@@ -11,10 +12,10 @@ class BiRRTSearcher(object):
         self.goal = goal
         self.RRT1 = RRTSearcher(start, goal, helper)
         self.RRT2 = RRTSearcher(goal, start, helper)
-        self.foundPath = Fa;se
+        self.foundPath = False
 
     def run(self):
-        return self.search()
+        self.foundPath = self.search()
 
     def search(self, numIters = 1000):
         for iterNum in range(numIters):
@@ -22,7 +23,9 @@ class BiRRTSearcher(object):
             if qExtended is not None:
                 self.RRT2.rebuildTreeIfNecessary()
                 qNearest = self.RRT2.nearestConfig(qExtended)
-                qExtendedTree2 = self.RRT2.extendToward(qNearest, qExtended)
+                if qNearest == qExtended:
+                    return True 
+                qExtendedTree2 = self.RRT2.extendToward(qNearest, qExtended)            
                 if qExtendedTree2 is not None:
                     self.RRT2.updateRRTWithNewNode(qNearest, qExtended)
                     if qExtendedTree2 == qExtended:
@@ -43,7 +46,7 @@ class BiRRTSearcher(object):
             tree2 = self.RRT1
         # find the meeting point of the two trees
         commonKeys = set(tree1.cameFrom.keys()).intersection(set(tree2.cameFrom.keys()))
-        assert(len(commonKeys) == 1)
+        assert(len(commonKeys) >= 1)
         meetingPoint = commonKeys.pop()
         pathFromStart = searcher.reconstructPath(tree1.cameFrom, meetingPoint)
         pathFromGoal = searcher.reconstructPath(tree2.cameFrom, meetingPoint)
