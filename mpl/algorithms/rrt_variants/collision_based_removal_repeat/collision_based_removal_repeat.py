@@ -11,6 +11,7 @@ class RepetitiveCollisionRemovalSearcher(object):
     def __init__(self, start, goal, helper):
         self.start = start
         self.goal = goal
+        self.helper = helper
         self.bestPath = []
         self.bestCover = set()
 
@@ -23,7 +24,7 @@ class RepetitiveCollisionRemovalSearcher(object):
         bestCover = None
         bestCoverScore = float('inf')
         for i in range(numRepititions):
-            searcher = birrt.BiRRTCollisionRemovalSearcher(start, goal, helper)
+            searcher = birrt.BiRRTCollisionRemovalSearcher(self.start, self.goal, self.helper)
             if searcher.run():
                 path = searcher.getPath()
                 cover = searcher.getCover()

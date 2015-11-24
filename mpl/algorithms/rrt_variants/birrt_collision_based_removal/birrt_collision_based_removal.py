@@ -8,18 +8,19 @@ from mpl.common import searcher
 
 #bi rrt implementation that ignores obstacles at the start configuration and goal configuration
 class BiRRTCollisionRemovalSearcher(object):
-    def __init__(self, start, goal, helper):
+    def __init__(self, start, goal, helper, obstaclesToIgnore = set()):
         self.start = start
         self.goal = goal
         self.helper = helper
         obstaclesAtStart = helper.collisionsAtQ(start)
         obstaclesAtGoal = helper.collisionsAtQ(goal)
         obstaclesAtStartAndGoal = obstaclesAtStart.union(obstaclesAtGoal)
-        self.obstaclesToIgnore = obstaclesAtStartAndGoal
+        self.obstaclesToIgnore = obstaclesToIgnore.union(obstaclesAtStartAndGoal)
         self.obstacleCollisionCounts = {}
         self.RRT1 = RRTSearcher(start, goal, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts)
         self.RRT2 = RRTSearcher(goal, start, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts)
         self.meetingPoint = None
+        self.deletedObstacles = {}
 
     def run(self):
         return self.search()
@@ -54,6 +55,7 @@ class BiRRTCollisionRemovalSearcher(object):
         obstacleToRemove = min(obstacleRemoveScore)[0]
         assert(obstacleToRemove not in self.obstaclesToIgnore)
         self.obstaclesToIgnore.add(obstacleToRemove)
+        self.deletedObstacles[obstacle] = self.obstacleCollisionCounts[obstacle]
         del self.obstacleCollisionCounts[obstacle]
         for obstacle in self.obstacleCollisionCounts:
             self.obstacleCollisionCounts[obstacle] *+ memoryFactor
