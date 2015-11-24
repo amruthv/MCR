@@ -24,10 +24,11 @@ class BiRRTCollisionRemovalSearcher(object):
     def run(self):
         return self.search()
 
-    def search(self, numIters = 1000, obstacleRemovalInterval = 100):
+    # want memoryFactor <= 1 used to discount previous weights since removing an obstacle opens up new space
+    def search(self, numIters = 1000, obstacleRemovalInterval = 100, memoryFactor = 1):
         for iterNum in range(numIters):
             if iterNum > 0 and iterNum % obstacleRemovalInterval == 0:
-                self.selectObstacleToRemove()
+                self.selectObstacleToRemove(memoryFactor)
             qExtended = self.RRT1.runIteration()
             if qExtended is not None:
                 self.RRT2.rebuildTreeIfNecessary()
@@ -45,7 +46,7 @@ class BiRRTCollisionRemovalSearcher(object):
                 self.RRT1, self.RRT2 = self.RRT2, self.RRT1
         return False
 
-    def selectObstacleToRemove(self):
+    def selectObstacleToRemove(self, memoryFactor):
         obstacleRemoveScore = []
         for obstacle in self.obstacleCollisionCounts:
             scoreForObstacle = obstacle.getWeight() * self.obstacleCollisionCounts[obstacle]
@@ -54,6 +55,8 @@ class BiRRTCollisionRemovalSearcher(object):
         assert(obstacleToRemove not in self.obstaclesToIgnore)
         self.obstaclesToIgnore.add(obstacleToRemove)
         del self.obstacleCollisionCounts[obstacle]
+        for obstacle in self.obstacleCollisionCounts:
+            self.obstacleCollisionCounts[obstacle] *+ memoryFactor
 
 
     def getPath(self):
@@ -69,10 +72,10 @@ class BiRRTCollisionRemovalSearcher(object):
         pathFromStart = searcher.reconstructPath(tree1.cameFrom, self.meetingPoint)
         pathFromGoal = searcher.reconstructPath(tree2.cameFrom, self.meetingPoint)
         trajectory = pathFromStart + pathFromGoal[::-1]
-        pathCover = self.getCoverOfPath(trajectory)
-        return (trajectory, pathCover)
+        return trajectory
 
-    def getCover(self, trajectory):
+    def getCover(self):
+        trajectory = self.getPath()
         cc = covercalculator.CoverCalculator(self.helper)
         cover = cc.cover(self.start)
         for i in range(len(trajectory) - 1):
