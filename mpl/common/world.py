@@ -7,12 +7,6 @@ class World():
         self.width = width
         self.height = height
         self.obstacles = obstacles
-        if assignIds:
-            self.assignIds()
-
-    def assignIds(self):
-        for i in range(len(self.obstacles)):
-            self.obstacles[i].setId(i)
 
     def inRange(self, x, y):
         if 0 <= x <= self.width and 0 <= y <= self.height:
@@ -32,21 +26,18 @@ class Obstacle():
         raise NotImplementedError()
 
     def __hash__(self):
-        return self.getId()
+        return self.getName().__hash__()
 
 class SimpleObstacle(Obstacle):
-    def __init__(self, points, weight = 1):
+    def __init__(self, name, points, weight = 1):
         self.points = points
         self.polygon = Polygon(points)
         self.bbox = BBox(points)
         self.weight = weight
-        self.id = None
+        self.name = name
 
-    def getId(self):
-        return self.id
-
-    def setId(self, obstacleId):
-        self.id = obstacleId
+    def getName(self):
+        return self.name
 
     def getWeight(self):
         return self.weight
@@ -55,6 +46,6 @@ class SimpleObstacle(Obstacle):
         self.weight = w
 
     def __str__(self):
-        return "id: {0}, weight: {1}".format(self.id, self.weight)
+        return "({0}, weight: {1})".format(self.name, self.weight)
     def __repr__(self):
         return self.__str__()
