@@ -70,3 +70,8 @@ class SimpleMCRHelper(MCRHelper):
 
     def distance(self, q1, q2):
         return self.robot.distance(q1, q2)
+
+    def getBetweenConfigurationWithFactor(self, qFrom, qTo, scaleFactor):
+        scaledVector = scaleFactor * (np.array(qTo) - np.array(qFrom))
+        qPrime = np.array(qFrom) + scaledVector
+        return tuple(qPrime)

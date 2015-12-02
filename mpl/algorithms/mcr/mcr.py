@@ -121,8 +121,7 @@ class MCRPlanner():
 
     def extendToward(self, G, closest, sample, delta, k, bisectionLimit = 4):
         scaleFactor = min(delta / self.mcrhelper.distance(closest, sample), 1)
-        scaledVector = scaleFactor * (np.array(sample) - np.array(closest))
-        qPrime = np.array(closest) + scaledVector
+        qPrime = self.mcrhelper.getBetweenConfigurationWithFactor(closest, sample, scaleFactor)
         closestCover = G.getTotalVertexCover(closest)
         bisectionCount = 0
         while True:
@@ -130,10 +129,10 @@ class MCRPlanner():
             qPrimeCover = self.cc.cover(qPrime)
             totalCover = closestCover.mergeWith(edgeCover).mergeWith(qPrimeCover)
             if totalCover.score <= k:
-                return tuple(qPrime)
+                return qPrime
             elif bisectionCount < bisectionLimit:
                 bisectionCount += 1
-                qPrime = tuple(0.5 * (qPrime + np.array(closest)))
+                qPrime = self.mcrhelper.getBetweenConfigurationWithFactor(closest, qPrime, 0.5)
             else:
                 return None
 

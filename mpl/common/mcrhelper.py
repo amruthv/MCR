@@ -15,5 +15,10 @@ class MCRHelper():
     def distance(self, q1, q2):
         raise NotImplementedError()
 
+    # get configuration through linear scaling of vector `qFrom + scaleFactor * (qTo - qFrom)`
+    def getBetweenConfigurationWithFactor(self, qFrom, qTo, scaleFactor):
+        raise NotImplementedError()
+
+
     # need a way to get the weight of an obstacle (right now its obstacle.getWeight())
 
