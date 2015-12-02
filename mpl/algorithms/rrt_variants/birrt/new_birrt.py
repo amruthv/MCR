@@ -16,6 +16,7 @@ class BiRRTSearcher(object):
 
     def run(self):
         self.foundPath = self.search()
+        return self.foundPath
 
     def search(self, numIters = 1000):
         for iterNum in range(numIters):
@@ -49,8 +50,14 @@ class BiRRTSearcher(object):
         assert(len(commonKeys) >= 1)
         meetingPoint = commonKeys.pop()
         pathFromStart = searcher.reconstructPath(tree1.cameFrom, meetingPoint)
+        pathFromStart = [self.start] + pathFromStart[1:]
         pathFromGoal = searcher.reconstructPath(tree2.cameFrom, meetingPoint)
-        trajectory = pathFromStart + pathFromGoal[:-1][::-1]
+        pathFromMeetingToGoal = pathFromGoal[:-1][::-1]
+        pathFromMeetingToGoal = pathFromMeetingToGoal[:-1] + [self.goal]
+        trajectory = pathFromStart + pathFromMeetingToGoal
+        print 'start =', self.start
+        print 'goal =', self.goal
+        print trajectory
         return trajectory
 
     def getCover(self):
