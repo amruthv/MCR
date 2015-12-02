@@ -6,7 +6,7 @@ from new_rrt import RRTSearcher
 from mpl.common import covercalculator
 from mpl.common import searcher
 
-#bi rrt implementation that ignores obstacles at the start configuration and goal configuration
+#bi rrt implementation that determines obstacles with interest of removing.
 class BiRRTCollisionRemovalSearcher(object):
     def __init__(self, start, goal, helper, obstaclesToIgnore = set()):
         self.start = start
@@ -50,15 +50,15 @@ class BiRRTCollisionRemovalSearcher(object):
     def selectObstacleToRemove(self, memoryFactor):
         obstacleRemoveScore = []
         for obstacle in self.obstacleCollisionCounts:
-            scoreForObstacle = obstacle.getWeight() * self.obstacleCollisionCounts[obstacle]
+            scoreForObstacle = self.obstacleCollisionCounts[obstacle] / float(obstacle.getWeight())
             obstacleRemoveScore.append((scoreForObstacle, obstacle))
-        obstacleToRemove = min(obstacleRemoveScore)[0]
+        obstacleToRemove = max(obstacleRemoveScore)[1]
         assert(obstacleToRemove not in self.obstaclesToIgnore)
         self.obstaclesToIgnore.add(obstacleToRemove)
-        self.deletedObstacles[obstacle] = self.obstacleCollisionCounts[obstacle]
-        del self.obstacleCollisionCounts[obstacle]
+        self.deletedObstacles[obstacleToRemove] = self.obstacleCollisionCounts[obstacleToRemove]
+        del self.obstacleCollisionCounts[obstacleToRemove]
         for obstacle in self.obstacleCollisionCounts:
-            self.obstacleCollisionCounts[obstacle] *+ memoryFactor
+            self.obstacleCollisionCounts[obstacle] *= memoryFactor
 
 
     def getPath(self):
