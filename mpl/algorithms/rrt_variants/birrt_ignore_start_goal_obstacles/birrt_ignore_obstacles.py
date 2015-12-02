@@ -19,6 +19,7 @@ class BiRRTIgnoreObstacleSearcher(object):
 
     def run(self):
         self.foundPath = self.search()
+        return self.foundPath
 
     def search(self, numIters = 1000):
         for iterNum in range(numIters):

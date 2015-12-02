@@ -18,7 +18,6 @@ class RRTSearcher(object):
     def searchWithRRT(self, numIters = 1000):
         for iterNum in range(numIters):
             qExtended = runIteration()
-            print 'qExtended = ', qExtended
             if qExtended == self.goal:
                 return True
         return False
@@ -72,7 +71,7 @@ class RRTSearcher(object):
     def euclideanDistanceSquared(self, q1, q2):
         return sum([(q1[i] - q2[i])**2 for i in range(len(q1))])
 
-    def extendToward(self, closest, sample, delta = 400):
+    def extendToward(self, closest, sample, delta = 800):
         return self.simpleExtendToward(closest, sample, delta)
 
     def simpleExtendToward(self, closest, sample, delta):

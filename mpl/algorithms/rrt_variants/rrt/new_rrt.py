@@ -20,6 +20,7 @@ class RRTSearcher(object):
     def run(self):
         if self.searchWithRRT():
             self.foundPath = True
+        return self.foundPath
 
     def searchWithRRT(self, numIters = 1000):
         for iterNum in range(numIters):
