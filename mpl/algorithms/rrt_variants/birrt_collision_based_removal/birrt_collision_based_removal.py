@@ -5,14 +5,15 @@ from scipy.spatial import KDTree
 from new_rrt import RRTSearcher
 from mpl.common import covercalculator
 from mpl.common import searcher
+from mpl.common import tlpObstacles
 
 #bi rrt implementation that determines obstacles with interest of removing.
 class BiRRTCollisionRemovalSearcher(object):
-    def __init__(self, start, goal, helper, obstaclesToIgnore = set()):
+    def __init__(self, start, goal, helper, useTLPObjects, obstaclesToIgnore = set()):
         self.start = start
         self.goal = goal
         self.helper = helper
-        obstaclesAtStart = helper.collisionsAtQ(start)
+        obstaclesAtStart = set(helper.collisionsAtQ(start))
         obstaclesAtGoal = helper.collisionsAtQ(goal)
         obstaclesAtStartAndGoal = obstaclesAtStart.union(obstaclesAtGoal)
         self.obstaclesToIgnore = obstaclesToIgnore.union(obstaclesAtStartAndGoal)
@@ -20,6 +21,7 @@ class BiRRTCollisionRemovalSearcher(object):
         self.RRT1 = RRTSearcher(start, goal, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts)
         self.RRT2 = RRTSearcher(goal, start, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts)
         self.meetingPoint = None
+        self.useTLPObjects = useTLPObjects
         self.deletedObstacles = {}
 
     def run(self):
@@ -48,14 +50,54 @@ class BiRRTCollisionRemovalSearcher(object):
         return False
 
     def selectObstacleToRemove(self, memoryFactor):
+        if self.useTLPObjects:
+            self.removeTLPObstacle(memoryFactor)
+        else:
+            self.removeNonTLPObstacle(memoryFactor)
+
+    def selectTLPObstacle(memoryFactor):
         obstacleRemoveScore = []
         for obstacle in self.obstacleCollisionCounts:
-            scoreForObstacle = self.obstacleCollisionCounts[obstacle] / float(obstacle.getWeight())
+            # don't want to remove a immovable obstacle
+            if obstacle == 'permanent':
+                continue
+            if obstacle.find('shadow') != -1:
+                weight = tlpObstacles.OBSTACLE_WEIGHTS['shadow']
+            else:
+                weight = tlpObstacles.OBSTACLE_WEIGHTS['obstacle']
+            scoreForObstacle = self.obstacleCollisionCounts[obstacle] / float(weight)
             obstacleRemoveScore.append((scoreForObstacle, obstacle))
-        obstacleToRemove = max(obstacleRemoveScore)[1]
+        obstacleToRemoveInfo = max(obstacleRemoveScore)
+        obstacleToRemoveWeight = obstacleRemoveInfo[0]
+        obstacleToRemove = obstacleRemoveInfo[1]
+        isObstacle = obstacleToRemove.find('shadow') == -1
         assert(obstacleToRemove not in self.obstaclesToIgnore)
         self.obstaclesToIgnore.add(obstacleToRemove)
-        self.deletedObstacles[obstacleToRemove] = self.obstacleCollisionCounts[obstacleToRemove]
+        self.deletedObstacles[obstacleToRemove] = obstacleToRemoveWeight
+        del self.obstacleCollisionCounts[obstacleToRemove]
+        if isObstacle:
+            companionShadow = tlpObstacles.getShadowFromObstacle(obstacleToRemove)
+            if companionShadow not in self.obstaclesToIgnore:
+                self.obstaclesToIgnore.add(companionShadow)
+                self.deletedObstacles[companionShadow] = \
+                    [score for score, obstacle in obstacelRemoveScore if obstacle == companionShadow][0]
+                del self.obstacleCollisionCounts[companionShadow]
+        for obstacle in self.obstacleCollisionCounts:
+            self.obstacleCollisionCounts[obstacle] *= memoryFactor
+
+    def removeNonTLPObstacle(self, memoryFactor):
+        obstacleRemoveScore = []
+        for obstacle in self.obstacleCollisionCounts:
+            if obstacle.getWeight() == float('inf'):
+                continue
+            scoreForObstacle = self.obstacleCollisionCounts[obstacle] / float(obstacle.getWeight())
+            obstacleRemoveScore.append((scoreForObstacle, obstacle))
+        obstacleToRemoveInfo = max(obstacleRemoveScore)
+        obstacleToRemoveWeight = obstacleRemoveInfo[0]
+        obstacleToRemove = obstacleRemoveInfo[1]
+        assert(obstacleToRemove not in self.obstaclesToIgnore)
+        self.obstaclesToIgnore.add(obstacleToRemove)
+        self.deletedObstacles[obstacleToRemove] = obstacleToRemoveWeight
         del self.obstacleCollisionCounts[obstacleToRemove]
         for obstacle in self.obstacleCollisionCounts:
             self.obstacleCollisionCounts[obstacle] *= memoryFactor
@@ -78,7 +120,7 @@ class BiRRTCollisionRemovalSearcher(object):
 
     def getCover(self):
         trajectory = self.getPath()
-        cc = covercalculator.CoverCalculator(self.helper)
+        cc = covercalculator.CoverCalculator(self.helper, self.useTLPObjects)
         cover = cc.cover(self.start)
         for i in range(len(trajectory) - 1):
             edgeCover = cc.edgeCover(trajectory[i], trajectory[i+1])

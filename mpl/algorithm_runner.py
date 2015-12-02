@@ -22,7 +22,7 @@ def runAlgorithm(start, goal, helper, algorithmNumber):
     elif algorithmNumber == 3:
         algorithm = birrt_ignore_obstacles.BiRRTIgnoreObstacleSearcher(start, goal, helper)
     elif algorithmNumber == 4:
-        algorithm = birrt_collision.BiRRTCollisionRemovalSearcher(start, goal, helper)
+        algorithm = birrt_collision.BiRRTCollisionRemovalSearcher(start, goal, helper, True)
     
     algorithm.run()
     path = algorithm.getPath()

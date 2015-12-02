@@ -2,13 +2,14 @@ import numpy as np
 from cover import Cover
 
 class CoverCalculator():
-    def __init__(self, mcrhelper):
+    def __init__(self, mcrhelper, useTLPObstacles):
         self.mcrhelper = mcrhelper
+        self.useTLPObstacles = useTLPObstacles
 
     #check that the configurations are in bounds elsewhere, here we assume they are. only checks configurations between the two not the endpoints
     def edgeCover(self, q_from, q_to):
         #make empty cover and build it up
-        edge_cover = Cover(set())
+        edge_cover = Cover(set(), self.useTLPObstacles)
         configurationsToCheck = self.mcrhelper.generateInBetweenConfigs(q_from, q_to)
         for q in configurationsToCheck:
             coverQ = self.cover(q)
@@ -20,7 +21,7 @@ class CoverCalculator():
         collisions = self.mcrhelper.collisionsAtQ(q)
         for collision in collisions:
             coverQ.add(collision)
-        return Cover(coverQ)
+        return Cover(coverQ, self.useTLPObstacles)
 
 
 

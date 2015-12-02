@@ -10,7 +10,7 @@ class BiRRTIgnoreObstacleSearcher(object):
     def __init__(self, start, goal, helper):
         self.start = start
         self.goal = goal
-        obstaclesAtStart = helper.collisionsAtQ(start)
+        obstaclesAtStart = set(helper.collisionsAtQ(start))
         obstaclesAtGoal = helper.collisionsAtQ(goal)
         self.obstaclesAtStartAndGoal = obstaclesAtStart.union(obstaclesAtGoal)
         self.RRT1 = RRTSearcher(start, goal, helper, self.obstaclesAtStartAndGoal)

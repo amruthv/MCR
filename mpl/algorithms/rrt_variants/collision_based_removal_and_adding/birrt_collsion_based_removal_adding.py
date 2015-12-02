@@ -7,19 +7,20 @@ from mpl.algorithms.rrt_variants.birrt_collision_based_removal import birrt_coll
 
 #bi rrt implementation that ignores obstacles at the start configuration and goal configuration
 class BiRRTCollisionRemovalAddingSearcher(object):
-    def __init__(self, start, goal, helper):
+    def __init__(self, start, goal, helper, useTLPObjects):
         self.start = start
         self.goal = goal
         self.helper = helper
         self.bestPath = []
         self.bestCover = set()
+        self.useTLPObjects = useTLPObjects
 
     def run(self):
         return self.search()
 
     # want memoryFactor <= 1 used to discount previous weights since removing an obstacle opens up new space
     def search(self, numAddAttempts = 5, memoryFactor = 0.4):
-        searcher = birrt.BiRRTCollisionRemovalSearcher(self.start, self.goal, self.helper)
+        searcher = birrt.BiRRTCollisionRemovalSearcher(self.start, self.goal, self.helper, self.useTLPObjects)
         if not searcher.search(memoryFactor = memoryFactor):
             return False
         searcherCover = searcher.getCover()
@@ -27,10 +28,10 @@ class BiRRTCollisionRemovalAddingSearcher(object):
             deletedObstaclesAndWeights = searcher.deletedObstacles
             if len(deletedObstaclesAndWeights) == 0:
                 return True
-            deletedObstaclesAsList = eletedObstaclesAndWeights.items()
+            deletedObstaclesAsList = deletedObstaclesAndWeights.items()
             obstacleToAdd = self.selectObstacleToAdd(deletedObstaclesAsList)
             obstaclesToIgnore = self.buildIgnoreObstaclesSet(deletedObstaclesAsList, obstacleToAdd)
-            newSearcher = birrt.BiRRTCollisionRemovalSearcher(self.start, self.goal, self.helper, obstaclesToIgnore)
+            newSearcher = birrt.BiRRTCollisionRemovalSearcher(self.start, self.goal, self.helper, self.useTLPObjects, obstaclesToIgnore)
             if not newSearcher.search(memoryFactor = memoryFactor) or obstacleToAdd in newSearcher.deletedObstacles:
                 continue
             newCover = newSearcher.getCover()

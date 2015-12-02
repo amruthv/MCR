@@ -29,7 +29,7 @@ def testNoObstacles():
     sim = makeSim(world)
     drawProblemAndWait(sim, linkRobot, [], start, goal)
 
-    mcr = MCRPlanner(start, goal, mcrhelper)
+    mcr = MCRPlanner(start, goal, mcrhelper, False)
     mcr.run()
 
 def testOneObstacleMiddle():
@@ -46,7 +46,7 @@ def testOneObstacleMiddle():
     linkRobot = MovableLinkRobot(links, world)
 
     mcrhelper = SimpleMCRHelper(linkRobot, world, goal)
-    mcr = MCRPlanner(start, goal, mcrhelper)
+    mcr = MCRPlanner(start, goal, mcrhelper, False)
 
     sim = makeSim(world)
     drawProblemAndWait(sim, linkRobot, obstacles, start, goal)
@@ -73,7 +73,7 @@ def testTwoDiffWeightObstacles():
     goal = (320, 50, 0, piOver2, -piOver2)
     linkRobot = MovableLinkRobot(links, world)
     mcrhelper = SimpleMCRHelper(linkRobot, world, goal)
-    mcr = MCRPlanner(start, goal, mcrhelper)
+    mcr = MCRPlanner(start, goal, mcrhelper, False)
 
     sim = makeSim(world)
     drawProblemAndWait(sim, linkRobot, obstacles, start, goal)
@@ -101,7 +101,7 @@ def testManyObstacles():
     goal = (450, 360, 0, piOver2, piOver2)
     linkRobot = MovableLinkRobot(links, world)
     mcrhelper = SimpleMCRHelper(linkRobot, world, goal)
-    mcr = MCRPlanner(start, goal, mcrhelper)
+    mcr = MCRPlanner(start, goal, mcrhelper, False)
     
     sim = makeSim(world)
     drawProblemAndWait(sim, linkRobot, obstacles, start, goal)
@@ -130,7 +130,7 @@ def testManyObstacles2Links():
     linkRobot = MovableLinkRobot(links, world)
     
     mcrhelper = SimpleMCRHelper(linkRobot, world, goal)
-    mcr = MCRPlanner(start, goal, mcrhelper, 20, False)
+    mcr = MCRPlanner(start, goal, mcrhelper, False, 20, False)
     
     sim = makeSim(world)
     drawProblemAndWait(sim, linkRobot, obstacles, start, goal)

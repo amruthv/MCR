@@ -27,7 +27,7 @@ def testOneObstacleMiddle():
     goal = (320, 50, 0, piOver2, -piOver2)
     linkRobot = movableLinkRobot.MovableLinkRobot(links, world)
     helper = SimpleMCRHelper(linkRobot, world, goal)
-    birrt = BiRRTCollisionRemovalSearcher(start, goal, helper)
+    birrt = BiRRTCollisionRemovalSearcher(start, goal, helper, False)
     
     sim = makeSim(world)
     drawProblemAndWait(sim, linkRobot, obstacles, start, goal)
@@ -56,7 +56,7 @@ def testManyObstacles(verbose = False):
     goal = (450, 360, 0, piOver2, piOver2)
     linkRobot = movableLinkRobot.MovableLinkRobot(links, world)
     helper = SimpleMCRHelper(linkRobot, world, goal)
-    birrt = BiRRTCollisionRemovalSearcher(start, goal, helper)
+    birrt = BiRRTCollisionRemovalSearcher(start, goal, helper, False)
     
     # sim = makeSim(world)
     # drawProblemAndWait(sim, linkRobot, obstacles, start, goal)

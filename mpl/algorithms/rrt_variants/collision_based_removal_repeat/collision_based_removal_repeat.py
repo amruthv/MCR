@@ -8,12 +8,13 @@ from mpl.common import searcher
 
 #bi rrt implementation that ignores obstacles at the start configuration and goal configuration
 class RepetitiveCollisionRemovalSearcher(object):
-    def __init__(self, start, goal, helper):
+    def __init__(self, start, goal, helper, useTLPObstacles):
         self.start = start
         self.goal = goal
         self.helper = helper
         self.bestPath = []
         self.bestCover = set()
+        self.useTLPObstacles = useTLPObstacles
 
     def run(self):
         return self.search()
@@ -24,7 +25,7 @@ class RepetitiveCollisionRemovalSearcher(object):
         bestCover = None
         bestCoverScore = float('inf')
         for i in range(numRepititions):
-            searcher = birrt.BiRRTCollisionRemovalSearcher(self.start, self.goal, self.helper)
+            searcher = birrt.BiRRTCollisionRemovalSearcher(self.start, self.goal, self.helper, self.useTLPObstacles)
             if searcher.run():
                 path = searcher.getPath()
                 cover = searcher.getCover()

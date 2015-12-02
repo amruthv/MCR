@@ -6,11 +6,11 @@ from mpl.common import searcher
 
 class MCRPlanner():
     # start and goal are both configurations
-    def __init__(self, start, goal, mcrhelper, numIterations = 100, verbose = False, sim = None, shouldDraw = False):
+    def __init__(self, start, goal, mcrhelper, useTLPObstacles, numIterations = 100, verbose = False, sim = None, shouldDraw = False):
         self.start = start
         self.goal = goal
         self.mcrhelper = mcrhelper
-        self.cc = CoverCalculator(mcrhelper)
+        self.cc = CoverCalculator(mcrhelper, useTLPObstacles)
         self.numIterations = numIterations
         self.verbose = verbose
         self.sim = sim
