@@ -93,8 +93,8 @@ class BiRRTCollisionRemovalSearcher(object):
             scoreForObstacle = self.obstacleCollisionCounts[obstacle] / float(obstacle.getWeight())
             obstacleRemoveScore.append((scoreForObstacle, obstacle))
         obstacleToRemoveInfo = max(obstacleRemoveScore)
-        obstacleToRemoveWeight = obstacleRemoveInfo[0]
-        obstacleToRemove = obstacleRemoveInfo[1]
+        obstacleToRemoveWeight = obstacleToRemoveInfo[0]
+        obstacleToRemove = obstacleToRemoveInfo[1]
         assert(obstacleToRemove not in self.obstaclesToIgnore)
         self.obstaclesToIgnore.add(obstacleToRemove)
         self.deletedObstacles[obstacleToRemove] = obstacleToRemoveWeight

@@ -1,6 +1,7 @@
 import math
 import random
 import numpy as np
+from mpl.common import tlpObstacles
 from mpl.common import cover
 from mpl.algorithms.rrt_variants.birrt_collision_based_removal import birrt_collision_based_removal as birrt
 
@@ -29,40 +30,49 @@ class BiRRTCollisionRemovalAddingSearcher(object):
             if len(deletedObstaclesAndWeights) == 0:
                 return True
             deletedObstaclesAsList = deletedObstaclesAndWeights.items()
-            obstacleToAdd = self.selectObstacleToAdd(deletedObstaclesAsList)
-            obstaclesToIgnore = self.buildIgnoreObstaclesSet(deletedObstaclesAsList, obstacleToAdd)
+            obstaclesToAdd = self.selectObstaclesToAdd(deletedObstaclesAsList)
+            obstaclesToIgnore = self.buildIgnoreObstaclesSet(deletedObstaclesAsList, obstaclesToAdd)
             newSearcher = birrt.BiRRTCollisionRemovalSearcher(self.start, self.goal, self.helper, self.useTLPObjects, obstaclesToIgnore)
-            if not newSearcher.search(memoryFactor = memoryFactor) or obstacleToAdd in newSearcher.deletedObstacles:
+            newSearcherSucceeded = newSearcher.search(memoryFactor = memoryFactor)
+            print type(obstaclesToAdd)
+            print len(obstaclesToAdd)
+            print type(obstaclesToAdd[0])
+            if not newSearcherSucceeded or \
+                any([obstacleToAdd in newSearcher.deletedObstacles for obstacleToAdd in obstaclesToAdd]):
                 continue
             newCover = newSearcher.getCover()
-            if cover.Cover(newCover).score < cover.Cover(searcherCover).score:
+            if cover.Cover(newCover, self.useTLPObjects).score < cover.Cover(searcherCover, self.useTLPObjects).score:
                 searcher = newSearcher
                 searcherCover = newCover
         self.bestPath = searcher.getPath()
         self.bestCover = searcher.getCover()            
 
     #deletedObstaclesAndWeights must be nonempty
-    def selectObstacleToAdd(self, deletedObstaclesAsList):
+    def selectObstaclesToAdd(self, deletedObstaclesAsList):
         collisionCountsList = [x[1] for x in deletedObstaclesAsList]
         obstacles = [x[0] for x in deletedObstaclesAsList]
         probabilities = self.determineProbabilities(collisionCountsList)
-        return np.random.choice(obstacles, probabilities)
+        obstaclesToAdd = [ np.random.choice(obstacles, p = probabilities) ]
+        print type(obstaclesToAdd)
+        if self.useTLPObjects:
+            if obstaclesToAdd[0].find('shadow') != -1:
+                companionObstacle = tlpObstacles.getObstacleFromShadow(obstaclesToAdd[0])
+                obstaclesToAdd.append(companionObstacle)
+        return obstaclesToAdd
 
-    def determineProbabilities(collisionCountsList):
+    def determineProbabilities(self, collisionCountsList):
         referenceNumber = float(collisionCountsList[0])
         scalingFactors = []
-        for i in collisionCountsList:
-            scalingFactors.append(referenceNumber / collisionCountsList[i])
+        for numberCollisions in collisionCountsList:
+            scalingFactors.append(referenceNumber / numberCollisions)
         referenceProbability = 1.0 / sum(scalingFactors)
         probabilities = [referenceProbability * scalingFactor for scalingFactor in scalingFactors]
         return probabilities
 
-
-
-    def buildIgnoreObstaclesSet(deletedObstaclesAsList, obstacleToAdd):
+    def buildIgnoreObstaclesSet(self, deletedObstaclesAsList, obstaclesToAdd):
         obstaclesToIgnore = set()
         for obstacle, _ in deletedObstaclesAsList:
-            if obstacle != obstacleToAdd:
+            if obstacle not in obstaclesToAdd:
                 obstaclesToIgnore.add(obstacle)
         return obstaclesToIgnore            
 
