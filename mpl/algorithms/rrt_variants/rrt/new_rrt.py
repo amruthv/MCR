@@ -1,4 +1,5 @@
 from scipy.spatial import KDTree
+import pdb
 import heapq
 import numpy as np
 import math
@@ -6,6 +7,11 @@ from mpl.common import searcher
 
 class RRTSearcher(object):
     def __init__(self, start, goal, helper, obstaclesToIgnore = set(), shouldDraw = False):
+        if not start or not goal:
+            pdb.set_trace()
+        print 'in rrt algorithm initializer'
+        print 'start =', start
+        print 'goal =', goal
         self.start = start
         self.goal = goal
         self.helper = helper
@@ -25,9 +31,11 @@ class RRTSearcher(object):
     def searchWithRRT(self, numIters = 1000):
         for iterNum in range(numIters):
             qExtended = self.runIteration()
-            print 'qExtended=', qExtended
+            # print 'qExtended=', qExtended
             if qExtended == self.goal:
+                print 'found path to goal'
                 return True
+        print 'couldn\'t find path to goal'
         return False
 
     def runIteration(self):
@@ -57,7 +65,7 @@ class RRTSearcher(object):
         if nearestInAuxillary is None:
             nearest = nearestInTree
         else:
-            nearestInTreeDistance = self.euclideanDistanceSquared(q_rand, nearestInTree)
+            nearestInTreeDistance = self.helper.distance(q_rand, nearestInTree)
             if nearestInTreeDistance < nearestInAuxillaryDistance:
                 nearest = nearestInTree
             else:
@@ -68,16 +76,12 @@ class RRTSearcher(object):
         closestSoFar = None
         closestDistance = float('inf')
         for q in self.auxillaryArray:
-            distance = self.euclideanDistanceSquared(q, q_rand)
+            distance = self.helper.distance(q, q_rand)
             if distance < closestDistance:
                 closestSoFar = q
                 closestDistance = distance
         return (closestSoFar, closestDistance)
 
-
-    # configurations need to have the same dimensions
-    def euclideanDistanceSquared(self, q1, q2):
-        return sum([(q1[i] - q2[i])**2 for i in range(len(q1))])
 
     def extendToward(self, closest, sample, delta = 400, complicated = False):
         if complicated:
@@ -86,9 +90,11 @@ class RRTSearcher(object):
             return self.simpleExtendToward(closest, sample, delta)
 
     def simpleExtendToward(self, closest, sample, delta):
-        scaleFactor = min(delta / math.sqrt(self.euclideanDistanceSquared(closest, sample)), 1)
-        scaledVector = scaleFactor * (np.array(sample) - np.array(closest))
-        qPrime = np.array(closest) + scaledVector
+        print 'closest', closest
+        print 'sample', sample
+        print 'goal', self.goal
+        scaleFactor = min(float(delta) / self.helper.distance(closest, sample), 1)
+        qPrime = self.helper.getBetweenConfigurationWithFactor(closest, sample, scaleFactor)
         configurationsToCheck = self.helper.generateInBetweenConfigs(closest, qPrime)
         configurationsToCheck.append(qPrime)
         collisions = set()

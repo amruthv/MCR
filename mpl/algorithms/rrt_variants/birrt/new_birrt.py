@@ -8,6 +8,8 @@ import pprint
 
 class BiRRTSearcher(object):
     def __init__(self, start, goal, helper):
+        print 'self.start', start
+        print 'self.goal', goal
         self.start = start
         self.goal = goal
         self.RRT1 = RRTSearcher(start, goal, helper)
@@ -16,17 +18,20 @@ class BiRRTSearcher(object):
 
     def run(self):
         self.foundPath = self.search()
+        print 'foundPath = ', self.foundPath
         return self.foundPath
 
     def search(self, numIters = 1000):
         for iterNum in range(numIters):
             qExtended = self.RRT1.runIteration()
+            print 'qExtended1', qExtended
             if qExtended is not None:
                 self.RRT2.rebuildTreeIfNecessary()
                 qNearest = self.RRT2.nearestConfig(qExtended)
                 if qNearest == qExtended:
                     return True 
-                qExtendedTree2 = self.RRT2.extendToward(qNearest, qExtended)            
+                qExtendedTree2 = self.RRT2.extendToward(qNearest, qExtended)        
+                print 'qExtendedTree2', qExtendedTree2    
                 if qExtendedTree2 is not None:
                     self.RRT2.updateRRTWithNewNode(qNearest, qExtended)
                     if qExtendedTree2 == qExtended:
@@ -49,9 +54,14 @@ class BiRRTSearcher(object):
         commonKeys = set(tree1.cameFrom.keys()).intersection(set(tree2.cameFrom.keys()))
         assert(len(commonKeys) >= 1)
         meetingPoint = commonKeys.pop()
+        print 'meetingPoint', meetingPoint
+        print 'from start dict', tree1.cameFrom
+        print 'from end dict', tree2.cameFrom
         pathFromStart = searcher.reconstructPath(tree1.cameFrom, meetingPoint)
+        print 'got from start'
         pathFromStart = [self.start] + pathFromStart[1:]
         pathFromGoal = searcher.reconstructPath(tree2.cameFrom, meetingPoint)
+        print 'got path from goal'
         pathFromMeetingToGoal = pathFromGoal[:-1][::-1]
         pathFromMeetingToGoal = pathFromMeetingToGoal[:-1] + [self.goal]
         trajectory = pathFromStart + pathFromMeetingToGoal

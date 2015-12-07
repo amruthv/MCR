@@ -16,8 +16,10 @@ def runAlgorithm(start, goal, helper, algorithmNumber):
     if algorithmNumber == 0:
         algorithm = mcr.MCRPlanner(start, goal, helper)
     elif algorithmNumber == 1:
+        print 'using just rrt'
         algorithm = rrt.RRTSearcher(start, goal, helper)
     elif algorithmNumber == 2:
+        print 'using vanilla birrt'
         algorithm = birrt.BiRRTSearcher(start, goal, helper)
     elif algorithmNumber == 3:
         algorithm = birrt_ignore_obstacles.BiRRTIgnoreObstacleSearcher(start, goal, helper)
