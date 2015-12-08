@@ -6,11 +6,11 @@ from mpl.common import searcher
 
 class MCRPlanner():
     # start and goal are both configurations
-    def __init__(self, start, goal, mcrhelper, useTLPObstacles, numIterations = 100, verbose = False, sim = None, shouldDraw = False):
+    def __init__(self, start, goal, helper, useTLPObstacles, numIterations = 100, verbose = False, sim = None, shouldDraw = False):
         self.start = start
         self.goal = goal
-        self.mcrhelper = mcrhelper
-        self.cc = CoverCalculator(mcrhelper, useTLPObstacles)
+        self.helper = helper
+        self.cc = CoverCalculator(helper, useTLPObstacles)
         self.numIterations = numIterations
         self.verbose = verbose
         self.sim = sim
@@ -86,10 +86,10 @@ class MCRPlanner():
             self.nodeIds[goal] = goalId
         return graph
 
-    def expandRoadmap(self, G, k, delta = 400.0):
-        sampleConfig = self.mcrhelper.sampleConfig(self.goal)
+    def expandRoadmap(self, G, k):
+        sampleConfig = self.helper.sampleConfig(self.goal)
         nearestConfig = self.closest(G,k,sampleConfig)
-        q = self.extendToward(G, nearestConfig, sampleConfig, delta, k)
+        q = self.extendToward(G, nearestConfig, sampleConfig, k)
         # couldn't find a point to extend towards satisfying k reachability
         if q is None:
             return
@@ -105,23 +105,23 @@ class MCRPlanner():
             addedEdge = False
             neighborsOfQ = self.neighbors(G, q)
             for neighbor in neighborsOfQ:
-                if round(self.mcrhelper.distance(neighbor, q)) <= round(delta): # and totalCover.score <= k:
+                if round(self.helper.distance(neighbor, q)) <= round(self.helper.getStepSize()): # and totalCover.score <= k:
                     addedEdge = True
                     G.addEdge(neighbor, q)
-            assert(addedEdge == True) # should be true since the closestEdge should be within distance of delta
+            assert(addedEdge == True) # should be true since the closestEdge should be within distance of stepSize
 
     def closest(self, G, k, sampleConfig):
         GKReachableNodes = []
         for node in G.V:
             if G.getTotalVertexCover(node).score <= k:
                 GKReachableNodes.append(node)
-        distances = [self.mcrhelper.distance(q, sampleConfig) if not (sampleConfig == self.goal and q == self.goal) else float('inf') for q in GKReachableNodes]
+        distances = [self.helper.distance(q, sampleConfig) if not (sampleConfig == self.goal and q == self.goal) else float('inf') for q in GKReachableNodes]
         minIndex = np.argmin(distances)
         return GKReachableNodes[minIndex]
 
-    def extendToward(self, G, closest, sample, delta, k, bisectionLimit = 4):
-        scaleFactor = min(delta / self.mcrhelper.distance(closest, sample), 1)
-        qPrime = self.mcrhelper.getBetweenConfigurationWithFactor(closest, sample, scaleFactor)
+    def extendToward(self, G, closest, sample, k, bisectionLimit = 4):
+        stepSize = self.helper.getStepSize()
+        qPrime = self.helper.stepTowards(closest, sample, stepSize)
         closestCover = G.getTotalVertexCover(closest)
         bisectionCount = 0
         while True:
@@ -132,13 +132,14 @@ class MCRPlanner():
                 return qPrime
             elif bisectionCount < bisectionLimit:
                 bisectionCount += 1
-                qPrime = self.mcrhelper.getBetweenConfigurationWithFactor(closest, qPrime, 0.5)
+                stepSize *= 0.5
+                qPrime = self.helper.stepTowards(closest, qPrime, stepSize)
             else:
                 return None
 
     def neighbors(self, G, q, m = 10):
         # we choose nearest 10 rather than the ball of radius r approach
-        distances = [(self.mcrhelper.distance(q, v), v) for v in G.V]
+        distances = [(self.helper.distance(q, v), v) for v in G.V]
         sortedDistances = sorted(distances)
         neighbors = [x[1] for x in sortedDistances[:min(m, len(sortedDistances))]]
         return neighbors

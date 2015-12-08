@@ -25,7 +25,7 @@ def testOneObstacleMiddle():
     goal = (320, 50, 0, piOver2, -piOver2)
     linkRobot = MovableLinkRobot(links, world)
 
-    helper = SimpleMCRHelper(linkRobot, world, goal)
+    helper = SimpleMCRHelper(linkRobot, world, goal, 50)
     rrt = RRTSearcher(start, goal, helper)
     
     sim = makeSim(world)

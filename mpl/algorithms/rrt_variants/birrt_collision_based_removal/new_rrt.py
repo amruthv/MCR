@@ -71,13 +71,8 @@ class RRTSearcher(object):
     def euclideanDistanceSquared(self, q1, q2):
         return sum([(q1[i] - q2[i])**2 for i in range(len(q1))])
 
-    def extendToward(self, closest, sample, delta = 800):
-        return self.simpleExtendToward(closest, sample, delta)
-
-    def simpleExtendToward(self, closest, sample, delta):
-        scaleFactor = min(delta / math.sqrt(self.euclideanDistanceSquared(closest, sample)), 1)
-        scaledVector = scaleFactor * (np.array(sample) - np.array(closest))
-        qPrime = np.array(closest) + scaledVector
+    def extendToward(self, closest, sample):
+        qPrime = self.helper.stepTowards(closest, sample)
         configurationsToCheck = self.helper.generateInBetweenConfigs(closest, qPrime)
         configurationsToCheck.append(qPrime)
         collisions = set()

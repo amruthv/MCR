@@ -5,11 +5,12 @@ import numpy as np
 import random
 
 class SimpleMCRHelper(MCRHelper):
-    def __init__(self, robot, world, goal):
+    def __init__(self, robot, world, goal, stepSize):
         self.robot = robot
         self.world = world
         self.goal = goal
         self.useBBoxChecker = True
+        self.stepSize = stepSize
 
     def collisionsAtQ(self, q):
         if self.useBBoxChecker:
@@ -71,7 +72,17 @@ class SimpleMCRHelper(MCRHelper):
     def distance(self, q1, q2):
         return self.robot.distance(q1, q2)
 
-    def getBetweenConfigurationWithFactor(self, qFrom, qTo, scaleFactor):
-        scaledVector = scaleFactor * (np.array(qTo) - np.array(qFrom))
-        qPrime = np.array(qFrom) + scaledVector
-        return tuple(qPrime)
+    def getStepSize(self):
+        return self.stepSize
+
+    def stepTowards(self, qFrom, qTo, stepSize = None):
+        if stepSize is None:
+            stepSize = self.stepSize
+        dist = self.distance(qFrom, qTo)
+        if dist < self.stepSize:
+            return qTo
+        else:
+            scaleFactor = float(self.stepSize) / self.distance(qFrom, qTo)
+            scaledVector = scaleFactor * (np.array(qTo) - np.array(qFrom))
+            qPrime = np.array(qFrom) + scaledVector
+            return tuple(qPrime)

@@ -83,18 +83,11 @@ class RRTSearcher(object):
         return (closestSoFar, closestDistance)
 
 
-    def extendToward(self, closest, sample, delta = 400, complicated = False):
-        if complicated:
-            return self.complicatedExtendToward(closest, sample, delta)
-        else:
-            return self.simpleExtendToward(closest, sample, delta)
-
-    def simpleExtendToward(self, closest, sample, delta):
+    def extendToward(self, closest, sample):
         print 'closest', closest
         print 'sample', sample
         print 'goal', self.goal
-        scaleFactor = min(float(delta) / self.helper.distance(closest, sample), 1)
-        qPrime = self.helper.getBetweenConfigurationWithFactor(closest, sample, scaleFactor)
+        qPrime = self.helper.stepTowards(closest, sample)
         configurationsToCheck = self.helper.generateInBetweenConfigs(closest, qPrime)
         configurationsToCheck.append(qPrime)
         collisions = set()
@@ -117,34 +110,3 @@ class RRTSearcher(object):
         if self.foundPath:
             return searcher.reconstructPath(self.cameFrom, self.goal)
         return []
-
-
-    def complicatedExtendToward(self, closest, sample, delta, bisectionLimit = 4):
-        scaleFactor = min(delta / math.sqrt(self.euclideanDistanceSquared(closest, sample)), 1)
-        scaledVector = scaleFactor * (np.array(sample) - np.array(closest))
-        qPrime = np.array(closest) + scaledVector
-        bisectionCount = 0
-        collisionCheckMap = {}
-        while True:
-            configurationsToCheck = self.helper.generateInBetweenConfigs(closest, qPrime)
-            configurationsToCheck.append(qPrime)
-            configsAreCollisionFree = True
-            for configurationToCheck in configurationsToCheck:
-                tupleisedConfiguration = tuple(configurationToCheck)
-                if tupleisedConfiguration in collisionCheckMap:
-                    numCollisionsAtConfiguration = collisionCheckMap[tupleisedConfiguration]             
-                else:
-                    obstacleCollisions = self.helper.collisionsAtQ(configurationToCheck)
-                    numCollisionsAtConfiguration = len(obstacleCollisions)
-                    collisionCheckMap[tupleisedConfiguration] = numCollisionsAtConfiguration
-                if numCollisionsAtConfiguration != 0:
-                    configsAreCollisionFree = False
-                    break
-            
-            if configsAreCollisionFree:
-                return tuple(qPrime)
-            elif bisectionCount < bisectionLimit:
-                bisectionCount += 1
-                qPrime = tuple(0.5 * (qPrime + np.array(closest)))
-            else:
-                return None

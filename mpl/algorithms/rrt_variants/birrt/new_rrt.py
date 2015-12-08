@@ -68,13 +68,8 @@ class RRTSearcher(object):
                 closestDistance = distance
         return (closestSoFar, closestDistance)
 
-    def extendToward(self, closest, sample, delta = 400):
-        print 'closest', closest
-        print 'sample', sample
-        scaleFactor = min(float(delta) / self.helper.distance(closest, sample), 1)
-        print 'scaleFactor', scaleFactor
-        qPrime = self.helper.getBetweenConfigurationWithFactor(closest, sample, scaleFactor)
-        print 'qPrime', qPrime
+    def extendToward(self, closest, sample):
+        qPrime = self.helper.stepTowards(closest, sample)
         configurationsToCheck = self.helper.generateInBetweenConfigs(closest, qPrime)
         configurationsToCheck.append(qPrime)
         collisions = set()
