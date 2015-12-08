@@ -72,19 +72,17 @@ class RRTSearcher(object):
     def euclideanDistanceSquared(self, q1, q2):
         return sum([(q1[i] - q2[i])**2 for i in range(len(q1))])
 
-    def extendToward(self, closest, sample, complicated = False):
+    def extendToward(self, closest, sample):
         qPrime = self.helper.stepTowards(closest, sample)
-        configurationsToCheck = self.helper.generateInBetweenConfigs(closest, qPrime)
-        configurationsToCheck.append(qPrime)
-        collisions = set()
-        for configuration in configurationsToCheck:
+        if set(self.helper.collisionsAtQ(qPrime)) != self.obstaclesToIgnore:
+            return None
+        for configuration in self.helper.generateInBetweenConfigs(closest, qPrime):
             collisionsAtConfiguration = self.helper.collisionsAtQ(configuration)
             for obstacle in collisionsAtConfiguration:
                 if obstacle not in self.obstaclesToIgnore:
-                    collisions.add(obstacle)
-        if len(collisions) == 0:
-            return tuple(qPrime)
-        return None
+                    return None
+        return tuple(qPrime)
+
 
     def treeSize(self):
         return len(self.tree.data) + len(self.auxillaryArray)

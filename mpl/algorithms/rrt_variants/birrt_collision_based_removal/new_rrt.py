@@ -73,20 +73,20 @@ class RRTSearcher(object):
 
     def extendToward(self, closest, sample):
         qPrime = self.helper.stepTowards(closest, sample)
-        configurationsToCheck = self.helper.generateInBetweenConfigs(closest, qPrime)
-        configurationsToCheck.append(qPrime)
-        collisions = set()
-        for configuration in configurationsToCheck:
+        if set(self.helper.collisionsAtQ(qPrime)) != self.obstaclesToIgnore:
+            return None
+        for configuration in self.helper.generateInBetweenConfigs(closest, qPrime):
             collisionsAtConfiguration = self.helper.collisionsAtQ(configuration)
+            collisionsToNotIgnore = set()
             for obstacle in collisionsAtConfiguration:
                 if obstacle not in self.obstaclesToIgnore:
-                    collisions.add(obstacle)
-        if len(collisions) == 0:
-            return tuple(qPrime)
-        for collision in collisions:
-            currentCollisionCountForObstacle = self.obstacleCollisionCounts.get(collision, 0)
-            self.obstacleCollisionCounts[collision] = currentCollisionCountForObstacle + 1
-        return None
+                    collisionsToNotIgnore.add(obstacle)
+            if len(collisionsToNotIgnore) != 0:
+                for collision in collisionsToNotIgnore:
+                    currentCollisionCountForObstacle = self.obstacleCollisionCounts.get(collision, 0)
+                    self.obstacleCollisionCounts[collision] = currentCollisionCountForObstacle + 1
+                return None
+        return tuple(qPrime)
 
     def treeSize(self):
         return len(self.tree.data) + len(self.auxillaryArray)

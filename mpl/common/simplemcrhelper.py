@@ -60,14 +60,15 @@ class SimpleMCRHelper(MCRHelper):
 
     def generateInBetweenConfigs(self, q_from, q_to):
         stepsToCheck = 10
-        configurations = []
+        # configurations = []
         q_from_np = np.array(q_from)
         q_to_np = np.array(q_to)
         q_delta = q_to_np - q_from_np
         for i in range(1, stepsToCheck):
             q = q_from_np + q_delta * float(i) / stepsToCheck
-            configurations.append(q)
-        return configurations
+            yield q
+            # configurations.append(q)
+        # return configurations
 
     def distance(self, q1, q2):
         return self.robot.distance(q1, q2)
