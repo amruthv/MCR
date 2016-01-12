@@ -3,8 +3,11 @@ import heapq
 import numpy as np
 import math
 
+from mpl.common import covercalculator
+
+
 class RRTSearcher(object):
-    def __init__(self, start, goal, helper, obstaclesToIgnore, obstacleCollisionCounts):
+    def __init__(self, start, goal, helper, obstaclesToIgnore, obstacleCollisionCounts, sim):
         self.start = start
         self.goal = goal
         self.helper = helper
@@ -14,6 +17,9 @@ class RRTSearcher(object):
         self.cameFrom = {}
         self.obstaclesToIgnore = obstaclesToIgnore
         self.obstacleCollisionCounts = obstacleCollisionCounts
+        self.sim = sim
+        self.cc = covercalculator.CoverCalculator(self.helper, False)
+
 
     def searchWithRRT(self, numIters = 1000):
         for iterNum in range(numIters):
@@ -27,11 +33,18 @@ class RRTSearcher(object):
         self.rebuildTreeIfNecessary()
         nearestConfig = self.nearestConfig(qRand)
         qExtended = self.extendToward(nearestConfig, qRand)
+        # if qExtended is not None:
+            # collisions = self.cc.cover(nearestConfig)
+            # collisions.mergeWith(self.cc.edgeCover(nearestConfig, qExtended))
+            # collisions.mergeWith(self.cc.cover(qExtended))
+            # print 'collisions', collisions
         self.updateRRTWithNewNode(nearestConfig, qExtended)
         return qExtended
 
     def updateRRTWithNewNode(self, qNear, qExtended):
         if qExtended is not None:
+            self.sim.drawPoint(qExtended)
+            self.sim.drawLine(qNear[0], qNear[1], qExtended[0], qExtended[1])
             self.cameFrom[qExtended] = qNear
             self.auxillaryArray.append(qExtended)
 
@@ -49,7 +62,7 @@ class RRTSearcher(object):
         if nearestInAuxillary is None:
             nearest = nearestInTree
         else:
-            nearestInTreeDistance = self.euclideanDistanceSquared(q_rand, nearestInTree)
+            nearestInTreeDistance = self.helper.distance(q_rand, nearestInTree)
             if nearestInTreeDistance < nearestInAuxillaryDistance:
                 nearest = nearestInTree
             else:
@@ -60,32 +73,34 @@ class RRTSearcher(object):
         closestSoFar = None
         closestDistance = float('inf')
         for q in self.auxillaryArray:
-            distance = self.euclideanDistanceSquared(q, q_rand)
+            distance = self.helper.distance(q, q_rand)
             if distance < closestDistance:
                 closestSoFar = q
                 closestDistance = distance
         return (closestSoFar, closestDistance)
 
-
-    # configurations need to have the same dimensions
-    def euclideanDistanceSquared(self, q1, q2):
-        return sum([(q1[i] - q2[i])**2 for i in range(len(q1))])
-
     def extendToward(self, closest, sample):
+        # print self.obstaclesToIgnore
         qPrime = self.helper.stepTowards(closest, sample)
-        if set(self.helper.collisionsAtQ(qPrime)) != self.obstaclesToIgnore:
-            return None
+        # print 'closest', closest
+        # print 'sample', sample
         for configuration in self.helper.generateInBetweenConfigs(closest, qPrime):
+            # print configuration
             collisionsAtConfiguration = self.helper.collisionsAtQ(configuration)
             collisionsToNotIgnore = set()
             for obstacle in collisionsAtConfiguration:
                 if obstacle not in self.obstaclesToIgnore:
                     collisionsToNotIgnore.add(obstacle)
+            # print 'collisions found', collisionsToNotIgnore
             if len(collisionsToNotIgnore) != 0:
+                # print 'hi'
                 for collision in collisionsToNotIgnore:
                     currentCollisionCountForObstacle = self.obstacleCollisionCounts.get(collision, 0)
+                    # print 'collision with obstacle', collision
+                    # print 'currentCollisionCountForObstacle', currentCollisionCountForObstacle 
                     self.obstacleCollisionCounts[collision] = currentCollisionCountForObstacle + 1
                 return None
+        # print 'no collisions!!!!!!!'
         return tuple(qPrime)
 
     def treeSize(self):

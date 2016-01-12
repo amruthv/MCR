@@ -6,10 +6,11 @@ from new_rrt import RRTSearcher
 from mpl.common import covercalculator
 from mpl.common import searcher
 from mpl.common import tlpObstacles
+import pdb
 
 #bi rrt implementation that determines obstacles with interest of removing.
 class BiRRTCollisionRemovalSearcher(object):
-    def __init__(self, start, goal, helper, useTLPObjects, obstaclesToIgnore = set()):
+    def __init__(self, start, goal, helper, useTLPObjects, obstaclesToIgnore = set(), sim = None):
         self.start = start
         self.goal = goal
         self.helper = helper
@@ -17,19 +18,27 @@ class BiRRTCollisionRemovalSearcher(object):
         obstaclesAtGoal = helper.collisionsAtQ(goal)
         obstaclesAtStartAndGoal = obstaclesAtStart.union(obstaclesAtGoal)
         self.obstaclesToIgnore = obstaclesToIgnore.union(obstaclesAtStartAndGoal)
+        print self.obstaclesToIgnore
         self.obstacleCollisionCounts = {}
-        self.RRT1 = RRTSearcher(start, goal, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts)
-        self.RRT2 = RRTSearcher(goal, start, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts)
+        self.RRT1 = RRTSearcher(start, goal, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts, sim)
+        self.RRT2 = RRTSearcher(goal, start, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts, sim)
         self.meetingPoint = None
         self.useTLPObjects = useTLPObjects
         self.deletedObstacles = {}
+        self.cc = covercalculator.CoverCalculator(self.helper, self.useTLPObjects)
+        if sim is not None:
+            self.sim = sim
+            startId = self.sim.drawPoint(start)
+            goalId = self.sim.drawPoint(goal)
 
     def run(self):
         return self.search()
 
     # want memoryFactor <= 1 used to discount previous weights since removing an obstacle opens up new space
-    def search(self, numIters = 1000, obstacleRemovalInterval = 100, memoryFactor = 1):
+    def search(self, numIters = 1000, obstacleRemovalInterval = 200, memoryFactor = 1):
         for iterNum in range(numIters):
+            # print 'iterNum=', iterNum
+            # print self.obstacleCollisionCounts
             if iterNum > 0 and iterNum % obstacleRemovalInterval == 0:
                 self.selectObstacleToRemove(memoryFactor)
             qExtended = self.RRT1.runIteration()
@@ -41,7 +50,7 @@ class BiRRTCollisionRemovalSearcher(object):
                     return True 
                 qExtendedTree2 = self.RRT2.extendToward(qNearest, qExtended)
                 if qExtendedTree2 is not None:
-                    self.RRT2.updateRRTWithNewNode(qNearest, qExtended)
+                    self.RRT2.updateRRTWithNewNode(qNearest, qExtendedTree2)
                     if qExtendedTree2 == qExtended:
                         self.meetingPoint = qExtended
                         return True
@@ -51,8 +60,10 @@ class BiRRTCollisionRemovalSearcher(object):
 
     def selectObstacleToRemove(self, memoryFactor):
         if self.useTLPObjects:
+            print 'using tlp obstacles'
             self.removeTLPObstacle(memoryFactor)
         else:
+            print 'not using tlp obstacles'
             self.removeNonTLPObstacle(memoryFactor)
 
     def selectTLPObstacle(memoryFactor):
@@ -86,7 +97,9 @@ class BiRRTCollisionRemovalSearcher(object):
             self.obstacleCollisionCounts[obstacle] *= memoryFactor
 
     def removeNonTLPObstacle(self, memoryFactor):
+        print 'REMOVING AN OBSTACLE'
         obstacleRemoveScore = []
+        print 'collision counts', self.obstacleCollisionCounts
         for obstacle in self.obstacleCollisionCounts:
             if obstacle.getWeight() == float('inf'):
                 continue
@@ -95,6 +108,7 @@ class BiRRTCollisionRemovalSearcher(object):
         obstacleToRemoveInfo = max(obstacleRemoveScore)
         obstacleToRemoveWeight = obstacleToRemoveInfo[0]
         obstacleToRemove = obstacleToRemoveInfo[1]
+        print 'REMOVING OBSTACLE', obstacleToRemove
         assert(obstacleToRemove not in self.obstaclesToIgnore)
         self.obstaclesToIgnore.add(obstacleToRemove)
         self.deletedObstacles[obstacleToRemove] = obstacleToRemoveWeight
@@ -126,4 +140,10 @@ class BiRRTCollisionRemovalSearcher(object):
             edgeCover = cc.edgeCover(trajectory[i], trajectory[i+1])
             cover = cover.mergeWith(edgeCover)
             cover = cover.mergeWith(cc.cover(trajectory[i+1]))
+            if any([obstacle not in self.obstaclesToIgnore for obstacle in cover.cover ]):
+                pdb.set_trace()
+        for obstacle in cover.cover:
+            if obstacle not in self.obstaclesToIgnore:
+                print 'gg'
+                pdb.set_trace()
         return cover.cover

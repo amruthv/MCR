@@ -56,9 +56,10 @@ def testManyObstacles(verbose = False):
     goal = (450, 360, 0, piOver2, piOver2)
     linkRobot = movableLinkRobot.MovableLinkRobot(links, world)
     helper = SimpleMCRHelper(linkRobot, world, goal, 50)
-    birrt = BiRRTCollisionRemovalSearcher(start, goal, helper, False)
-    
     sim = makeSim(world)
+
+    birrt = BiRRTCollisionRemovalSearcher(start, goal, helper, False, sim = sim)
+    
     drawProblemAndWait(sim, linkRobot, obstacles, start, goal)
     
     if birrt.run():
