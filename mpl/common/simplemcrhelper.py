@@ -59,12 +59,12 @@ class SimpleMCRHelper(MCRHelper):
         return self.robot.generateRandomConfiguration()
 
     def generateInBetweenConfigs(self, q_from, q_to):
-        stepsToCheck = 10
+        stepsToCheck = 40
         # configurations = []
         q_from_np = np.array(q_from)
         q_to_np = np.array(q_to)
         q_delta = q_to_np - q_from_np
-        for i in range(1, stepsToCheck):
+        for i in range(0, stepsToCheck + 1):
             q = q_from_np + q_delta * float(i) / stepsToCheck
             yield q
             # configurations.append(q)
