@@ -21,7 +21,7 @@ class BiRRTIgnoreObstacleSearcher(object):
         self.foundPath = self.search()
         return self.foundPath
 
-    def search(self, numIters = 1000):
+    def search(self, numIters = 2000):
         for iterNum in range(numIters):
             qExtended = self.RRT1.runIteration()
             if qExtended is not None:
@@ -31,7 +31,7 @@ class BiRRTIgnoreObstacleSearcher(object):
                     return True 
                 qExtendedTree2 = self.RRT2.extendToward(qNearest, qExtended)
                 if qExtendedTree2 is not None:
-                    self.RRT2.updateRRTWithNewNode(qNearest, qExtended)
+                    self.RRT2.updateRRTWithNewNode(qNearest, qExtendedTree2)
                     if qExtendedTree2 == qExtended:
                         return True
             if self.RRT1.treeSize() > self.RRT2.treeSize():
