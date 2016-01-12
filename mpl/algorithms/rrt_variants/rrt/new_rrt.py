@@ -28,13 +28,26 @@ class RRTSearcher(object):
         return self.foundPath
 
     def searchWithRRT(self, numIters = 1000):
+        nonNoneQExtended = 0
+        noneQExtended = 0
         for iterNum in range(numIters):
             qExtended = self.runIteration()
             # print 'qExtended=', qExtended
+            if qExtended is not None:
+                nonNoneQExtended += 1
+            else:
+                noneQExtended += 1
+            # if iterNum % 1000 == 0:
+            #     print 'nonNoneQExtended', nonNoneQExtended
+            #     print 'noneQExtended', noneQExtended
             if qExtended == self.goal:
                 print 'found path to goal'
                 return True
-        print 'couldn\'t find path to goal'
+        print "couldn't find path to goal"
+        nearestToGoal = self.nearestConfig(self.goal)
+        print 'nearestToGoal', nearestToGoal
+        print 'goal', self.goal
+        pdb.set_trace()
         return False
 
     def runIteration(self):

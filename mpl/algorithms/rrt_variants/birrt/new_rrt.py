@@ -1,10 +1,14 @@
 from scipy.spatial import KDTree
+import pdb
 import heapq
 import numpy as np
 import math
+from mpl.common import searcher
 
 class RRTSearcher(object):
     def __init__(self, start, goal, helper, shouldDraw = False):
+        if not start or not goal:
+            pdb.set_trace()
         self.start = start
         self.goal = goal
         self.helper = helper
@@ -13,21 +17,41 @@ class RRTSearcher(object):
         self.auxillaryArrayThreshold = 50
         self.cameFrom = {}
         self.shouldDraw = shouldDraw
+        self.foundPath = False
+
+    def run(self):
+        if self.searchWithRRT():
+            self.foundPath = True
+        return self.foundPath
 
     def searchWithRRT(self, numIters = 1000):
+        nonNoneQExtended = 0
+        noneQExtended = 0
         for iterNum in range(numIters):
-            qExtended = runIteration()
+            qExtended = self.runIteration()
+            # print 'qExtended=', qExtended
+            if qExtended is not None:
+                nonNoneQExtended += 1
+            else:
+                noneQExtended += 1
+            # if iterNum % 1000 == 0:
+            #     print 'nonNoneQExtended', nonNoneQExtended
+            #     print 'noneQExtended', noneQExtended
             if qExtended == self.goal:
+                print 'found path to goal'
                 return True
+        print "couldn't find path to goal"
+        nearestToGoal = self.nearestConfig(self.goal)
+        print 'nearestToGoal', nearestToGoal
+        print 'goal', self.goal
+        pdb.set_trace()
         return False
 
     def runIteration(self):
         qRand = self.helper.sampleConfig(self.goal)
         self.rebuildTreeIfNecessary()
         nearestConfig = self.nearestConfig(qRand)
-        print 'nearestConfig', nearestConfig
         qExtended = self.extendToward(nearestConfig, qRand)
-        print 'in rrt code', qExtended
         self.updateRRTWithNewNode(nearestConfig, qExtended)
         return qExtended
 
@@ -67,6 +91,7 @@ class RRTSearcher(object):
                 closestDistance = distance
         return (closestSoFar, closestDistance)
 
+
     def extendToward(self, closest, sample):
         qPrime = self.helper.stepTowards(closest, sample)
         if len(self.helper.collisionsAtQ(qPrime)) != 0:
@@ -79,3 +104,11 @@ class RRTSearcher(object):
 
     def treeSize(self):
         return len(self.tree.data) + len(self.auxillaryArray)
+
+    def getCover(self):
+        return set()
+
+    def getPath(self):
+        if self.foundPath:
+            return searcher.reconstructPath(self.cameFrom, self.goal)
+        return []
