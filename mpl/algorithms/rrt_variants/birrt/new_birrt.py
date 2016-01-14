@@ -11,8 +11,9 @@ class BiRRTSearcher(object):
     def __init__(self, start, goal, helper):
         self.start = start
         self.goal = goal
-        self.RRT1 = RRTSearcher(start, goal, helper)
-        self.RRT2 = RRTSearcher(goal, start, helper)
+        self.helper = helper
+        self.RRT1 = RRTSearcher(start, goal, helper, extendBackwards = False)
+        self.RRT2 = RRTSearcher(goal, start, helper, extendBackwards = True)
         self.foundPath = False
         self.meetingPoint = None
 
@@ -51,9 +52,6 @@ class BiRRTSearcher(object):
             tree1 = self.RRT2
             tree2 = self.RRT1
         commonKeys = set(tree1.cameFrom.keys()).intersection(set(tree2.cameFrom.keys()))
-        if len(commonKeys) == 0 and self.meetingPoint == self.start:
-            pdb.set_trace()
-
         pathFromStart = searcher.reconstructPath(tree1.cameFrom, self.meetingPoint)
         pathFromGoal = searcher.reconstructPath(tree2.cameFrom, self.meetingPoint)
         if self.meetingPoint == self.goal:
@@ -65,6 +63,14 @@ class BiRRTSearcher(object):
             pathFromMeetingToGoal = pathFromMeetingToGoal[:-1] + [self.goal]   
             pathToReturn = pathFromStart + pathFromMeetingToGoal
         pathToReturn = [self.start] + pathToReturn[1:-1] + [self.goal]
+
+        for i in range(len(pathToReturn) - 1):
+            for config in self.helper.generateInBetweenConfigs(pathToReturn[i], pathToReturn[i+1]):
+                collisions = self.helper.collisionsAtQ(config)
+                # print 'coll', collisions
+                if len(collisions) != 0:
+                    print 'somehow had collisions when there should be none'
+                    pdb.set_trace()
         return pathToReturn
 
 

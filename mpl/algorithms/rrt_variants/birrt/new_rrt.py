@@ -6,7 +6,7 @@ import math
 from mpl.common import searcher
 
 class RRTSearcher(object):
-    def __init__(self, start, goal, helper, shouldDraw = False):
+    def __init__(self, start, goal, helper, extendBackwards, shouldDraw = False):
         if not start or not goal:
             pdb.set_trace()
         self.start = start
@@ -16,8 +16,10 @@ class RRTSearcher(object):
         self.auxillaryArray = []
         self.auxillaryArrayThreshold = 50
         self.cameFrom = {}
+        self.extendBackwards = extendBackwards
         self.shouldDraw = shouldDraw
         self.foundPath = False
+        self.edgeCovers = {}
 
     def run(self):
         if self.searchWithRRT():
@@ -96,10 +98,17 @@ class RRTSearcher(object):
         qPrime = self.helper.stepTowards(closest, sample)
         if len(self.helper.collisionsAtQ(qPrime)) != 0:
             return None
-        for configuration in self.helper.generateInBetweenConfigs(closest, qPrime):
+        allCollisions = set()
+        if self.extendBackwards:
+            generator = self.helper.generateInBetweenConfigs(qPrime, closest)
+        else:
+            generator = self.helper.generateInBetweenConfigs(closest, qPrime)
+        for configuration in generator:
             collisionsAtConfiguration = self.helper.collisionsAtQ(configuration)
+            allCollisions.update(collisionsAtConfiguration)
             if len(collisionsAtConfiguration) != 0:
                 return None
+        self.edgeCovers[(closest, qPrime)] = allCollisions
         return tuple(qPrime)
 
     def treeSize(self):
