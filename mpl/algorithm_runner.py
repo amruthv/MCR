@@ -25,6 +25,7 @@ def runAlgorithm(start, goal, helper, algorithmNumber):
         print 'using ignore start and goal'
         algorithm = birrt_ignore_obstacles.BiRRTIgnoreObstacleSearcher(start, goal, helper)
     elif algorithmNumber == 4:
+        print 'using collision removal birrt'
         algorithm = birrt_collision.BiRRTCollisionRemovalSearcher(start, goal, helper, True)
     
     algorithm.run()

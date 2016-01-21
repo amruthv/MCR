@@ -1,4 +1,5 @@
 import math
+import pdb
 from heapq import *
 
 def distanceBetweenXYThetaPoints(point1, point2, penalizeRotation = False):
@@ -17,6 +18,8 @@ def reconstructPath(cameFrom, finalConfiguration):
     while location in cameFrom:
         path.insert(0, (location))
         location = cameFrom[location]
+        if location in path:
+            pdb.set_trace()
     path.insert(0, location)
     return path
 

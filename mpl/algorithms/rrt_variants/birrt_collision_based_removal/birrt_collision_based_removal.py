@@ -4,13 +4,14 @@ import math
 from scipy.spatial import KDTree
 from new_rrt import RRTSearcher
 from mpl.common import covercalculator
+from mpl.common.cover import Cover
 from mpl.common import searcher
 from mpl.common import tlpObstacles
 import pdb
 
 #bi rrt implementation that determines obstacles with interest of removing.
 class BiRRTCollisionRemovalSearcher(object):
-    def __init__(self, start, goal, helper, useTLPObjects, obstaclesToIgnore = set(), sim = None):
+    def __init__(self, start, goal, helper, useTLPObjects, obstaclesToIgnore = set()):
         self.start = start
         self.goal = goal
         self.helper = helper
@@ -18,30 +19,33 @@ class BiRRTCollisionRemovalSearcher(object):
         obstaclesAtGoal = helper.collisionsAtQ(goal)
         obstaclesAtStartAndGoal = obstaclesAtStart.union(obstaclesAtGoal)
         self.obstaclesToIgnore = obstaclesToIgnore.union(obstaclesAtStartAndGoal)
-        print self.obstaclesToIgnore
         self.obstacleCollisionCounts = {}
-        self.RRT1 = RRTSearcher(start, goal, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts, sim)
-        self.RRT2 = RRTSearcher(goal, start, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts, sim)
+        self.RRT1 = RRTSearcher(start, goal, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts, extendBackwards = False)
+        self.RRT2 = RRTSearcher(goal, start, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts, extendBackwards = True)
         self.meetingPoint = None
         self.useTLPObjects = useTLPObjects
         self.deletedObstacles = {}
-        self.cc = covercalculator.CoverCalculator(self.helper, self.useTLPObjects)
-        if sim is not None:
-            self.sim = sim
-            startId = self.sim.drawPoint(start)
-            goalId = self.sim.drawPoint(goal)
 
     def run(self):
-        return self.search()
+        print 'in collision birrt run'
+        self.foundPath = self.search()
+        return self.foundPath
 
     # want memoryFactor <= 1 used to discount previous weights since removing an obstacle opens up new space
-    def search(self, numIters = 1000, obstacleRemovalInterval = 200, memoryFactor = 1):
+    def search(self, numIters = 100, obstacleRemovalInterval = 30, memoryFactor = 1):
         for iterNum in range(numIters):
-            # print 'iterNum=', iterNum
-            # print self.obstacleCollisionCounts
             if iterNum > 0 and iterNum % obstacleRemovalInterval == 0:
+                # print '!!!!!' * 10 + 'time to remove a obstacle'
                 self.selectObstacleToRemove(memoryFactor)
+            if iterNum > 0 and iterNum % 10 == 0:
+                print self.obstaclesToIgnore
             qExtended = self.RRT1.runIteration()
+            # if qExtended == self.goal:
+            #     self.meetingPoint = self.goal
+            #     return True
+            # elif qExtended == self.start:
+            #     self.meetingPoint = self.start
+            #     return True
             if qExtended is not None:
                 self.RRT2.rebuildTreeIfNecessary()
                 qNearest = self.RRT2.nearestConfig(qExtended)
@@ -60,13 +64,14 @@ class BiRRTCollisionRemovalSearcher(object):
 
     def selectObstacleToRemove(self, memoryFactor):
         if self.useTLPObjects:
-            print 'using tlp obstacles'
+            # print 'using tlp obstacles'
             self.removeTLPObstacle(memoryFactor)
         else:
             print 'not using tlp obstacles'
             self.removeNonTLPObstacle(memoryFactor)
 
-    def selectTLPObstacle(memoryFactor):
+    def removeTLPObstacle(self, memoryFactor):
+        # print self.obstacleCollisionCounts
         obstacleRemoveScore = []
         for obstacle in self.obstacleCollisionCounts:
             # don't want to remove a immovable obstacle
@@ -78,13 +83,18 @@ class BiRRTCollisionRemovalSearcher(object):
                 weight = tlpObstacles.OBSTACLE_WEIGHTS['obstacle']
             scoreForObstacle = self.obstacleCollisionCounts[obstacle] / float(weight)
             obstacleRemoveScore.append((scoreForObstacle, obstacle))
+        # GET RID OF THiS EVENTUALLY WANT TO SEE IF IT WORKS IF WE IGNORE THE TABLE
+        # obstacleRemoveScore = [(score, name) for (score,name) in obstacleRemoveScore if name.find('table') == -1]
+        if len(obstacleRemoveScore) == 0:
+            return
         obstacleToRemoveInfo = max(obstacleRemoveScore)
-        obstacleToRemoveWeight = obstacleRemoveInfo[0]
-        obstacleToRemove = obstacleRemoveInfo[1]
+        obstacleToRemoveWeight = obstacleToRemoveInfo[0]
+        obstacleToRemove = obstacleToRemoveInfo[1]
         isObstacle = obstacleToRemove.find('shadow') == -1
         assert(obstacleToRemove not in self.obstaclesToIgnore)
         self.obstaclesToIgnore.add(obstacleToRemove)
         self.deletedObstacles[obstacleToRemove] = obstacleToRemoveWeight
+        print 'removing obstacle', obstacleToRemove
         del self.obstacleCollisionCounts[obstacleToRemove]
         if isObstacle:
             companionShadow = tlpObstacles.getShadowFromObstacle(obstacleToRemove)
@@ -97,7 +107,7 @@ class BiRRTCollisionRemovalSearcher(object):
             self.obstacleCollisionCounts[obstacle] *= memoryFactor
 
     def removeNonTLPObstacle(self, memoryFactor):
-        print 'REMOVING AN OBSTACLE'
+        # print 'REMOVING AN OBSTACLE'
         obstacleRemoveScore = []
         print 'collision counts', self.obstacleCollisionCounts
         for obstacle in self.obstacleCollisionCounts:
@@ -108,7 +118,7 @@ class BiRRTCollisionRemovalSearcher(object):
         obstacleToRemoveInfo = max(obstacleRemoveScore)
         obstacleToRemoveWeight = obstacleToRemoveInfo[0]
         obstacleToRemove = obstacleToRemoveInfo[1]
-        print 'REMOVING OBSTACLE', obstacleToRemove
+        # print 'REMOVING OBSTACLE', obstacleToRemove
         assert(obstacleToRemove not in self.obstaclesToIgnore)
         self.obstaclesToIgnore.add(obstacleToRemove)
         self.deletedObstacles[obstacleToRemove] = obstacleToRemoveWeight
@@ -118,7 +128,7 @@ class BiRRTCollisionRemovalSearcher(object):
 
 
     def getPath(self):
-        if self.meetingPoint is None:
+        if not self.foundPath:
             return []
         if self.RRT1.goal == self.goal:
             tree1 = self.RRT1
@@ -126,24 +136,31 @@ class BiRRTCollisionRemovalSearcher(object):
         else:
             tree1 = self.RRT2
             tree2 = self.RRT1
-        # find the meeting point of the two trees
+
         pathFromStart = searcher.reconstructPath(tree1.cameFrom, self.meetingPoint)
         pathFromGoal = searcher.reconstructPath(tree2.cameFrom, self.meetingPoint)
-        trajectory = pathFromStart + pathFromGoal[::-1]
-        return trajectory
+        if self.meetingPoint == self.goal:
+            pathToReturn = pathFromStart
+        elif self.meetingPoint == self.start:
+            pathToReturn = pathFromGoal[::-1]
+        else:
+            pathFromMeetingToGoal = pathFromGoal[:-1][::-1]
+            pathFromMeetingToGoal = pathFromMeetingToGoal[:-1] + [self.goal]   
+            pathToReturn = pathFromStart + pathFromMeetingToGoal
+        pathToReturn = [self.start] + pathToReturn[1:-1] + [self.goal]
+        return pathToReturn
 
     def getCover(self):
         trajectory = self.getPath()
         cc = covercalculator.CoverCalculator(self.helper, self.useTLPObjects)
-        cover = cc.cover(self.start)
+        pathCover = Cover(set(), self.useTLPObjects)
         for i in range(len(trajectory) - 1):
-            edgeCover = cc.edgeCover(trajectory[i], trajectory[i+1])
-            cover = cover.mergeWith(edgeCover)
-            cover = cover.mergeWith(cc.cover(trajectory[i+1]))
-            if any([obstacle not in self.obstaclesToIgnore for obstacle in cover.cover ]):
+            edgeCoverInclusive = cc.edgeCover(trajectory[i], trajectory[i+1])
+            pathCover = pathCover.mergeWith(edgeCoverInclusive)
+            if any([obstacle not in self.obstaclesToIgnore for obstacle in pathCover.cover]):
                 pdb.set_trace()
-        for obstacle in cover.cover:
+        for obstacle in pathCover.cover:
             if obstacle not in self.obstaclesToIgnore:
                 print 'gg'
                 pdb.set_trace()
-        return cover.cover
+        return pathCover.cover

@@ -2,12 +2,13 @@ from scipy.spatial import KDTree
 import heapq
 import numpy as np
 import math
+import pdb
 
 from mpl.common import covercalculator
 
 
 class RRTSearcher(object):
-    def __init__(self, start, goal, helper, obstaclesToIgnore, obstacleCollisionCounts, sim):
+    def __init__(self, start, goal, helper, obstaclesToIgnore, obstacleCollisionCounts, extendBackwards):
         self.start = start
         self.goal = goal
         self.helper = helper
@@ -17,8 +18,7 @@ class RRTSearcher(object):
         self.cameFrom = {}
         self.obstaclesToIgnore = obstaclesToIgnore
         self.obstacleCollisionCounts = obstacleCollisionCounts
-        self.sim = sim
-        self.cc = covercalculator.CoverCalculator(self.helper, False)
+        self.extendBackwards = extendBackwards
 
 
     def searchWithRRT(self, numIters = 1000):
@@ -33,21 +33,15 @@ class RRTSearcher(object):
         self.rebuildTreeIfNecessary()
         nearestConfig = self.nearestConfig(qRand)
         qExtended = self.extendToward(nearestConfig, qRand)
-        # if qExtended is not None:
-            # collisions = self.cc.cover(nearestConfig)
-            # collisions.mergeWith(self.cc.edgeCover(nearestConfig, qExtended))
-            # collisions.mergeWith(self.cc.cover(qExtended))
-            # print 'collisions', collisions
         self.updateRRTWithNewNode(nearestConfig, qExtended)
         return qExtended
 
     def updateRRTWithNewNode(self, qNear, qExtended):
+        if qNear == qExtended:
+            pdb.set_trace()
         if qExtended is not None:
-            self.sim.drawPoint(qExtended)
-            self.sim.drawLine(qNear[0], qNear[1], qExtended[0], qExtended[1])
             self.cameFrom[qExtended] = qNear
             self.auxillaryArray.append(qExtended)
-
 
     def rebuildTreeIfNecessary(self):
         if len(self.auxillaryArray) > self.auxillaryArrayThreshold:
@@ -80,27 +74,22 @@ class RRTSearcher(object):
         return (closestSoFar, closestDistance)
 
     def extendToward(self, closest, sample):
-        # print self.obstaclesToIgnore
         qPrime = self.helper.stepTowards(closest, sample)
-        # print 'closest', closest
-        # print 'sample', sample
-        for configuration in self.helper.generateInBetweenConfigs(closest, qPrime):
-            # print configuration
+        if self.extendBackwards:
+            generator = self.helper.generateInBetweenConfigs(qPrime, closest)
+        else:
+            generator = self.helper.generateInBetweenConfigs(closest, qPrime)
+        for configuration in generator:
             collisionsAtConfiguration = self.helper.collisionsAtQ(configuration)
             collisionsToNotIgnore = set()
             for obstacle in collisionsAtConfiguration:
                 if obstacle not in self.obstaclesToIgnore:
                     collisionsToNotIgnore.add(obstacle)
-            # print 'collisions found', collisionsToNotIgnore
             if len(collisionsToNotIgnore) != 0:
-                # print 'hi'
                 for collision in collisionsToNotIgnore:
                     currentCollisionCountForObstacle = self.obstacleCollisionCounts.get(collision, 0)
-                    # print 'collision with obstacle', collision
-                    # print 'currentCollisionCountForObstacle', currentCollisionCountForObstacle 
                     self.obstacleCollisionCounts[collision] = currentCollisionCountForObstacle + 1
                 return None
-        # print 'no collisions!!!!!!!'
         return tuple(qPrime)
 
     def treeSize(self):

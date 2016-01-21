@@ -35,7 +35,6 @@ class BiRRTSearcher(object):
                     self.RRT2.updateRRTWithNewNode(qNearest, qExtendedTree2)
                     if qExtendedTree2 == qExtended:
                         self.meetingPoint = qExtended
-                        print 'meetingPoint=', qExtended
                         return True
             if self.RRT1.treeSize() > self.RRT2.treeSize():
                 self.RRT1, self.RRT2 = self.RRT2, self.RRT1
@@ -43,7 +42,7 @@ class BiRRTSearcher(object):
 
     def getPath(self):
         if not self.foundPath:
-            print 'couldn\'t find a path'
+            print "couldn't find a path"
             return []
         if self.RRT1.goal == self.goal:
             tree1 = self.RRT1
@@ -51,7 +50,6 @@ class BiRRTSearcher(object):
         else:
             tree1 = self.RRT2
             tree2 = self.RRT1
-        commonKeys = set(tree1.cameFrom.keys()).intersection(set(tree2.cameFrom.keys()))
         pathFromStart = searcher.reconstructPath(tree1.cameFrom, self.meetingPoint)
         pathFromGoal = searcher.reconstructPath(tree2.cameFrom, self.meetingPoint)
         if self.meetingPoint == self.goal:
