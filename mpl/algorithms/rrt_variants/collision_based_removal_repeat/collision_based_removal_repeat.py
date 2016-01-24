@@ -29,7 +29,7 @@ class RepetitiveCollisionRemovalSearcher(object):
             if searcher.run():
                 path = searcher.getPath()
                 cover = searcher.getCover()
-                coverScore = sum([obstacle.getWeight()
+                coverScore = sum([obstacle.getWeight()])
                 if bestCover is None or bestCoverScore > coverScore for obstacle in cover]):
                     bestPath = path
                     bestCover = cover

@@ -32,7 +32,7 @@ class BiRRTCollisionRemovalSearcher(object):
         return self.foundPath
 
     # want memoryFactor <= 1 used to discount previous weights since removing an obstacle opens up new space
-    def search(self, numIters = 100, obstacleRemovalInterval = 30, memoryFactor = 1):
+    def search(self, numIters = 500, obstacleRemovalInterval = 30, memoryFactor = 1):
         for iterNum in range(numIters):
             if iterNum > 0 and iterNum % obstacleRemovalInterval == 0:
                 # print '!!!!!' * 10 + 'time to remove a obstacle'
@@ -71,7 +71,7 @@ class BiRRTCollisionRemovalSearcher(object):
             self.removeNonTLPObstacle(memoryFactor)
 
     def removeTLPObstacle(self, memoryFactor):
-        # print self.obstacleCollisionCounts
+        print self.obstacleCollisionCounts
         obstacleRemoveScore = []
         for obstacle in self.obstacleCollisionCounts:
             # don't want to remove a immovable obstacle
@@ -163,4 +163,4 @@ class BiRRTCollisionRemovalSearcher(object):
             if obstacle not in self.obstaclesToIgnore:
                 print 'gg'
                 pdb.set_trace()
-        return pathCover.cover
+        return list(pathCover.cover)

@@ -73,5 +73,5 @@ class BiRRTSearcher(object):
 
 
     def getCover(self):
-        return set()
+        return []
 

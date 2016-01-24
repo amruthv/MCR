@@ -58,4 +58,4 @@ class BiRRTIgnoreObstacleSearcher(object):
         return trajectory
 
     def getCover(self):
-        return self.obstaclesAtStartAndGoal
+        return list(self.obstaclesAtStartAndGoal)
