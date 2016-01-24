@@ -15,7 +15,7 @@ from mpl.algorithms.rrt_variants.birrt_ignore_all import birrt_ignore_all
 # 4 collision based rrt
 def runAlgorithm(start, goal, helper, algorithmNumber):
     if algorithmNumber == 0:
-        algorithm = mcr.MCRPlanner(start, goal, helper)
+        algorithm = mcr.MCRPlanner(start, goal, helper, True, 100, True)
     elif algorithmNumber == 1:
         print 'using just rrt'
         algorithm = rrt.RRTSearcher(start, goal, helper)

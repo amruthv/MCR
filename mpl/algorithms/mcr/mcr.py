@@ -1,5 +1,6 @@
 import numpy as np
 import heapq
+import pdb
 from mcrGraph import MCRGraph
 from mpl.common.covercalculator import CoverCalculator
 from mpl.common import searcher
@@ -10,6 +11,7 @@ class MCRPlanner():
         self.start = start
         self.goal = goal
         self.helper = helper
+        self.useTLPObstacles = useTLPObstacles
         self.cc = CoverCalculator(helper, useTLPObstacles)
         self.numIterations = numIterations
         self.verbose = verbose
@@ -25,8 +27,8 @@ class MCRPlanner():
 
     def discreteMCR(self, N_raise = 10):
         #setup stuff
-        startCover = self.G.getLocalVertexCover(self.start)
-        goalCover = self.G.getLocalVertexCover(self.goal)
+        startCover = self.cc.cover(self.start)
+        goalCover = self.cc.cover(self.goal)
         best_possible_cover = startCover.mergeWith(goalCover)
         startGoalEdgeCover = self.cc.edgeCover(self.start, self.goal)
         s_min =  best_possible_cover.mergeWith(startGoalEdgeCover).score
@@ -36,12 +38,13 @@ class MCRPlanner():
             print 'initial s_min', s_min
             print 'initial k =', k 
         G = self.G
-        N = 1
+        print 'original s_min', s_min
+        iterCount = self.numIterations
         for i in range(self.numIterations):
             self.expandRoadmap(G, k)
             self.cameFrom = self.computeMinExplanations(G)
             s_min = G.getTotalVertexCover(self.goal).score
-            if N % N_raise == 0:
+            if i % N_raise == 0:
                 if self.verbose:
                     print '====================='
                     print "s_min = ", s_min
@@ -49,15 +52,18 @@ class MCRPlanner():
                 k += 1
             if k >= s_min:
                 k = s_min - 1
-            if self.verbose and N % N_raise == 0:
+            if self.verbose and i % N_raise == 0:
                 print 'k = ', k
-            N += 1
+                print 's_min', s_min
             if s_min == best_possible_score:
+                iterCount = i
                 break
         if self.verbose:
             if s_min == best_possible_score:
-                print 'Got best path possible'
-            print "took N = {0} iterations".format(N)
+                print 'Got best path possible with score', s_min
+            else:
+                print 'Got subpar path of score {0} when best score possible is {1}'.format(s_min, best_possible_score)
+            print "took {0} iterations".format(iterCount)
             print 'size of G: ', len(G.V)
         return s_min
 
@@ -72,13 +78,10 @@ class MCRPlanner():
         E[goal] = [start]
         graph = MCRGraph(V,E)
         startCover = self.cc.cover(start)
-        graph.setLocalVertexCover(start, startCover)
-        goalCover = self.cc.cover(goal)
-        graph.setLocalVertexCover(goal, goalCover)
         startGoalEdgeCover = self.cc.edgeCover(start, goal)
         graph.setEdgeCover(start, goal, startGoalEdgeCover)
         graph.setTotalVertexCover(start, startCover)
-        graph.setTotalVertexCover(goal, startCover.mergeWith(startGoalEdgeCover).mergeWith(goalCover))
+        graph.setTotalVertexCover(goal, startGoalEdgeCover)
         if self.shouldDraw:
             startId = self.sim.drawPoint(start)
             goalId = self.sim.drawPoint(goal)
@@ -100,15 +103,21 @@ class MCRPlanner():
                 qId = self.sim.drawPoint((q[0], q[1]))
                 self.nodeIds[q] = qId
             G.addVertex(q)
-            qCover = self.cc.cover(q)
-            G.setLocalVertexCover(q, qCover)
             addedEdge = False
             neighborsOfQ = self.neighbors(G, q)
+            neighborsOfQ = [qq for qq in neighborsOfQ if qq != q]
             for neighbor in neighborsOfQ:
-                if round(self.helper.distance(neighbor, q)) <= round(self.helper.getStepSize()): # and totalCover.score <= k:
+                # if its within the extendable distance
+                qq = self.helper.stepTowards(neighbor, q)
+                if all(x-y < 1.0e-6 for x,y in zip(q, qq)):
+                # if self.helper.stepTowards(neighbor, q) == q: # and totalCover.score <= k:
                     addedEdge = True
                     G.addEdge(neighbor, q)
-            assert(addedEdge == True) # should be true since the closestEdge should be within distance of stepSize
+            try:
+                assert(addedEdge == True) # should be true since the closestEdge should be within distance of stepSize
+            except:
+                pdb.set_trace()
+                print 'something went wrong'
 
     def closest(self, G, k, sampleConfig):
         GKReachableNodes = []
@@ -119,23 +128,15 @@ class MCRPlanner():
         minIndex = np.argmin(distances)
         return GKReachableNodes[minIndex]
 
-    def extendToward(self, G, closest, sample, k, bisectionLimit = 4):
-        stepSize = self.helper.getStepSize()
-        qPrime = self.helper.stepTowards(closest, sample, stepSize)
+    def extendToward(self, G, closest, sample, k):
+        qPrime = self.helper.stepTowards(closest, sample)
         closestCover = G.getTotalVertexCover(closest)
-        bisectionCount = 0
-        while True:
-            edgeCover = self.cc.edgeCover(closest, qPrime)
-            qPrimeCover = self.cc.cover(qPrime)
-            totalCover = closestCover.mergeWith(edgeCover).mergeWith(qPrimeCover)
-            if totalCover.score <= k:
-                return qPrime
-            elif bisectionCount < bisectionLimit:
-                bisectionCount += 1
-                stepSize *= 0.5
-                qPrime = self.helper.stepTowards(closest, qPrime, stepSize)
-            else:
-                return None
+        edgeCover = self.cc.edgeCover(closest, qPrime)
+        totalCover = closestCover.mergeWith(edgeCover)
+        if totalCover.score <= k:
+            return qPrime
+        else:
+            return None
 
     def neighbors(self, G, q, m = 10):
         # we choose nearest 10 rather than the ball of radius r approach
@@ -184,12 +185,11 @@ class MCRPlanner():
                 # only manipulate those not in finalCovers
                 if neighbor not in finalCovers:
                     # solve neighbor cover with edge cover from vertexName
-                    neighborCover = G.getLocalVertexCover(neighbor)
                     edgeCover = G.getEdgeCover(vertexName, neighbor)
                     if edgeCover == None:
                         edgeCover = self.cc.edgeCover(vertexName, neighbor)
                         G.setEdgeCover(vertexName, neighbor, edgeCover)
-                    totalCover = vertexCover.mergeWith(edgeCover).mergeWith(neighborCover)
+                    totalCover = vertexCover.mergeWith(edgeCover)
                     neighborEntry = makeEntry(totalCover, neighbor)
                     if neighbor not in coversSoFar:
                         coversSoFar[neighbor] = neighborEntry
@@ -211,10 +211,13 @@ class MCRPlanner():
         return cameFrom
 
     def getPath(self):
-        return searcher.reconstructPath(self.cameFrom, self.goal)
+        if self.useTLPObstacles and 'permanent' in self.getCover():
+            return []
+        path = searcher.reconstructPath(self.cameFrom, self.goal)
+        return path
 
     def getCover(self):
-        return self.G.getTotalVertexCover(self.goal).cover
+        return list(self.G.getTotalVertexCover(self.goal).cover)
 
     def updateColors(self):
         for node in self.G.V:
