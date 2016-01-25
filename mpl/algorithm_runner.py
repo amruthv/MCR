@@ -15,7 +15,7 @@ from mpl.algorithms.rrt_variants.birrt_ignore_all import birrt_ignore_all
 # 4 collision based rrt
 def runAlgorithm(start, goal, helper, algorithmNumber):
     if algorithmNumber == 0:
-        algorithm = mcr.MCRPlanner(start, goal, helper, True, 100, True)
+        algorithm = mcr.MCRPlanner(start, goal, helper, useTLPObstacles = True, verbose = True)
     elif algorithmNumber == 1:
         print 'using just rrt'
         algorithm = rrt.RRTSearcher(start, goal, helper)
@@ -27,7 +27,7 @@ def runAlgorithm(start, goal, helper, algorithmNumber):
         algorithm = birrt_ignore_obstacles.BiRRTIgnoreObstacleSearcher(start, goal, helper)
     elif algorithmNumber == 4:
         print 'using collision removal birrt'
-        algorithm = birrt_collision.BiRRTCollisionRemovalSearcher(start, goal, helper, True)
+        algorithm = birrt_collision.BiRRTCollisionRemovalSearcher(start, goal, helper, useTLPObstacles = True, removalStrategy = 'not greedy')
     elif algorithmNumber == 5:
         print 'using ignore all non-permanent obstacles birrt'
         algorithm = birrt_ignore_all.BiRRTIgnoreObstaclesSearcher(start, goal, helper, True)

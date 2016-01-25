@@ -11,19 +11,20 @@ import pdb
 
 #bi rrt implementation that determines obstacles with interest of removing.
 class BiRRTCollisionRemovalSearcher(object):
-    def __init__(self, start, goal, helper, useTLPObjects, obstaclesToIgnore = set()):
+    def __init__(self, start, goal, helper, useTLPObstacles, removalStrategy):
         self.start = start
         self.goal = goal
         self.helper = helper
         obstaclesAtStart = set(helper.collisionsAtQ(start))
         obstaclesAtGoal = helper.collisionsAtQ(goal)
         obstaclesAtStartAndGoal = obstaclesAtStart.union(obstaclesAtGoal)
-        self.obstaclesToIgnore = obstaclesToIgnore.union(obstaclesAtStartAndGoal)
+        self.obstaclesToIgnore = obstaclesAtStartAndGoal
         self.obstacleCollisionCounts = {}
         self.RRT1 = RRTSearcher(start, goal, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts, extendBackwards = False)
         self.RRT2 = RRTSearcher(goal, start, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts, extendBackwards = True)
         self.meetingPoint = None
-        self.useTLPObjects = useTLPObjects
+        self.useTLPObstacles = useTLPObstacles
+        self.removalStrategy = removalStrategy
         self.deletedObstacles = {}
 
     def run(self):
@@ -63,7 +64,7 @@ class BiRRTCollisionRemovalSearcher(object):
         return False
 
     def selectObstacleToRemove(self, memoryFactor):
-        if self.useTLPObjects:
+        if self.useTLPObstacles:
             # print 'using tlp obstacles'
             self.removeTLPObstacle(memoryFactor)
         else:
@@ -87,9 +88,10 @@ class BiRRTCollisionRemovalSearcher(object):
         # obstacleRemoveScore = [(score, name) for (score,name) in obstacleRemoveScore if name.find('table') == -1]
         if len(obstacleRemoveScore) == 0:
             return
-        obstacleToRemoveInfo = max(obstacleRemoveScore)
-        obstacleToRemoveWeight = obstacleToRemoveInfo[0]
-        obstacleToRemove = obstacleToRemoveInfo[1]
+        if self.removalStrategy == 'greedy':
+            obstacleToRemove, obstacleToRemoveWeight = self.greedyRemoval(obstacleRemoveScore)
+        else:
+            obstacleToRemove, obstacleToRemoveWeight = self.probabilisticRemoval(obstacleRemoveScore)
         isObstacle = obstacleToRemove.find('shadow') == -1
         assert(obstacleToRemove not in self.obstaclesToIgnore)
         self.obstaclesToIgnore.add(obstacleToRemove)
@@ -115,9 +117,10 @@ class BiRRTCollisionRemovalSearcher(object):
                 continue
             scoreForObstacle = self.obstacleCollisionCounts[obstacle] / float(obstacle.getWeight())
             obstacleRemoveScore.append((scoreForObstacle, obstacle))
-        obstacleToRemoveInfo = max(obstacleRemoveScore)
-        obstacleToRemoveWeight = obstacleToRemoveInfo[0]
-        obstacleToRemove = obstacleToRemoveInfo[1]
+        if self.removalStrategy == 'greedy':
+            obstacleToRemove, obstacleToRemoveWeight = self.greedyRemoval(obstacleRemoveScore)
+        else:
+            obstacleToRemove, obstacleToRemoveWeight = self.probabilisticRemoval(obstacleRemoveScore)
         # print 'REMOVING OBSTACLE', obstacleToRemove
         assert(obstacleToRemove not in self.obstaclesToIgnore)
         self.obstaclesToIgnore.add(obstacleToRemove)
@@ -126,6 +129,20 @@ class BiRRTCollisionRemovalSearcher(object):
         for obstacle in self.obstacleCollisionCounts:
             self.obstacleCollisionCounts[obstacle] *= memoryFactor
 
+    # there must be an obstacle in obstacleScores
+    def greedyRemoval(self, obstacleScores):
+        obstacleToRemoveInfo = max(obstacleScores)
+        obstacleToRemoveWeight = obstacleToRemoveInfo[0]
+        obstacleToRemove = obstacleToRemoveInfo[1]
+        return obstacleToRemove, obstacleToRemoveWeight
+
+    def probabilisticRemoval(self, obstacleScores):
+        total = sum([score for score, obstacle in obstacleScores])
+        obstacles = [obstacle for score, obstacle in obstacleScores]
+        probabilities = [float(score)/total for score, _ in obstacleScores]
+        obstacleToRemove = np.random.choice(obstacles, p = probabilities)
+        return obstacleScores[obstacles.find(obstacleToRemove)]
+    
 
     def getPath(self):
         if not self.foundPath:
@@ -152,8 +169,8 @@ class BiRRTCollisionRemovalSearcher(object):
 
     def getCover(self):
         trajectory = self.getPath()
-        cc = covercalculator.CoverCalculator(self.helper, self.useTLPObjects)
-        pathCover = Cover(set(), self.useTLPObjects)
+        cc = covercalculator.CoverCalculator(self.helper, self.useTLPObstacles)
+        pathCover = Cover(set(), self.useTLPObstacles)
         for i in range(len(trajectory) - 1):
             edgeCoverInclusive = cc.edgeCover(trajectory[i], trajectory[i+1])
             pathCover = pathCover.mergeWith(edgeCoverInclusive)

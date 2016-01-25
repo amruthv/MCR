@@ -7,13 +7,12 @@ from mpl.common import searcher
 
 class MCRPlanner():
     # start and goal are both configurations
-    def __init__(self, start, goal, helper, useTLPObstacles, numIterations = 100, verbose = False, sim = None, shouldDraw = False):
+    def __init__(self, start, goal, helper, useTLPObstacles, verbose = False, sim = None, shouldDraw = False):
         self.start = start
         self.goal = goal
         self.helper = helper
         self.useTLPObstacles = useTLPObstacles
         self.cc = CoverCalculator(helper, useTLPObstacles)
-        self.numIterations = numIterations
         self.verbose = verbose
         self.sim = sim
         self.shouldDraw = shouldDraw
@@ -25,7 +24,7 @@ class MCRPlanner():
     def run(self):
         return self.discreteMCR()
 
-    def discreteMCR(self, N_raise = 10):
+    def discreteMCR(self, numIterations = 100, N_raise = 10):
         #setup stuff
         startCover = self.cc.cover(self.start)
         goalCover = self.cc.cover(self.goal)
@@ -39,8 +38,8 @@ class MCRPlanner():
             print 'initial k =', k 
         G = self.G
         print 'original s_min', s_min
-        iterCount = self.numIterations
-        for i in range(self.numIterations):
+        iterCount = numIterations
+        for i in range(numIterations):
             self.expandRoadmap(G, k)
             self.cameFrom = self.computeMinExplanations(G)
             s_min = G.getTotalVertexCover(self.goal).score
