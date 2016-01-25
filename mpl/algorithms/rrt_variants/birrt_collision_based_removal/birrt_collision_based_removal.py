@@ -141,7 +141,7 @@ class BiRRTCollisionRemovalSearcher(object):
         obstacles = [obstacle for score, obstacle in obstacleScores]
         probabilities = [float(score)/total for score, _ in obstacleScores]
         obstacleToRemove = np.random.choice(obstacles, p = probabilities)
-        return obstacleScores[obstacles.find(obstacleToRemove)]
+        return obstacleScores[obstacles.index(obstacleToRemove)]
     
 
     def getPath(self):
