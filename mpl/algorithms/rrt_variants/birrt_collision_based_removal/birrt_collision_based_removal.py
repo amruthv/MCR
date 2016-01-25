@@ -36,10 +36,9 @@ class BiRRTCollisionRemovalSearcher(object):
     def search(self, numIters = 500, obstacleRemovalInterval = 30, memoryFactor = 1):
         for iterNum in range(numIters):
             if iterNum > 0 and iterNum % obstacleRemovalInterval == 0:
-                # print '!!!!!' * 10 + 'time to remove a obstacle'
                 self.selectObstacleToRemove(memoryFactor)
-            if iterNum > 0 and iterNum % 10 == 0:
-                print self.obstaclesToIgnore
+            # if iterNum > 0 and iterNum % 10 == 0:
+            #     print self.obstaclesToIgnore
             qExtended = self.RRT1.runIteration()
             # if qExtended == self.goal:
             #     self.meetingPoint = self.goal
@@ -68,7 +67,7 @@ class BiRRTCollisionRemovalSearcher(object):
             # print 'using tlp obstacles'
             self.removeTLPObstacle(memoryFactor)
         else:
-            print 'not using tlp obstacles'
+            # print 'not using tlp obstacles'
             self.removeNonTLPObstacle(memoryFactor)
 
     def removeTLPObstacle(self, memoryFactor):
@@ -141,7 +140,7 @@ class BiRRTCollisionRemovalSearcher(object):
         obstacles = [obstacle for score, obstacle in obstacleScores]
         probabilities = [float(score)/total for score, _ in obstacleScores]
         obstacleToRemove = np.random.choice(obstacles, p = probabilities)
-        return obstacleScores[obstacles.index(obstacleToRemove)]
+        return obstacleScores[obstacles.index(obstacleToRemove)][::-1]
     
 
     def getPath(self):
