@@ -1,4 +1,7 @@
-
+import pdb
+import packagehelper
+from mpl.common.movableLinkRobot import MovableLinkRobot
+# from movableLinkRobot import MovableLinkRobot
 class Simulator():
     def __init__(self, canvas, canvasWidth, canvasHeight):
         self.canvas = canvas
@@ -16,10 +19,28 @@ class Simulator():
         self.canvas.itemconfig(objId, fill = fill)
         self.canvas.update()
 
-    def drawRobot(self, robot, fill = 'blue'):
+    def drawRobot(self, robot):
+        if isinstance(robot, MovableLinkRobot):
+            self.drawRobotNoHeldObstacle(robot)
+        else:
+            self.drawRobotWithHeldObstacle(robot)
+
+    def drawRobotNoHeldObstacle(self, robot):
         ids = []
         for polygon in robot.position:
-            polyId = self.drawPolygon(polygon, fill)
+            polyId = self.drawPolygon(polygon, 'blue')
+            ids.append(polyId)
+        self.canvas.update()
+        return ids
+
+    def drawRobotWithHeldObstacle(self, robot):
+        ids = []
+        for polygon in robot.robotPosition:
+            polyId = self.drawPolygon(polygon, 'blue')
+            ids.append(polyId)
+        for polygon in robot.heldObjectPosition:
+            print polygon
+            polyId = self.drawPolygon(polygon, 'green')
             ids.append(polyId)
         self.canvas.update()
         return ids

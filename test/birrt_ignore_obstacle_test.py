@@ -1,21 +1,18 @@
 from drawCommon import *
+from testWorlds import *
 import packagehelper
 
 import math
 from mpl.common import searcher
 from mpl.common.movableLinkRobot import MovableLinkRobot
 from mpl.algorithms.rrt_variants.birrt_ignore_start_goal_obstacles.birrt_ignore_obstacles import BiRRTIgnoreObstacleSearcher
-from mpl.common.world import World, Obstacle, SimpleObstacle
 from mpl.common.simplemcrhelper import SimpleMCRHelper
 
 pi = math.pi
 piOver2 = math.pi / 2
 
 def testOneObstacleMiddle():
-    obstacle1 = SimpleObstacle("obs1", [(200,20), (300,20), (300,150), (200,150)])
-    obstacles = [] 
-    obstacles = [obstacle1]
-    world = World(500,350, obstacles)
+    world, obstacles = getWorldMiddleObstacle()
 
     links = []
     links.append([0, [(50,50), (90,50), (90,70), (50,70)]])

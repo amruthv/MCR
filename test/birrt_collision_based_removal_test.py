@@ -1,5 +1,6 @@
 from profiler import *
 from drawCommon import *
+from testWorlds import *
 import packagehelper
 
 import cProfile
@@ -14,11 +15,7 @@ pi = math.pi
 piOver2 = math.pi / 2
 
 def testOneObstacleMiddle():
-    obstacle1 = SimpleObstacle("obs1", [(200,20), (300,20), (300,150), (200,150)])
-    obstacles = [] 
-    obstacles = [obstacle1]
-    world = World(500,350, obstacles)
-
+    world, obstacles = getWorldMiddleObstacle()
     links = []
     links.append([0, [(50,50), (90,50), (90,70), (50,70)]])
     links.append([0, [(90,50), (130,50), (130,70), (90,70)]])
@@ -40,13 +37,7 @@ def testOneObstacleMiddle():
         sim.drawPath(obstacles, linkRobot, path)
 
 def testManyObstacles(verbose = False):
-    obstacle1 = SimpleObstacle("obs1", [(100,0), (275,0), (300,100), (190,180), (75, 100)], 4)
-    obstacle2 = SimpleObstacle("obs2", [(140, 385), (225,425), (140,480), (55,425)], 1)
-    obstacle3 = SimpleObstacle("obs3", [(250, 200), (350, 200), (350, 375), (250, 375)], 20)
-    obstacle4 = SimpleObstacle("obs4", [(375, 50), (480, 50), (480, 140), (375, 140)])
-    obstacle5 = SimpleObstacle("obs5", [(410, 350), (430, 350), (430, 450), (410, 450), (410, 420), (360, 400), (410, 380)])
-    obstacles = [obstacle1, obstacle2, obstacle3, obstacle4, obstacle5]
-    world = World(500,500, obstacles)
+    world, obstacles = getManyObstaclesWeightedWorld
 
     links = []
     links.append([0, [(20,200), (60,200), (60,220), (20,220)]])
@@ -58,7 +49,7 @@ def testManyObstacles(verbose = False):
     helper = SimpleMCRHelper(linkRobot, world, goal, 50)
     sim = makeSim(world)
 
-    birrt = BiRRTCollisionRemovalSearcher(start, goal, helper, False, sim = sim)
+    birrt = BiRRTCollisionRemovalSearcher(start, goal, helper, useTLPObstacles = False, removalStrategy = 'greedy')
     
     drawProblemAndWait(sim, linkRobot, obstacles, start, goal)
     
@@ -70,7 +61,7 @@ def testManyObstacles(verbose = False):
         sim.drawPath(obstacles, linkRobot, path)
 
 if __name__ == '__main__':
-    # testOneObstacleMiddle()
+    testOneObstacleMiddle()
     testManyObstacles()
     # prof('testManyObstacles()')
 

@@ -1,4 +1,5 @@
 from drawCommon import *
+from testWorlds import *
 import packagehelper
 
 import math
@@ -13,9 +14,8 @@ pi = math.pi
 piOver2 = math.pi / 2
 
 def testOneObstacleMiddle():
-    obstacle1 = SimpleObstacle("obs1", [(200,20), (300,20), (300,150), (200,150)])
-    obstacles = [obstacle1]
-    world = World(500,350, obstacles)
+    
+    world, obstacles = getWorldMiddleObstacle()
 
     links = []
     links.append([0, [(50,50), (90,50), (90,70), (50,70)]])
