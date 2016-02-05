@@ -14,9 +14,9 @@ from mpl.algorithms.rrt_variants.collision_based_removal_repeat import collision
 # 2 birrt
 # 3 ignore start and goal birrt
 # 4 collision based rrt
-def runAlgorithm(start, goal, helper, algorithmNumber):
+def runAlgorithm(start, goal, helper, algorithmNumber, useTLPObstacles = False):
     if algorithmNumber == 0:
-        algorithm = mcr.MCRPlanner(start, goal, helper, useTLPObstacles = True, verbose = True)
+        algorithm = mcr.MCRPlanner(start, goal, helper, useTLPObstacles = useTLPObstacles, verbose = True)
     elif algorithmNumber == 1:
         print 'using just rrt'
         algorithm = rrt.RRTSearcher(start, goal, helper)
@@ -27,14 +27,17 @@ def runAlgorithm(start, goal, helper, algorithmNumber):
         print 'using ignore start and goal'
         algorithm = birrt_ignore_obstacles.BiRRTIgnoreObstacleSearcher(start, goal, helper)
     elif algorithmNumber == 4:
-        print 'using collision removal birrt'
-        algorithm = birrt_collision.BiRRTCollisionRemovalSearcher(start, goal, helper, useTLPObstacles = True, removalStrategy = 'not greedy')
+        print 'using collision removal birrt greedy'
+        algorithm = birrt_collision.BiRRTCollisionRemovalSearcher(start, goal, helper, useTLPObstacles = useTLPObstacles, removalStrategy = 'greedy')
     elif algorithmNumber == 5:
-        print 'using ignore all non-permanent obstacles birrt'
-        algorithm = birrt_ignore_all.BiRRTIgnoreObstaclesSearcher(start, goal, helper, True)
+        print 'using collision removal birrt not greedy'
+        algorithm = birrt_collision.BiRRTCollisionRemovalSearcher(start, goal, helper, useTLPObstacles = useTLPObstacles, removalStrategy = 'not greedy')
     elif algorithmNumber == 6:
+        print 'using ignore all non-permanent obstacles birrt'
+        algorithm = birrt_ignore_all.BiRRTIgnoreObstaclesSearcher(start, goal, helper, useTLPObstacles = useTLPObstacles)
+    elif algorithmNumber == 7:
         print 'using birrt collision removal repeat'
-        algorithm = collision_based_removal_repeat.RepetitiveCollisionRemovalSearcher(start, goal, helper, True, removalStrategy = 'greedy')
+        algorithm = collision_based_removal_repeat.RepetitiveCollisionRemovalSearcher(start, goal, helper, useTLPObstacles = useTLPObstacles, removalStrategy = 'greedy')
     else:
         raise Exception("Unexpected algorithm")
     

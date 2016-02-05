@@ -11,14 +11,14 @@ import pdb
 
 #bi rrt implementation that determines obstacles with interest of removing.
 class BiRRTIgnoreObstaclesSearcher(object):
-    def __init__(self, start, goal, helper, useTLPObjects):
+    def __init__(self, start, goal, helper, useTLPObstacles):
         self.start = start
         self.goal = goal
         self.helper = helper
-        self.RRT1 = RRTSearcher(start, goal, helper, useTLPObjects, extendBackwards = False)
-        self.RRT2 = RRTSearcher(goal, start, helper, useTLPObjects, extendBackwards = True)
+        self.RRT1 = RRTSearcher(start, goal, helper, useTLPObstacles, extendBackwards = False)
+        self.RRT2 = RRTSearcher(goal, start, helper, useTLPObstacles, extendBackwards = True)
         self.meetingPoint = None
-        self.useTLPObjects = useTLPObjects
+        self.useTLPObstacles = useTLPObstacles
 
     def run(self):
         print 'in ignore all birrt run'
@@ -70,8 +70,8 @@ class BiRRTIgnoreObstaclesSearcher(object):
 
     def getCover(self):
         trajectory = self.getPath()
-        cc = covercalculator.CoverCalculator(self.helper, self.useTLPObjects)
-        pathCover = Cover(set(), self.useTLPObjects)
+        cc = covercalculator.CoverCalculator(self.helper, self.useTLPObstacles)
+        pathCover = Cover(set(), self.useTLPObstacles)
         for i in range(len(trajectory) - 1):
             edgeCoverInclusive = cc.edgeCover(trajectory[i], trajectory[i+1])
             pathCover = pathCover.mergeWith(edgeCoverInclusive)
