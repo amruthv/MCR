@@ -2,6 +2,7 @@ from scipy.spatial import KDTree
 import heapq
 import numpy as np
 import math
+import mpl.mplGlobals as mplGlob
 from new_rrt import RRTSearcher
 from mpl.common import searcher
 import pprint
@@ -18,11 +19,16 @@ class BiRRTSearcher(object):
         self.meetingPoint = None
 
     def run(self):
-        self.foundPath = self.search()
-        return self.foundPath
+        for i in range(mplGlob.rrtIterFailLimit):
+            success = self.search()
+            if success:
+                self.foundPath = True
+                return True
+        self.foundPath = False
+        return False
 
-    def search(self, numIters = 1000):
-        for iterNum in range(numIters):
+    def search(self):
+        for iterNum in range(mplGlob.rrtIterCount):
             qExtended = self.RRT1.runIteration()
             if qExtended is not None:
                 self.RRT2.rebuildTreeIfNecessary()
@@ -42,7 +48,6 @@ class BiRRTSearcher(object):
 
     def getPath(self):
         if not self.foundPath:
-            print "couldn't find a path"
             return []
         if self.RRT1.goal == self.goal:
             tree1 = self.RRT1

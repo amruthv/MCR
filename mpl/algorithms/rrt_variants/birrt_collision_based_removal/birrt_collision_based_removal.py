@@ -7,6 +7,7 @@ from mpl.common import covercalculator
 from mpl.common.cover import Cover
 from mpl.common import searcher
 from mpl.common import tlpObstacles
+import mpl.mplGlobals as mplGlob
 import pdb
 
 #bi rrt implementation that determines obstacles with interest of removing.
@@ -28,24 +29,21 @@ class BiRRTCollisionRemovalSearcher(object):
         self.deletedObstacles = {}
 
     def run(self):
-        print 'in collision birrt run'
-        self.foundPath = self.search()
-        return self.foundPath
+        for i in range(mplGlob.rrtIterFailLimit):
+            print 'trying on iter', i
+            success = self.search()
+            if success:
+                self.foundPath = True
+                return True
+        self.foundPath = False
+        return False
 
     # want memoryFactor <= 1 used to discount previous weights since removing an obstacle opens up new space
-    def search(self, numIters = 500, obstacleRemovalInterval = 30, memoryFactor = 1):
-        for iterNum in range(numIters):
+    def search(self, obstacleRemovalInterval = 40, memoryFactor = 0.5):
+        for iterNum in range(mplGlob.rrtIterCount):
             if iterNum > 0 and iterNum % obstacleRemovalInterval == 0:
                 self.selectObstacleToRemove(memoryFactor)
-            # if iterNum > 0 and iterNum % 10 == 0:
-            #     print self.obstaclesToIgnore
             qExtended = self.RRT1.runIteration()
-            # if qExtended == self.goal:
-            #     self.meetingPoint = self.goal
-            #     return True
-            # elif qExtended == self.start:
-            #     self.meetingPoint = self.start
-            #     return True
             if qExtended is not None:
                 self.RRT2.rebuildTreeIfNecessary()
                 qNearest = self.RRT2.nearestConfig(qExtended)
@@ -83,8 +81,6 @@ class BiRRTCollisionRemovalSearcher(object):
                 weight = tlpObstacles.OBSTACLE_WEIGHTS['obstacle']
             scoreForObstacle = self.obstacleCollisionCounts[obstacle] / float(weight)
             obstacleRemoveScore.append((scoreForObstacle, obstacle))
-        # GET RID OF THiS EVENTUALLY WANT TO SEE IF IT WORKS IF WE IGNORE THE TABLE
-        # obstacleRemoveScore = [(score, name) for (score,name) in obstacleRemoveScore if name.find('table') == -1]
         if len(obstacleRemoveScore) == 0:
             return
         if self.removalStrategy == 'greedy':
@@ -120,7 +116,6 @@ class BiRRTCollisionRemovalSearcher(object):
             obstacleToRemove, obstacleToRemoveWeight = self.greedyRemoval(obstacleRemoveScore)
         else:
             obstacleToRemove, obstacleToRemoveWeight = self.probabilisticRemoval(obstacleRemoveScore)
-        # print 'REMOVING OBSTACLE', obstacleToRemove
         assert(obstacleToRemove not in self.obstaclesToIgnore)
         self.obstaclesToIgnore.add(obstacleToRemove)
         self.deletedObstacles[obstacleToRemove] = obstacleToRemoveWeight

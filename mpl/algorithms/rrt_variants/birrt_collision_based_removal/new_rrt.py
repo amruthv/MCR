@@ -87,6 +87,8 @@ class RRTSearcher(object):
                     collisionsToNotIgnore.add(obstacle)
             if len(collisionsToNotIgnore) != 0:
                 for collision in collisionsToNotIgnore:
+                    if isinstance(collision, SelfObstacle):
+                        continue
                     currentCollisionCountForObstacle = self.obstacleCollisionCounts.get(collision, 0)
                     self.obstacleCollisionCounts[collision] = currentCollisionCountForObstacle + 1
                 return None

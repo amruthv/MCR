@@ -3,15 +3,11 @@ import pdb
 import heapq
 import numpy as np
 import math
+import mpl.mplGlobals as mplGlob
 from mpl.common import searcher
 
 class RRTSearcher(object):
     def __init__(self, start, goal, helper, shouldDraw = False):
-        if not start or not goal:
-            pdb.set_trace()
-        print 'in rrt algorithm initializer'
-        print 'start =', start
-        print 'goal =', goal
         self.start = start
         self.goal = goal
         self.helper = helper
@@ -27,27 +23,12 @@ class RRTSearcher(object):
             self.foundPath = True
         return self.foundPath
 
-    def searchWithRRT(self, numIters = 1000):
-        nonNoneQExtended = 0
-        noneQExtended = 0
-        for iterNum in range(numIters):
+    def searchWithRRT(self):
+        for iterNum in range(mplGlob.rrtIterCount):
             qExtended = self.runIteration()
-            # print 'qExtended=', qExtended
-            if qExtended is not None:
-                nonNoneQExtended += 1
-            else:
-                noneQExtended += 1
-            # if iterNum % 1000 == 0:
-            #     print 'nonNoneQExtended', nonNoneQExtended
-            #     print 'noneQExtended', noneQExtended
             if qExtended == self.goal:
-                print 'found path to goal'
                 return True
-        print "couldn't find path to goal"
         nearestToGoal = self.nearestConfig(self.goal)
-        print 'nearestToGoal', nearestToGoal
-        print 'goal', self.goal
-        pdb.set_trace()
         return False
 
     def runIteration(self):

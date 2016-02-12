@@ -7,6 +7,7 @@ from mpl.common import covercalculator
 from mpl.common.cover import Cover
 from mpl.common import searcher
 from mpl.common import tlpObstacles
+import mpl.mplGlobals as mplGlob
 import pdb
 
 #bi rrt implementation that determines obstacles with interest of removing.
@@ -21,13 +22,18 @@ class BiRRTIgnoreObstaclesSearcher(object):
         self.useTLPObstacles = useTLPObstacles
 
     def run(self):
-        print 'in ignore all birrt run'
-        self.foundPath = self.search()
-        return self.foundPath
+        for i in range(mplGlob.rrtIterFailLimit):
+            success = self.search()
+            if success:
+                self.foundPath = True
+                return True
+        self.foundPath = False
+        return False
+
 
     # want memoryFactor <= 1 used to discount previous weights since removing an obstacle opens up new space
-    def search(self, numIters = 500):
-        for iterNum in range(numIters):
+    def search(self):
+        for iterNum in range(mplGlob.iterCount):
             qExtended = self.RRT1.runIteration()
             if qExtended is not None:
                 self.RRT2.rebuildTreeIfNecessary()

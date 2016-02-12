@@ -3,6 +3,7 @@ import heapq
 import numpy as np
 import math
 from mpl.common import searcher
+import mpl.mplGlobals as mplGlob
 from new_rrt import RRTSearcher
 
 #bi rrt implementation that ignores obstacles at the start configuration and goal configuration
@@ -18,11 +19,17 @@ class BiRRTIgnoreObstacleSearcher(object):
         self.foundPath = False
 
     def run(self):
-        self.foundPath = self.search()
-        return self.foundPath
+        for i in range(mplGlob.rrtIterFailLimit):
+            success = self.search()
+            if success:
+                self.foundPath = True
+                return True
+        self.foundPath = False
+        return False
 
-    def search(self, numIters = 2000):
-        for iterNum in range(numIters):
+
+    def search(self):
+        for iterNum in range(mplGlob.rrtIterCount):
             qExtended = self.RRT1.runIteration()
             if qExtended is not None:
                 self.RRT2.rebuildTreeIfNecessary()
