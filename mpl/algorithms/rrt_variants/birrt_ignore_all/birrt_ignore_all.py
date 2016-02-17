@@ -33,7 +33,7 @@ class BiRRTIgnoreObstaclesSearcher(object):
 
     # want memoryFactor <= 1 used to discount previous weights since removing an obstacle opens up new space
     def search(self):
-        for iterNum in range(mplGlob.iterCount):
+        for iterNum in range(mplGlob.rrtIterCount):
             qExtended = self.RRT1.runIteration()
             if qExtended is not None:
                 self.RRT2.rebuildTreeIfNecessary()
@@ -81,4 +81,7 @@ class BiRRTIgnoreObstaclesSearcher(object):
         for i in range(len(trajectory) - 1):
             edgeCoverInclusive = cc.edgeCover(trajectory[i], trajectory[i+1])
             pathCover = pathCover.mergeWith(edgeCoverInclusive)
-        return list(pathCover.cover)
+        if self.useTLPObstacles:
+            return list(pathCover.cover)
+        else:
+            return pathCover

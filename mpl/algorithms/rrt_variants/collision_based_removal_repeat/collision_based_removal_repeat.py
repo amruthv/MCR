@@ -3,6 +3,7 @@ import numpy as np
 import math
 from mpl.common import cover
 from mpl.algorithms.rrt_variants.birrt_collision_based_removal import birrt_collision_based_removal as birrt
+import pdb
 
 #bi rrt implementation that ignores obstacles at the start configuration and goal configuration
 class RepetitiveCollisionRemovalSearcher(object):
@@ -19,7 +20,7 @@ class RepetitiveCollisionRemovalSearcher(object):
         return self.search()
 
     # want memoryFactor <= 1 used to discount previous weights since removing an obstacle opens up new space
-    def search(self, numRepititions = 5):
+    def search(self, numRepititions = 10):
         bestPath = []
         bestCover = None
         for i in range(numRepititions):
@@ -27,13 +28,17 @@ class RepetitiveCollisionRemovalSearcher(object):
             if searcher.run():
                 iterationPath = searcher.getPath()
                 iterationCover = searcher.getCover()
-                coverObj = cover.Cover(set(iterationCover), self.useTLPObstacles)
+                try:
+                    coverObj = cover.Cover(set(iterationCover), self.useTLPObstacles)
+                except: 
+                    pdb.set_trace()
                 if iterationPath != [] and (bestCover is None or bestCover.score > coverObj.score):
                     bestPath = iterationPath
                     bestCover = coverObj
         self.bestPath = bestPath
-        self.bestCover = list(bestCover.cover)
+        self.bestCover = bestCover
         if self.bestPath == []:
+            self.bestCover = cover.Cover(set(), self.useTLPObstacles)
             return False
         return True
 
@@ -41,4 +46,7 @@ class RepetitiveCollisionRemovalSearcher(object):
         return self.bestPath
 
     def getCover(self):
-        return self.bestCover
+        if self.useTLPObstacles:
+            return list(self.bestCover.cover)
+        else:
+            return self.bestCover

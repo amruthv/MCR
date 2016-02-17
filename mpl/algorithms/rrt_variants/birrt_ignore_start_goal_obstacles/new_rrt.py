@@ -8,20 +8,13 @@ class RRTSearcher(object):
         self.start = start
         self.goal = goal
         self.helper = helper
-        self.tree = KDTree([start])
+        self.tree = KDTree([start.toPrimitive()])
         self.auxillaryArray = []
         self.auxillaryArrayThreshold = 50
         self.cameFrom = {}
         self.obstaclesToIgnore = obstaclesToIgnore
         self.shouldDraw = shouldDraw
-
-    def searchWithRRT(self, numIters = 1000):
-        for iterNum in range(numIters):
-            qExtended = runIteration()
-            print 'qExtended = ', qExtended
-            if qExtended == self.goal:
-                return True
-        return False
+        self.primitiveToConfigurationDict = {start.toPrimitive() : start}
 
     def runIteration(self):
         qRand = self.helper.sampleConfig(self.goal)
@@ -35,22 +28,25 @@ class RRTSearcher(object):
         if qExtended is not None:
             self.cameFrom[qExtended] = qNear
             self.auxillaryArray.append(qExtended)
+            self.primitiveToConfigurationDict[qExtended.toPrimitive()] = qExtended
 
 
     def rebuildTreeIfNecessary(self):
         if len(self.auxillaryArray) > self.auxillaryArrayThreshold:
-            newData = np.vstack([self.tree.data, self.auxillaryArray])
+            print 'here'
+            auxillaryAsPrimitive = [q.toPrimitive() for q in self.auxillaryArray]
+            newData = np.vstack([self.tree.data, auxillaryAsPrimitive])
             self.auxillaryArray = []
             self.tree = KDTree(newData)
 
     def nearestConfig(self, q_rand):
-        _, nearestInTreeIndex = self.tree.query(q_rand, 1)
-        nearestInTree = tuple(self.tree.data[nearestInTreeIndex])
+        _, nearestInTreeIndex = self.tree.query(q_rand.toPrimitive(), 1)
+        nearestInTree = self.primitiveToConfigurationDict[tuple(self.tree.data[nearestInTreeIndex])]
         nearestInAuxillary, nearestInAuxillaryDistance = self.getNearestFromAuxillary(q_rand)
         if nearestInAuxillary is None:
             nearest = nearestInTree
         else:
-            nearestInTreeDistance = self.euclideanDistanceSquared(q_rand, nearestInTree)
+            nearestInTreeDistance = self.helper.distance(q_rand, nearestInTree)
             if nearestInTreeDistance < nearestInAuxillaryDistance:
                 nearest = nearestInTree
             else:
@@ -58,19 +54,14 @@ class RRTSearcher(object):
         return nearest
 
     def getNearestFromAuxillary(self, q_rand):
-        closestSoFar = None
-        closestDistance = float('inf')
-        for q in self.auxillaryArray:
-            distance = self.euclideanDistanceSquared(q, q_rand)
-            if distance < closestDistance:
-                closestSoFar = q
-                closestDistance = distance
-        return (closestSoFar, closestDistance)
+        if len(self.auxillaryArray) == 0:
+            return None, float('inf')
+        distances = [self.helper.distance(q, q_rand) for q in self.auxillaryArray]
+        qWithMinDistanceIndex =  np.argmin(distances)
+        qWithMinDistance = self.auxillaryArray[qWithMinDistanceIndex]
+        minDistance = distances[qWithMinDistanceIndex]
+        return (qWithMinDistance, minDistance)
 
-
-    # configurations need to have the same dimensions
-    def euclideanDistanceSquared(self, q1, q2):
-        return sum([(q1[i] - q2[i])**2 for i in range(len(q1))])
 
     def extendToward(self, closest, sample):
         qPrime = self.helper.stepTowards(closest, sample)
@@ -81,8 +72,7 @@ class RRTSearcher(object):
             for obstacle in collisionsAtConfiguration:
                 if obstacle not in self.obstaclesToIgnore:
                     return None
-        return tuple(qPrime)
-
+        return qPrime
 
     def treeSize(self):
         return len(self.tree.data) + len(self.auxillaryArray)

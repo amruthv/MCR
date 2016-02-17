@@ -12,7 +12,7 @@ class MovableLinkRobot(Robot):
         referenceTransforms, inverseReferenceTransforms = self.makeInitialTransforms(polygonInfoArray)
         self.referenceTransforms = referenceTransforms
         self.inverseReferenceTransforms = inverseReferenceTransforms
-        # assume the robot starts off flat, but we can extract the x,y coordinate of the first leg from the provided points
+        # extract the x,y coordinate of the first leg from the provided points
         firstCoordinate = list(polygonInfoArray[0][1][0])   
         self.initialOrigin = firstCoordinate
         self.moveToConfiguration(firstCoordinate + [0] * self.numJoints)
@@ -129,4 +129,41 @@ class MovableLinkRobot(Robot):
         jointAngleDistance = math.sqrt(jointAngleSum)
         distance = euclideanDistance + jointAngleDistance * angleFactor
         return distance
+
+    def coverAtQ(self, q):
+        return self.coverWithBBox(q)
+
+    def coverWithBBox(self, q):
+        self.robot.moveToConfiguration(q)
+        collisions = set()
+        allRobotPoints = [pt for polyPoints in self.robot.position for pt in polyPoints]
+        allRobotBBox = BBox(allRobotPoints)
+        for obstacle in self.world.obstacles:
+            collisionFree = True
+            for obstacle in self.world.obstacles:
+                if allRobotBBox.intersectsBBox(obstacle.bbox):
+                    collisionFree = False
+                    break
+            if collisionFree:
+                return collisions
+
+            #else check each robot polygon bbox
+            for polygonPts in self.robot.position:
+                bboxRobotPoly = BBox(polygonPts)
+                polygon = Polygon(polygonPts)
+                for obstacle in self.world.obstacles:
+                    if bboxRobotPoly.intersectsBBox(obstacle.bbox):
+                        if polygon.intersects(obstacle.polygon):
+                            collisions.add(obstacle)
+        return collisions
+
+    def naiiveCover(self, q):
+        self.robot.moveToConfiguration(q)
+        collisions = set()
+        for polygon in self.robot.position:
+            poly = Polygon(polygon)
+            for obstacle in self.world.obstacles:
+                if poly.intersects(obstacle.polygon):
+                    collisions.add(obstacle)
+        return collisions
 

@@ -5,21 +5,21 @@ import math
 import pdb
 
 from mpl.common import covercalculator
-
+from mpl.common.world import SelfObstacle
 
 class RRTSearcher(object):
     def __init__(self, start, goal, helper, obstaclesToIgnore, obstacleCollisionCounts, extendBackwards):
         self.start = start
         self.goal = goal
         self.helper = helper
-        self.tree = KDTree([start])
+        self.tree = KDTree([start.toPrimitive()])
         self.auxillaryArray = []
         self.auxillaryArrayThreshold = 50
         self.cameFrom = {}
         self.obstaclesToIgnore = obstaclesToIgnore
         self.obstacleCollisionCounts = obstacleCollisionCounts
         self.extendBackwards = extendBackwards
-
+        self.primitiveToConfigurationDict = {start.toPrimitive() : start}
 
     def searchWithRRT(self, numIters = 1000):
         for iterNum in range(numIters):
@@ -42,16 +42,18 @@ class RRTSearcher(object):
         if qExtended is not None:
             self.cameFrom[qExtended] = qNear
             self.auxillaryArray.append(qExtended)
+            self.primitiveToConfigurationDict[qExtended.toPrimitive()] = qExtended
 
     def rebuildTreeIfNecessary(self):
         if len(self.auxillaryArray) > self.auxillaryArrayThreshold:
-            newData = np.vstack([self.tree.data, self.auxillaryArray])
+            auxillaryAsPrimitive = [q.toPrimitive() for q in self.auxillaryArray]
+            newData = np.vstack([self.tree.data, auxillaryAsPrimitive])
             self.auxillaryArray = []
             self.tree = KDTree(newData)
 
     def nearestConfig(self, q_rand):
-        _, nearestInTreeIndex = self.tree.query(q_rand, 1)
-        nearestInTree = tuple(self.tree.data[nearestInTreeIndex])
+        _, nearestInTreeIndex = self.tree.query(q_rand.toPrimitive(), 1)
+        nearestInTree = self.primitiveToConfigurationDict[tuple(self.tree.data[nearestInTreeIndex])] 
         nearestInAuxillary, nearestInAuxillaryDistance = self.getNearestFromAuxillary(q_rand)
         if nearestInAuxillary is None:
             nearest = nearestInTree
@@ -64,14 +66,13 @@ class RRTSearcher(object):
         return nearest
 
     def getNearestFromAuxillary(self, q_rand):
-        closestSoFar = None
-        closestDistance = float('inf')
-        for q in self.auxillaryArray:
-            distance = self.helper.distance(q, q_rand)
-            if distance < closestDistance:
-                closestSoFar = q
-                closestDistance = distance
-        return (closestSoFar, closestDistance)
+        if len(self.auxillaryArray) == 0:
+            return None, float('inf')
+        distances = [self.helper.distance(q, q_rand) for q in self.auxillaryArray]
+        qWithMinDistanceIndex =  np.argmin(distances)
+        qWithMinDistance = self.auxillaryArray[qWithMinDistanceIndex]
+        minDistance = distances[qWithMinDistanceIndex]
+        return (qWithMinDistance, minDistance)
 
     def extendToward(self, closest, sample):
         qPrime = self.helper.stepTowards(closest, sample)
@@ -88,11 +89,11 @@ class RRTSearcher(object):
             if len(collisionsToNotIgnore) != 0:
                 for collision in collisionsToNotIgnore:
                     if isinstance(collision, SelfObstacle):
-                        continue
+                        return None
                     currentCollisionCountForObstacle = self.obstacleCollisionCounts.get(collision, 0)
                     self.obstacleCollisionCounts[collision] = currentCollisionCountForObstacle + 1
                 return None
-        return tuple(qPrime)
+        return qPrime
 
     def treeSize(self):
         return len(self.tree.data) + len(self.auxillaryArray)

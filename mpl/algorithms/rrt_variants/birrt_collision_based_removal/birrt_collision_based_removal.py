@@ -112,6 +112,8 @@ class BiRRTCollisionRemovalSearcher(object):
                 continue
             scoreForObstacle = self.obstacleCollisionCounts[obstacle] / float(obstacle.getWeight())
             obstacleRemoveScore.append((scoreForObstacle, obstacle))
+        if len(obstacleRemoveScore) == 0:
+            return
         if self.removalStrategy == 'greedy':
             obstacleToRemove, obstacleToRemoveWeight = self.greedyRemoval(obstacleRemoveScore)
         else:
@@ -174,4 +176,7 @@ class BiRRTCollisionRemovalSearcher(object):
             if obstacle not in self.obstaclesToIgnore:
                 print 'gg'
                 pdb.set_trace()
-        return list(pathCover.cover)
+        if self.useTLPObstacles:
+            return list(pathCover.cover)
+        else:
+            return pathCover.cover

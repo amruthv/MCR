@@ -5,26 +5,28 @@ from mcrGraph import MCRGraph
 from mpl.common.covercalculator import CoverCalculator
 from mpl.common import searcher
 
+from mpl.common.drawing.drawCommon import *
+from mpl.common.drawing.simulator import Simulator
+
 class MCRPlanner():
     # start and goal are both configurations
-    def __init__(self, start, goal, helper, useTLPObstacles, verbose = False, sim = None, shouldDraw = False):
+    def __init__(self, start, goal, helper, useTLPObstacles, verbose = False):
         self.start = start
         self.goal = goal
         self.helper = helper
         self.useTLPObstacles = useTLPObstacles
         self.cc = CoverCalculator(helper, useTLPObstacles)
         self.verbose = verbose
-        self.sim = sim
-        self.shouldDraw = shouldDraw
         self.G = self.initializeGraph()
         self.cameFrom = {}
-        self.colorMap = {0: 'white', 1: 'black', 2: 'red', 3: 'green', 4: 'blue', 5: 'cyan', 6: 'purple', 7: 'yellow', 8 : 'orange'}
-        self.nodeIds = {}
+        self.sim = makeSim(helper.world)
+        drawProblemAndWait(self.sim, helper.robot, helper.world.obstacles, start, goal)
+
 
     def run(self):
         return self.discreteMCR()
 
-    def discreteMCR(self, numIterations = 100, N_raise = 10):
+    def discreteMCR(self, numIterations = 100, N_raise = 20):
         #setup stuff
         startCover = self.cc.cover(self.start)
         goalCover = self.cc.cover(self.goal)
@@ -51,9 +53,13 @@ class MCRPlanner():
                 k += 1
             if k >= s_min:
                 k = s_min - 1
+            if k > 1:
+                k = 1
             if self.verbose and i % N_raise == 0:
                 print 'k = ', k
                 print 's_min', s_min
+                print 'size of G: ', len(G.V)
+                print 'number of neighbors to the goal', len(G.E[self.goal])
             if s_min == best_possible_score:
                 iterCount = i
                 break
@@ -81,26 +87,29 @@ class MCRPlanner():
         graph.setEdgeCover(start, goal, startGoalEdgeCover)
         graph.setTotalVertexCover(start, startCover)
         graph.setTotalVertexCover(goal, startGoalEdgeCover)
-        if self.shouldDraw:
-            startId = self.sim.drawPoint(start)
-            goalId = self.sim.drawPoint(goal)
-            self.nodeIds[start] = startId
-            self.nodeIds[goal] = goalId
         return graph
+
+    def drawProblemWithSampleAndNearest(self, sampleConfig, nearestConfig):
+        self.sim.clearCanvas()
+        # self.sim.drawConfiguration(self.helper.robot, self.start, 'blue')
+        # self.sim.drawConfiguration(self.helper.robot, self.goal, 'blue')
+        self.sim.drawObstacles(self.helper.world.obstacles)
+        self.sim.drawConfiguration(self.helper.robot, nearestConfig, 'purple')
+        self.sim.drawConfiguration(self.helper.robot, sampleConfig, 'orange')
 
     def expandRoadmap(self, G, k):
         sampleConfig = self.helper.sampleConfig(self.goal)
         nearestConfig = self.closest(G,k,sampleConfig)
         q = self.extendToward(G, nearestConfig, sampleConfig, k)
+        self.drawProblemWithSampleAndNearest(sampleConfig, nearestConfig)
+        # raw_input()
         # couldn't find a point to extend towards satisfying k reachability
         if q is None:
+            # pdb.set_trace()
             return
         if q == self.goal:
             return
         if q not in G.V:
-            if self.shouldDraw:
-                qId = self.sim.drawPoint((q[0], q[1]))
-                self.nodeIds[q] = qId
             G.addVertex(q)
             addedEdge = False
             neighborsOfQ = self.neighbors(G, q)
@@ -108,7 +117,7 @@ class MCRPlanner():
             for neighbor in neighborsOfQ:
                 # if its within the extendable distance
                 qq = self.helper.stepTowards(neighbor, q)
-                if all(x-y < 1.0e-6 for x,y in zip(q, qq)):
+                if self.helper.nearEqual(q, qq):
                 # if self.helper.stepTowards(neighbor, q) == q: # and totalCover.score <= k:
                     addedEdge = True
                     G.addEdge(neighbor, q)
@@ -218,7 +227,10 @@ class MCRPlanner():
     def getCover(self):
         return list(self.G.getTotalVertexCover(self.goal).cover)
 
-    def updateColors(self):
-        for node in self.G.V:
-            coverScore = self.G.getTotalVertexCover(node).score
-            self.sim.changePointFill(self.nodeIds[node], self.colorMap[coverScore])
+
+    def drawInBetweenPath(self, nearestConfig, sampleConfig):
+        qPrime = self.helper.stepTowards(nearestConfig, sampleConfig)
+        for config in self.helper.generateInBetweenConfigs(nearestConfig, sampleConfig):
+            self.sim.clearCanvas()
+            self.sim.drawObstacles(self.helper.world.obstacles)
+            self.sim.drawConfiguration(self.helper.robot, config, 'blue')
