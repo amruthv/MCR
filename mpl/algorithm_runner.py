@@ -37,7 +37,7 @@ def runAlgorithm(start, goal, helper, algorithmNumber, useTLPObstacles = False):
         algorithm = birrt_ignore_all.BiRRTIgnoreObstaclesSearcher(start, goal, helper, useTLPObstacles = useTLPObstacles)
     elif algorithmNumber == 7:
         print 'using birrt collision removal repeat'
-        algorithm = collision_based_removal_repeat.RepetitiveCollisionRemovalSearcher(start, goal, helper, useTLPObstacles = useTLPObstacles, removalStrategy = 'greedy')
+        algorithm = collision_based_removal_repeat.RepetitiveCollisionRemovalSearcher(start, goal, helper, useTLPObstacles = useTLPObstacles, removalStrategy = 'not greedy')
     else:
         raise Exception("Unexpected algorithm")
     
