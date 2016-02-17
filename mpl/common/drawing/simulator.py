@@ -1,5 +1,4 @@
 import pdb
-import packagehelper
 from mpl.common.movableLinkRobot import MovableLinkRobot
 
 class Simulator():
