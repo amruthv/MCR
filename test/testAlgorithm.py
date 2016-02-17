@@ -6,7 +6,7 @@ from mpl.common.movableLinkRobotWithObject import MovableLinkRobotWithObject
 from mpl.common.movableLinkRobot import MovableLinkRobot
 
 from mpl import algorithm_runner
-from mpl.common.simplemcrhelper import SimpleMCRHelper
+from mpl.common.MPLHelper import MPLHelper
 import math
 
 pi = math.pi
@@ -27,7 +27,7 @@ goal = (300, 300, 0, piOver2, -piOver2)
 # drawProblemAndWait(sim, linkRobot, obstacles, start, goal)
 # linkRobotWithObject = MovableLinkRobotWithObject(links, heldObject, world)
 # drawProblemAndWait(sim, linkRobotWithObject, obstacles, start, goal)
-# helper = SimpleMCRHelper(linkRobot, world, goal, 50)
+# helper = MPLHelper(linkRobot, world, goal, 50)
 
 # path, cover = algorithm_runner.runAlgorithm(start, goal, helper, 5, useTLPObstacles = False)
 
@@ -52,9 +52,9 @@ def holdingObstacleLinkRobot():
     links.append([0, [(130,50), (170,50), (170,70), (130,70)]])
     heldObject = []
     heldObject.append([(170,50), (250,50), (250, 100), (170, 100)])
-    # heldObject.append([(250,50), (350,50), (350, 100), (250, 100)])
-    start = (50,50, 0, 0, 0)
-    goal = (300, 300, 0, piOver2, 0)
+    heldObject.append([(350,50), (450,50), (450, 100), (350, 100)])
+    start = (50,50, 0, piOver2, 0)
+    goal = (100, 250, 0, piOver2, -piOver2)
     linkRobotWithObject = MovableLinkRobotWithObject(links, heldObject, world)
     drawProblemAndWait(sim, linkRobotWithObject, obstacles, start, goal)
 

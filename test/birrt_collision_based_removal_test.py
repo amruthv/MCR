@@ -9,7 +9,7 @@ from mpl.algorithms.rrt_variants.birrt_collision_based_removal.birrt_collision_b
 from mpl.common import searcher
 from mpl.common import movableLinkRobot
 from mpl.common.world import World, SimpleObstacle
-from mpl.common.simplemcrhelper import SimpleMCRHelper
+from mpl.common.MPLHelper import MPLHelper
 
 pi = math.pi
 piOver2 = math.pi / 2
@@ -23,7 +23,7 @@ def testOneObstacleMiddle():
     start = (50,50, 0, 0, 0)
     goal = (320, 50, 0, piOver2, -piOver2)
     linkRobot = movableLinkRobot.MovableLinkRobot(links, world)
-    helper = SimpleMCRHelper(linkRobot, world, goal, 50)
+    helper = MPLHelper(linkRobot, world, goal, 50)
     birrt = BiRRTCollisionRemovalSearcher(start, goal, helper, False)
     
     sim = makeSim(world)
@@ -46,7 +46,7 @@ def testManyObstacles(verbose = False):
     start = (20,200, 0, 0, 0)
     goal = (450, 360, 0, piOver2, piOver2)
     linkRobot = movableLinkRobot.MovableLinkRobot(links, world)
-    helper = SimpleMCRHelper(linkRobot, world, goal, 50)
+    helper = MPLHelper(linkRobot, world, goal, 50)
     sim = makeSim(world)
 
     birrt = BiRRTCollisionRemovalSearcher(start, goal, helper, useTLPObstacles = False, removalStrategy = 'greedy')

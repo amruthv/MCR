@@ -5,22 +5,23 @@ import packagehelper
 import math
 from Tkinter import *
 from mpl import algorithm_runner
-from mpl.common.simplemcrhelper import SimpleMCRHelper
+from mpl.common.MPLHelper import MPLHelper
 from mpl.common.world import World, SimpleObstacle
-from mpl.common.movableLinkRobot import MovableLinkRobot
+from mpl.common.movableLinkRobotWithObject import MovableLinkRobotWithObject
 
 pi = math.pi
 piOver2 = math.pi / 2
-
-world, obstacles = getManySmallObstaclesWorld()
-links = []
-links.append([0, [(50,50), (90,50), (90,70), (50,70)]])
-links.append([0, [(90,50), (130,50), (130,70), (90,70)]])
-links.append([0, [(130,50), (170,50), (170,70), (130,70)]])
-start = (50,50, 0, 0, 0)
-goal = (300, 300, 0, piOver2, -piOver2)
-linkRobot = MovableLinkRobot(links, world)
-mcrhelper = SimpleMCRHelper(linkRobot, world, goal, 50)
-
+world, obstacles = get2DHandleAndCansWorld()
 sim = makeSim(world)
-drawProblemAndWait(sim, linkRobot,obstacles, start, goal)
+links = []
+links.append([0, [(205,225), (280,225), (280,275), (205,275)]])
+links.append([0, [(280,225), (355,225), (355,275), (280,275)]])
+links.append([0, [(355,225), (430,225), (430,275), (355,275)]])
+heldObject = []
+heldObject.append([(430, 150), (480, 150), (480, 350), (430, 350)])
+start = (205,225, 0, 0, 0)
+goal = (50, 50, 0, piOver2, -piOver2)
+robot = MovableLinkRobotWithObject(links, heldObject, world)
+helper = MPLHelper(robot, world, goal, 50)
+drawProblemAndWait(sim, robot, obstacles, start, goal)
+helper.collisionsAtQ(start)

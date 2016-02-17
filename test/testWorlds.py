@@ -56,3 +56,13 @@ def getManySmallObstaclesWorld():
                 obstacle7, obstacle8, obstacle9]
     world = World(500,500, obstacles)
     return world, obstacles
+
+
+def get2DHandleAndCansWorld():
+    sodaTop = SimpleObstacle("soda top", [(340, 300), (400, 300), (400, 350), (340, 350)], 1)
+    sodaBot = SimpleObstacle("soda bot", [(300, 120), (400, 120), (400, 200), (300, 200)], 10)
+    obstacles = [sodaTop, sodaBot]
+    world = World(500, 500, obstacles)
+    return world, obstacles
+
+

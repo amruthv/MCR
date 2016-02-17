@@ -6,7 +6,7 @@ import math
 from mpl.common import searcher
 from mpl.common.movableLinkRobot import MovableLinkRobot
 from mpl.algorithms.rrt_variants.birrt_ignore_start_goal_obstacles.birrt_ignore_obstacles import BiRRTIgnoreObstacleSearcher
-from mpl.common.simplemcrhelper import SimpleMCRHelper
+from mpl.common.MPLHelper import MPLHelper
 
 pi = math.pi
 piOver2 = math.pi / 2
@@ -22,7 +22,7 @@ def testOneObstacleMiddle():
     goal = (320, 50, 0, piOver2, -piOver2)
     linkRobot = MovableLinkRobot(links, world)
 
-    helper = SimpleMCRHelper(linkRobot, world, goal, 50)
+    helper = MPLHelper(linkRobot, world, goal, 50)
     birrt = BiRRTIgnoreObstacleSearcher(start, goal, helper)
 
     sim = makeSim(world)

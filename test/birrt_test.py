@@ -7,7 +7,7 @@ from Tkinter import *
 from mpl.common import searcher
 from mpl.algorithms.rrt_variants.birrt.new_birrt import BiRRTSearcher
 from mpl.common.movableLinkRobot import MovableLinkRobot
-from mpl.common.simplemcrhelper import SimpleMCRHelper
+from mpl.common.MPLHelper import MPLHelper
 
 pi = math.pi
 piOver2 = math.pi / 2
@@ -23,7 +23,7 @@ def testOneObstacleMiddle():
     goal = (320, 50, 0, piOver2, -piOver2)
     linkRobot = MovableLinkRobot(links, world)
 
-    helper = SimpleMCRHelper(linkRobot, world, goal, 50)
+    helper = MPLHelper(linkRobot, world, goal, 50)
     birrt = BiRRTSearcher(start, goal, helper)
     
     sim = makeSim(world)
