@@ -49,3 +49,12 @@ class SimpleObstacle(Obstacle):
         return "({0}, weight: {1})".format(self.name, self.weight)
     def __repr__(self):
         return self.__str__()
+
+class SelfObstacle(Obstacle):
+    def __init__(self):
+        pass    
+    def getName(self):
+        return 'self'
+
+    def getWeight(self):
+        return float('inf')
