@@ -84,4 +84,4 @@ class BiRRTIgnoreObstaclesSearcher(object):
         if self.useTLPObstacles:
             return list(pathCover.cover)
         else:
-            return pathCover
+            return pathCover.cover

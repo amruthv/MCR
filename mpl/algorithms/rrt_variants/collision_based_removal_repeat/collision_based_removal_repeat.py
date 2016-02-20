@@ -36,11 +36,12 @@ class RepetitiveCollisionRemovalSearcher(object):
                     bestPath = iterationPath
                     bestCover = coverObj
         self.bestPath = bestPath
-        self.bestCover = bestCover
         if self.bestPath == []:
-            self.bestCover = cover.Cover(set(), self.useTLPObstacles)
+            self.bestCover = set()
             return False
-        return True
+        else:
+            self.bestCover = bestCover.cover
+            return True
 
     def getPath(self):
         return self.bestPath
