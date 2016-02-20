@@ -90,4 +90,3 @@ class Simulator():
             self.drawObstacles(obstacles)
             robot.moveToConfiguration(q)
             self.drawRobot(robot)
-            raw_input()

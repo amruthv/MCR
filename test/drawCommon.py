@@ -16,8 +16,17 @@ def drawRobotStartGoalObstacles(sim, robot, obstacles, start, goal):
     sim.drawRobot(robot)
     robot.moveToConfiguration(goal)
     sim.drawRobot(robot)
-    sim.drawPoint((start[0], start[1]), fill = 'green')
-    sim.drawPoint((goal[0], goal[1]), fill = 'blue')
+    sim.drawPoint(start.cartesianParameters, fill = 'green')
+    sim.drawPoint(goal.cartesianParameters, fill = 'blue')
+
+def drawPath(sim, obstacles, robot, path):
+    while True:
+        prompt = raw_input("Draw Path? y/n")
+        if prompt == 'y':
+            sim.drawPath(obstacles, robot, path)
+        elif prompt == 'n':
+            return
+
 
 
 def drawProblemAndWait(sim, robot, obstacles, start, goal):
