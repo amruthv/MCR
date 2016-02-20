@@ -1,3 +1,5 @@
+from shapely.geometry import Polygon
+
 class BBox():
     #points is [(x,y), (x1,y1),...]
     def __init__(self, points):
@@ -8,9 +10,9 @@ class BBox():
         self.maxX = max(xs)
         self.minY = min(ys)
         self.maxY = max(ys)
+        self.bboxCorners = [(self.minX, self.minY), (self.minX, self.maxY), (self.maxX, self.minY), (self.maxX, self.maxY)]
 
     def intersectsBBox(self, other):
-        for pt in self.points:
-            if other.minX < pt[0] < other.maxX and other.minY < pt[1] < other.maxY:
-                return True
-        return False
+        selfPolygon = Polygon(self.bboxCorners)
+        otherPolygon = Polygon(other.bboxCorners)
+        return selfPolygon.overlaps(otherPolygon)

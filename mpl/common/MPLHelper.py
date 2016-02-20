@@ -12,7 +12,6 @@ class MPLHelper(MCRHelper):
         self.robot = robot
         self.world = world
         self.goal = goal
-        self.useBBoxChecker = True
         self.stepSize = stepSize
 
     def collisionsAtQ(self, q):
@@ -31,42 +30,6 @@ class MPLHelper(MCRHelper):
     # makes the same configurations when rotating either direction for better or worse
     def generateInBetweenConfigs(self, q_from, q_to):
         return Configuration.generateInBetweenConfigurations(q_from, q_to)
-
-    #inputs are -pi to pi
-    def angleGenerator(self, q_from, q_to, stepsToCheck):
-        # different sign
-        if q_from * q_to < 0:
-            if q_from < 0:
-                negativeAngle = q_from
-                positiveAngle = q_to
-            else:
-                negativeAngle = q_to
-                positiveAngle = q_from
-            twoPiShiftedNegativeAngle = negativeAngle + 2 * math.pi
-            assert(positiveAngle - negativeAngle > 0)
-            assert(twoPiShiftedNegativeAngle - positiveAngle > 0)
-            if (negativeAngle - positiveAngle) > (twoPiShiftedNegativeAngle - positiveAngle):
-                # we should use the addition of 2pi
-                if positiveAngle == q_from:
-                    qFrom = positiveAngle
-                    qTo = twoPiShiftedNegativeAngle
-                else:
-                    qFrom = twoPiShiftedNegativeAngle
-                    qTo = positiveAngle
-                return normalInterpolateGenerator(qFrom, qTo, True)
-        return normalInterpolateGenerator(q_from, q_to, False)
-
-    # assumes that q_from and q_to are singular scalars
-    def normalInterpolateGenerator(self, q_from, q_to, needsAngleAdjustment = False):
-        q_from_np = np.array([q_from])
-        q_to_np = np.array([q_to])
-        q_delta = q_to_np - q_from_np
-        for i in range(0, stepsToCheck + 1):
-            q = q_from_np + q_delta * float(i) / stepsToCheck
-            if needsAngleAdjustment and q > math.pi:
-                yield q - 2 * math.pi
-            yield q
-
 
     def distance(self, q1, q2):
         return self.robot.distance(q1, q2)
