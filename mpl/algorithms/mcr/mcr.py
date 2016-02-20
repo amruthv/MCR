@@ -19,14 +19,14 @@ class MCRPlanner():
         self.verbose = verbose
         self.G = self.initializeGraph()
         self.cameFrom = {}
-        self.sim = makeSim(helper.world)
-        drawProblemAndWait(self.sim, helper.robot, helper.world.obstacles, start, goal)
+        # self.sim = makeSim(helper.world)
+        # drawProblemAndWait(self.sim, helper.robot, helper.world.obstacles, start, goal)
 
 
     def run(self):
         return self.discreteMCR()
 
-    def discreteMCR(self, numIterations = 100, N_raise = 20):
+    def discreteMCR(self, N_raise = 20):
         #setup stuff
         startCover = self.cc.cover(self.start)
         goalCover = self.cc.cover(self.goal)
@@ -39,9 +39,7 @@ class MCRPlanner():
             print 'initial s_min', s_min
             print 'initial k =', k 
         G = self.G
-        print 'original s_min', s_min
-        iterCount = numIterations
-        for i in range(numIterations):
+        for i in range(N_raise * (s_min + 1)):
             self.expandRoadmap(G, k)
             self.cameFrom = self.computeMinExplanations(G)
             s_min = G.getTotalVertexCover(self.goal).score
@@ -53,22 +51,19 @@ class MCRPlanner():
                 k += 1
             if k >= s_min:
                 k = s_min - 1
-            if k > 1:
-                k = 1
             if self.verbose and i % N_raise == 0:
                 print 'k = ', k
                 print 's_min', s_min
                 print 'size of G: ', len(G.V)
                 print 'number of neighbors to the goal', len(G.E[self.goal])
             if s_min == best_possible_score:
-                iterCount = i
                 break
         if self.verbose:
             if s_min == best_possible_score:
                 print 'Got best path possible with score', s_min
             else:
                 print 'Got subpar path of score {0} when best score possible is {1}'.format(s_min, best_possible_score)
-            print "took {0} iterations".format(iterCount)
+            print "took {0} iterations".format(i)
             print 'size of G: ', len(G.V)
         return s_min
 
@@ -101,7 +96,7 @@ class MCRPlanner():
         sampleConfig = self.helper.sampleConfig(self.goal)
         nearestConfig = self.closest(G,k,sampleConfig)
         q = self.extendToward(G, nearestConfig, sampleConfig, k)
-        self.drawProblemWithSampleAndNearest(sampleConfig, nearestConfig)
+        # self.drawProblemWithSampleAndNearest(sampleConfig, nearestConfig)
         # raw_input()
         # couldn't find a point to extend towards satisfying k reachability
         if q is None:
@@ -111,6 +106,7 @@ class MCRPlanner():
             return
         if q not in G.V:
             G.addVertex(q)
+            # self.drawCartesianPoint(q)
             addedEdge = False
             neighborsOfQ = self.neighbors(G, q)
             neighborsOfQ = [qq for qq in neighborsOfQ if qq != q]
@@ -121,6 +117,9 @@ class MCRPlanner():
                 # if self.helper.stepTowards(neighbor, q) == q: # and totalCover.score <= k:
                     addedEdge = True
                     G.addEdge(neighbor, q)
+                # else:
+                #     if neighbor == self.goal:
+                #         pdb.set_trace()
             try:
                 assert(addedEdge == True) # should be true since the closestEdge should be within distance of stepSize
             except:
@@ -226,6 +225,10 @@ class MCRPlanner():
 
     def getCover(self):
         return list(self.G.getTotalVertexCover(self.goal).cover)
+
+
+    def drawCartesianPoint(self, q):
+        self.sim.drawPoint(q.cartesianParameters)
 
 
     def drawInBetweenPath(self, nearestConfig, sampleConfig):
