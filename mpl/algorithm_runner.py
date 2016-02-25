@@ -30,7 +30,7 @@ def runAlgorithm(start, goal, helper, algorithmNumber, useTLPObstacles = False):
         print 'using collision removal birrt greedy'
         algorithm = birrt_collision.BiRRTCollisionRemovalSearcher(start, goal, helper, useTLPObstacles = useTLPObstacles, removalStrategy = 'greedy')
     elif algorithmNumber == 5:
-        print 'using collision removal birrt not greedy'
+        print 'using collision removal birrt probabilistic'
         algorithm = birrt_collision.BiRRTCollisionRemovalSearcher(start, goal, helper, useTLPObstacles = useTLPObstacles, removalStrategy = 'not greedy')
     elif algorithmNumber == 6:
         print 'using ignore all non-permanent obstacles birrt'

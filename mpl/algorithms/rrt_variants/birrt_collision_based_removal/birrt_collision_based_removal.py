@@ -62,14 +62,11 @@ class BiRRTCollisionRemovalSearcher(object):
 
     def selectObstacleToRemove(self, memoryFactor):
         if self.useTLPObstacles:
-            # print 'using tlp obstacles'
             self.removeTLPObstacle(memoryFactor)
         else:
-            # print 'not using tlp obstacles'
             self.removeNonTLPObstacle(memoryFactor)
 
     def removeTLPObstacle(self, memoryFactor):
-        print self.obstacleCollisionCounts
         obstacleRemoveScore = []
         for obstacle in self.obstacleCollisionCounts:
             # don't want to remove a immovable obstacle
@@ -91,7 +88,6 @@ class BiRRTCollisionRemovalSearcher(object):
         assert(obstacleToRemove not in self.obstaclesToIgnore)
         self.obstaclesToIgnore.add(obstacleToRemove)
         self.deletedObstacles[obstacleToRemove] = obstacleToRemoveWeight
-        print 'removing obstacle', obstacleToRemove
         del self.obstacleCollisionCounts[obstacleToRemove]
         if isObstacle:
             companionShadow = tlpObstacles.getShadowFromObstacle(obstacleToRemove)
@@ -104,9 +100,7 @@ class BiRRTCollisionRemovalSearcher(object):
             self.obstacleCollisionCounts[obstacle] *= memoryFactor
 
     def removeNonTLPObstacle(self, memoryFactor):
-        # print 'REMOVING AN OBSTACLE'
         obstacleRemoveScore = []
-        print 'collision counts', self.obstacleCollisionCounts
         for obstacle in self.obstacleCollisionCounts:
             if obstacle.getWeight() == float('inf'):
                 continue

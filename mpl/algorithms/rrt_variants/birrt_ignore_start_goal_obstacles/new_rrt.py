@@ -33,7 +33,6 @@ class RRTSearcher(object):
 
     def rebuildTreeIfNecessary(self):
         if len(self.auxillaryArray) > self.auxillaryArrayThreshold:
-            print 'here'
             auxillaryAsPrimitive = [q.toPrimitive() for q in self.auxillaryArray]
             newData = np.vstack([self.tree.data, auxillaryAsPrimitive])
             self.auxillaryArray = []

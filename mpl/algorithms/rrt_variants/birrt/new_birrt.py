@@ -70,7 +70,6 @@ class BiRRTSearcher(object):
         for i in range(len(pathToReturn) - 1):
             for config in self.helper.generateInBetweenConfigs(pathToReturn[i], pathToReturn[i+1]):
                 collisions = self.helper.collisionsAtQ(config)
-                # print 'coll', collisions
                 if len(collisions) != 0:
                     print 'somehow had collisions when there should be none'
                     pdb.set_trace()
