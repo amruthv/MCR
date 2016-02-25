@@ -172,8 +172,8 @@ class MovableLinkRobotWithObject(Robot):
 
     def distance(self, q1, q2):
         # return self.angleDiscount(q1, q2)
-        # return self.forwardKinDistance(q1, q2)
-        return self.l2Norm(q1.cartesianParameters + q1.angleParameters, q2.cartesianParameters + q2.angleParameters)
+        return self.forwardKinDistance(q1, q2)
+        # return self.l2Norm(q1.cartesianParameters + q1.angleParameters, q2.cartesianParameters + q2.angleParameters)
 
     def forwardKinDistance(self, q1, q2):
         self.moveToConfiguration(q1)

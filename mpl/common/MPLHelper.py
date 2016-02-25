@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import math
+import pdb
 
 from mcrhelper import MCRHelper
 from shapely.geometry import Polygon
@@ -42,15 +43,19 @@ class MPLHelper(MCRHelper):
         if stepSize is None:
             stepSize = self.stepSize
         dist = self.distance(qFrom, qTo)
-        if dist < self.stepSize:
+        if dist < stepSize:
             return qTo
-        else:
-            scaleFactor = float(self.stepSize) / self.distance(qFrom, qTo)
+        bisectionCount = 0
+        while True:
+            bisectionCount += 1
             npQFromCartesian = np.array(qFrom.cartesianParameters)
             npQToCartesian = np.array(qTo.cartesianParameters)
             npQFromAngle = np.array(qFrom.angleParameters)
             npQToAngle = np.array(qTo.angleParameters)
-            qPrimeCartesian = npQFromCartesian + scaleFactor * (npQToCartesian - npQFromCartesian)
-            qPrimeAngle = npQFromAngle + scaleFactor * (npQToAngle- npQFromAngle)
+            qPrimeCartesian = npQFromCartesian + 0.5 * (npQToCartesian - npQFromCartesian)
+            qPrimeAngle = npQFromAngle + 0.5 * (npQToAngle- npQFromAngle)
             qPrime = Configuration(list(qPrimeCartesian), list(qPrimeAngle))
-            return qPrime
+            if self.distance(qFrom, qPrime) < stepSize:
+                # print 'bisected {0} times'.format(bisectionCount)
+                return qPrime
+            qTo = qPrime
