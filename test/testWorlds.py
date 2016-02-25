@@ -65,4 +65,27 @@ def get2DHandleAndCansWorld():
     world = World(500, 500, obstacles)
     return world, obstacles
 
+def get2DHandleAndClutteredWorld():
+    sodaTop = SimpleObstacle("soda top", [(340, 300), (400, 300), (400, 350), (340, 350)], 1)
+    sodaBot = SimpleObstacle("soda bot", [(300, 120), (400, 120), (400, 200), (300, 200)], 10)
+    heavyBlock = SimpleObstacle("heavy block", [(130, 290), (250,290), (250, 400), (130, 400)], 20)
+    longLightBlock = SimpleObstacle("long light", [(50, 250), (80,250), (80, 425), (50, 425)], 5)
+    massiveBlock = SimpleObstacle("massive block", [(420, 0), (500,0), (500, 130), (420, 130)], 50)
+    triangleBlock = SimpleObstacle("triangle", [(190, 30), (260, 30), (225, 150)], 3)
+    smallBlock = SimpleObstacle("small block", [(120, 160), (230, 160), (230, 200), (120, 200)], 2)
+    obstacles = [sodaTop, sodaBot, heavyBlock, longLightBlock, massiveBlock, triangleBlock, smallBlock]
+    world = World(500, 500, obstacles)
+    return world, obstacles
+
+def get2DHandleAndTopLightClutteredWorld():
+    sodaTop = SimpleObstacle("soda top", [(340, 300), (400, 300), (400, 350), (340, 350)], 4)
+    sodaBot = SimpleObstacle("soda bot", [(300, 120), (400, 120), (400, 200), (300, 200)], 10)
+    heavyBlock = SimpleObstacle("heavy block", [(130, 290), (250,290), (250, 400), (130, 400)], 5)
+    longLightBlock = SimpleObstacle("long light", [(50, 250), (80,250), (80, 425), (50, 425)], 5)
+    massiveBlock = SimpleObstacle("massive block", [(420, 0), (500,0), (500, 130), (420, 130)], 50)
+    triangleBlock = SimpleObstacle("triangle", [(190, 30), (260, 30), (225, 150)], 10)
+    smallBlock = SimpleObstacle("small block", [(210, 160), (280, 160), (280, 200), (210, 200)], 10)
+    obstacles = [sodaTop, sodaBot, heavyBlock, longLightBlock, massiveBlock, triangleBlock, smallBlock]
+    world = World(500, 500, obstacles)
+    return world, obstacles
 
