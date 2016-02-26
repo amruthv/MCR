@@ -39,7 +39,9 @@ class MCRPlanner():
             print 'initial s_min', s_min
             print 'initial k =', k 
         G = self.G
-        for i in range(N_raise * (s_min + 1)):
+        i = 0
+        while i < (N_raise * (s_min + 1)):
+            print 'i=', i
             self.expandRoadmap(G, k)
             self.cameFrom = self.computeMinExplanations(G)
             s_min = G.getTotalVertexCover(self.goal).score
@@ -58,6 +60,7 @@ class MCRPlanner():
                 print 'number of neighbors to the goal', len(G.E[self.goal])
             if s_min == best_possible_score:
                 break
+            i += 1
         if self.verbose:
             if s_min == best_possible_score:
                 print 'Got best path possible with score', s_min

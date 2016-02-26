@@ -19,6 +19,7 @@ algorithmNumberToStrategyMap = {0: 'MCR', 1: 'RRT', 2: 'BiRRT', 3: 'BiRRT ignore
 
 draw = True
 numTimesToRunEach = 10
+stepSize = 1150
 pi = math.pi
 piOver2 = math.pi / 2
 def runAllOnTwoSoda():
@@ -32,7 +33,7 @@ def runAllOnTwoSoda():
     start = Configuration([205,225], [0, 0, 0])
     goal = Configuration([50, 50], [0, piOver2, -piOver2])
     robot = MovableLinkRobotWithObject(links, heldObject, world)
-    helper = MPLHelper(robot, world, goal, 75)
+    helper = MPLHelper(robot, world, goal, stepSize)
     testResults = runAlgorithms(start, goal, helper, robot, world)    
     writeTestResults('TwoSodaHandle', testResults, robot)
 
@@ -47,7 +48,7 @@ def runAllOnClutteredWorld():
     start = Configuration([205,225], [0, 0, 0])
     goal = Configuration([70, 0], [piOver2, 0, -piOver2])
     robot = MovableLinkRobotWithObject(links, heldObject, world)
-    helper = MPLHelper(robot, world, goal, 250)
+    helper = MPLHelper(robot, world, goal, stepSize)
     testResults = runAlgorithms(start, goal, helper, robot, world)    
     writeTestResults('ClutteredWorld', testResults, robot)
 
@@ -62,7 +63,7 @@ def runAllOnTopLightClutteredWorld():
     start = Configuration([205,225], [0, 0, 0])
     goal = Configuration([70, 0], [piOver2, 0, -piOver2])
     robot = MovableLinkRobotWithObject(links, heldObject, world)
-    helper = MPLHelper(robot, world, goal, 75)
+    helper = MPLHelper(robot, world, goal, stepSize)
     testResults = runAlgorithms(start, goal, helper, robot, world)    
     # writeTestResults('TopLightClutteredWorld', testResults, robot)
 
