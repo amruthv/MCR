@@ -1,4 +1,5 @@
 from shapely.geometry import Polygon
+import pdb
 
 class BBox():
     #points is [(x,y), (x1,y1),...]
@@ -10,9 +11,13 @@ class BBox():
         self.maxX = max(xs)
         self.minY = min(ys)
         self.maxY = max(ys)
-        self.bboxCorners = [(self.minX, self.minY), (self.minX, self.maxY), (self.maxX, self.minY), (self.maxX, self.maxY)]
+        self.bboxCorners = [(self.minX, self.minY), (self.maxX, self.minY), (self.maxX, self.maxY), (self.minX, self.maxY)]
 
     def intersectsBBox(self, other):
         selfPolygon = Polygon(self.bboxCorners)
         otherPolygon = Polygon(other.bboxCorners)
-        return selfPolygon.overlaps(otherPolygon)
+        overlaps = selfPolygon.overlaps(otherPolygon)
+        intersects = selfPolygon.intersects(otherPolygon)
+        if overlaps and not intersects:
+            pdb.set_trace()
+        return intersects or overlaps

@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import random
+import pdb
 
 class Configuration():
     def __init__(self, cartesianParameters, angleParameters):
@@ -42,7 +43,7 @@ class Configuration():
         q_to_angles = q_to.angleParameters
         for i in range(len(q_from_angles)):
             angleGenerators.append(Configuration.angleGenerator(q_from_angles[i], q_to_angles[i], stepsToCheck))
-        for i in range(stepsToCheck):
+        for i in range(stepsToCheck + 1):
             nextCartesianParams = [g.next() for g in cartesianGenerators]
             nextAngleParams = [g.next() for g in angleGenerators]
             yield Configuration(nextCartesianParams, nextAngleParams)
@@ -79,4 +80,5 @@ class Configuration():
             q = q_from + q_delta * float(i) / stepsToCheck
             if needsAngleAdjustment and q > math.pi:
                 yield q - 2 * math.pi
-            yield q
+            else:
+                yield q
