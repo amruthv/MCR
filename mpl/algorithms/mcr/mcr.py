@@ -40,8 +40,7 @@ class MCRPlanner():
             print 'initial k =', k 
         G = self.G
         i = 0
-        while i < (N_raise * (s_min + 1)):
-            print 'i=', i
+        while i < (N_raise * (s_min + 5)):
             self.expandRoadmap(G, k)
             self.cameFrom = self.computeMinExplanations(G)
             s_min = G.getTotalVertexCover(self.goal).score

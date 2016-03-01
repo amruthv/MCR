@@ -21,7 +21,7 @@ def drawRobotStartGoalObstacles(sim, robot, obstacles, start, goal):
 
 def drawPath(sim, obstacles, robot, path):
     while True:
-        prompt = raw_input("Draw Path? y/n")
+        prompt = raw_input("Draw Path? y/n: ")
         if prompt == 'y':
             sim.drawPath(obstacles, robot, path)
         elif prompt == 'n':
