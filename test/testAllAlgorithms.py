@@ -185,8 +185,7 @@ def computeLengthOfPath(path, robot):
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        arg = sys.argv[1]
-        print 'arg=', arg
+        arg = int(sys.argv[1])
         if arg == 0:
             runAllOnEmptyWorld()
         elif arg == 1:
