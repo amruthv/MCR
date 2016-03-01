@@ -7,11 +7,11 @@ def getEmptyWorld():
     world = World(500, 500, obstacles)
     return world, obstacles
 
-def getWorldMiddleObstacle():
-    obstacle1 = SimpleObstacle("obs1", [(200,20), (300,20), (300,150), (200,150)])
-    obstacles = [] 
-    obstacles = [obstacle1]
-    world = World(500,350, obstacles)
+def getWorldWithFeasible():
+    obstacle1 = SimpleObstacle("obs1", [(270,20), (370,20), (370,150), (270,150)],10)
+    obstacle2 = SimpleObstacle("obs2", [(100, 350), (175,350), (175, 450), (100, 450)])
+    obstacles = [obstacle1, obstacle2]
+    world = World(500,500, obstacles)
     return world, obstacles
 
 def getManyObstaclesWorld():
@@ -88,4 +88,11 @@ def get2DHandleAndTopLightClutteredWorld():
     obstacles = [sodaTop, sodaBot, heavyBlock, longLightBlock, massiveBlock, triangleBlock, smallBlock]
     world = World(500, 500, obstacles)
     return world, obstacles
+
+
+def getTest():
+    robotBBox = SimpleObstacle("robot", [(41.389077013869496, 175.05698777063566), (246.69113553220637, 175.05698777063566), (246.69113553220637, 477.52548308292057), (41.389077013869496, 477.52548308292057)])
+    obstacleBBox = SimpleObstacle("obstacle", [(100, 350), (175, 350), (175, 450), (100, 450)])
+    obstacles = [robotBBox, obstacleBBox]
+    return World(500, 500, obstacles), obstacles
 

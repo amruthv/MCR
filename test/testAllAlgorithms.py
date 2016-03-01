@@ -1,6 +1,7 @@
 import math
 import time
 import pdb
+import sys
 
 from testWorlds import *
 from drawCommon import makeSim, drawProblemAndWait, drawPath
@@ -17,11 +18,43 @@ from mpl.common.configuration import Configuration
 algorithmNumberToStrategyMap = {0: 'MCR', 1: 'RRT', 2: 'BiRRT', 3: 'BiRRT ignore start and goal', 4: 'collision removal greedy', 5: 'collision removal probabilistic',
                                     6: 'ignore all non-permanent non-self', 7: 'collision removal repeat not greedy'}
 
-draw = True
-numTimesToRunEach = 10
+draw = False
+numTimesToRunEach = 20
 stepSize = 1150
 pi = math.pi
 piOver2 = math.pi / 2
+
+
+def runAllOnEmptyWorld():
+    world, obstacles = getEmptyWorld()
+    links = []
+    links.append([0, [(205,225), (280,225), (280,275), (205,275)]])
+    links.append([0, [(280,225), (355,225), (355,275), (280,275)]])
+    links.append([0, [(355,225), (430,225), (430,275), (355,275)]])
+    heldObject = []
+    heldObject.append([(430, 150), (480, 150), (480, 350), (430, 350)])
+    start = Configuration([205,225], [0, 0, 0])
+    goal = Configuration([50, 50], [0, piOver2, -piOver2])
+    robot = MovableLinkRobotWithObject(links, heldObject, world)
+    helper = MPLHelper(robot, world, goal, stepSize)
+    testResults = runAlgorithms(start, goal, helper, robot, world)   
+    writeTestResults('EmptyWorld', testResults, robot)
+
+def runAllOnSomeObstaclesFeasibleWorld():
+    world, obstacles = getWorldWithFeasible()
+    links = []
+    links.append([0, [(205,225), (280,225), (280,275), (205,275)]])
+    links.append([0, [(280,225), (355,225), (355,275), (280,275)]])
+    links.append([0, [(355,225), (430,225), (430,275), (355,275)]])
+    heldObject = []
+    heldObject.append([(430, 150), (480, 150), (480, 350), (430, 350)])
+    start = Configuration([205,225], [0, 0, 0])
+    goal = Configuration([50, 50], [0, piOver2, -piOver2])
+    robot = MovableLinkRobotWithObject(links, heldObject, world)
+    helper = MPLHelper(robot, world, goal, stepSize)
+    testResults = runAlgorithms(start, goal, helper, robot, world)    
+    writeTestResults('SomeObstaclesFeasibleWorld', testResults, robot)
+
 def runAllOnTwoSoda():
     world, obstacles = get2DHandleAndCansWorld()
     links = []
@@ -65,7 +98,7 @@ def runAllOnTopLightClutteredWorld():
     robot = MovableLinkRobotWithObject(links, heldObject, world)
     helper = MPLHelper(robot, world, goal, stepSize)
     testResults = runAlgorithms(start, goal, helper, robot, world)    
-    # writeTestResults('TopLightClutteredWorld', testResults, robot)
+    writeTestResults('TopLightClutteredWorld', testResults, robot)
 
 def runAlgorithms(start, goal, helper, robot, world):
     testResults = {}
@@ -73,7 +106,7 @@ def runAlgorithms(start, goal, helper, robot, world):
     if draw:
         sim = makeSim(world)
         drawProblemAndWait(sim, robot, obstacles, start, goal)
-    for algorithmNumber in range(1):
+    for algorithmNumber in range(8):
         algorithmSuccessCount = 0.
         computationTime = 0.
         pathCost = 0.
@@ -84,15 +117,20 @@ def runAlgorithms(start, goal, helper, robot, world):
             if len(path) != 0:
                 algorithmSuccessCount += 1
                 pathCost += computeLengthOfPath(path, robot)
-                coverCost += Cover(cover, False).score
+                coverOfPath = Cover(cover, False)
+                coverCost += coverOfPath.score
                 computationTime += time.time() - t
                 print 'path =', path
                 print 'cover = ', cover
-                if coverCost == 0:
-                    print 'SOMETHING IS REALLY WRONG'
+                interpolatedPath = generateInterpolatedPath(path, helper)
+                try:
+                    assert(helper.nearEqual(interpolatedPath[0], start))
+                    assert(helper.nearEqual(interpolatedPath[-1], goal))
+                except:
                     pdb.set_trace()
+                # if coverOfPath.score == 0:
+                    # pdb.set_trace()
                 if draw:
-                    interpolatedPath = generateInterpolatedPath(path, helper)
                     drawPath(sim, obstacles, robot, interpolatedPath)
             else:
                 print 'no path ;('
@@ -133,7 +171,36 @@ def computeLengthOfPath(path, robot):
     return dist
 
 
+
+# world, obstacles = getTest()
+# sim = makeSim(world)
+# sim.drawObstacles(obstacles)
+
+
+# runAllOnEmptyWorld()
+# runAllOnSomeObstaclesFeasibleWorld()
 # runAllOnTwoSoda()
-runAllOnClutteredWorld()
+# runAllOnClutteredWorld()
 # runAllOnTopLightClutteredWorld()
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        arg = sys.argv[1]
+        print 'arg=', arg
+        if arg == 0:
+            runAllOnEmptyWorld()
+        elif arg == 1:
+            runAllOnSomeObstaclesFeasibleWorld()
+        elif arg == 2:
+            runAllOnTwoSoda()
+        elif arg == 3:
+            runAllOnClutteredWorld()
+        elif arg == 4:
+            runAllOnTopLightClutteredWorld()
+    else:
+        runAllOnEmptyWorld()
+        runAllOnSomeObstaclesFeasibleWorld()
+        runAllOnTwoSoda()
+        runAllOnClutteredWorld()
+        runAllOnTopLightClutteredWorld()
 
