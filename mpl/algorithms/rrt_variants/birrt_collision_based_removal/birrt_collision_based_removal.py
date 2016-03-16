@@ -12,7 +12,7 @@ import pdb
 
 #bi rrt implementation that determines obstacles with interest of removing.
 class BiRRTCollisionRemovalSearcher(object):
-    def __init__(self, start, goal, helper, useTLPObstacles, removalStrategy):
+    def __init__(self, start, goal, helper, useTLPObstacles, removalStrategy, memoryFactor = 0.5):
         self.start = start
         self.goal = goal
         self.helper = helper
@@ -27,6 +27,7 @@ class BiRRTCollisionRemovalSearcher(object):
         self.useTLPObstacles = useTLPObstacles
         self.removalStrategy = removalStrategy
         self.deletedObstacles = {}
+        self.memoryFactor = memoryFactor
 
     def run(self):
         for i in range(mplGlob.rrtIterFailLimit):
