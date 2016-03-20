@@ -1,7 +1,7 @@
 from mpl.algorithms.mcr import mcr
 from mpl.algorithms.rrt_variants.rrt import new_rrt as rrt
 from mpl.algorithms.rrt_variants.birrt import new_birrt as birrt
-from mpl.algorithms.rrt_variants.birrt_ignore_start_goal_obstacles import birrt_ignore_obstacles 
+from mpl.algorithms.rrt_variants.birrt_ignore_start_goal_obstacles import birrt_ignore_start_goal_obstacles 
 from mpl.algorithms.rrt_variants.birrt_collision_based_removal import birrt_collision_based_removal as birrt_collision
 from mpl.algorithms.rrt_variants.birrt_ignore_all import birrt_ignore_all
 from mpl.algorithms.rrt_variants.collision_based_removal_repeat import collision_based_removal_repeat
@@ -25,7 +25,7 @@ def runAlgorithm(start, goal, helper, algorithmNumber, useTLPObstacles = False):
         algorithm = birrt.BiRRTSearcher(start, goal, helper)
     elif algorithmNumber == 3:
         print 'using ignore start and goal'
-        algorithm = birrt_ignore_obstacles.BiRRTIgnoreObstacleSearcher(start, goal, helper)
+        algorithm = birrt_ignore_start_goal_obstacles.BiRRTIgnoreStartGoalObstacleSearcher(start, goal, helper)
     elif algorithmNumber == 4:
         print 'using collision removal birrt greedy'
         algorithm = birrt_collision.BiRRTCollisionRemovalSearcher(start, goal, helper, useTLPObstacles = useTLPObstacles, removalStrategy = 'greedy')

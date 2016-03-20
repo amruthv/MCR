@@ -7,7 +7,7 @@ import mpl.mplGlobals as mplGlob
 from new_rrt import RRTSearcher
 
 #bi rrt implementation that ignores obstacles at the start configuration and goal configuration
-class BiRRTIgnoreObstacleSearcher(object):
+class BiRRTIgnoreStartGoalObstacleSearcher(object):
     def __init__(self, start, goal, helper):
         self.start = start
         self.goal = goal
@@ -17,6 +17,7 @@ class BiRRTIgnoreObstacleSearcher(object):
         self.RRT1 = RRTSearcher(start, goal, helper, self.obstaclesAtStartAndGoal)
         self.RRT2 = RRTSearcher(goal, start, helper, self.obstaclesAtStartAndGoal)
         self.foundPath = False
+        self.meetingPoint  = None
 
     def run(self):
         for i in range(mplGlob.rrtIterFailLimit):
@@ -35,11 +36,13 @@ class BiRRTIgnoreObstacleSearcher(object):
                 self.RRT2.rebuildTreeIfNecessary()
                 qNearest = self.RRT2.nearestConfig(qExtended)
                 if qNearest == qExtended:
+                    self.meetingPoint = qExtended
                     return True 
                 qExtendedTree2 = self.RRT2.extendToward(qNearest, qExtended)
                 if qExtendedTree2 is not None:
                     self.RRT2.updateRRTWithNewNode(qNearest, qExtendedTree2)
                     if qExtendedTree2 == qExtended:
+                        self.meetingPoint = qExtended
                         return True
             if self.RRT1.treeSize() > self.RRT2.treeSize():
                 self.RRT1, self.RRT2 = self.RRT2, self.RRT1
@@ -55,14 +58,19 @@ class BiRRTIgnoreObstacleSearcher(object):
         else:
             tree1 = self.RRT2
             tree2 = self.RRT1
-        # find the meeting point of the two trees
-        commonKeys = set(tree1.cameFrom.keys()).intersection(set(tree2.cameFrom.keys()))
-        assert(len(commonKeys) >= 1)
-        meetingPoint = commonKeys.pop()
-        pathFromStart = searcher.reconstructPath(tree1.cameFrom, meetingPoint)
-        pathFromGoal = searcher.reconstructPath(tree2.cameFrom, meetingPoint)
-        trajectory = pathFromStart + pathFromGoal[:-1][::-1]
-        return trajectory
+
+        pathFromStart = searcher.reconstructPath(tree1.cameFrom, self.meetingPoint)
+        pathFromGoal = searcher.reconstructPath(tree2.cameFrom, self.meetingPoint)
+        if self.meetingPoint == self.goal:
+            pathToReturn = pathFromStart
+        elif self.meetingPoint == self.start:
+            pathToReturn = pathFromGoal[::-1]
+        else:
+            pathFromMeetingToGoal = pathFromGoal[:-1][::-1]
+            pathFromMeetingToGoal = pathFromMeetingToGoal[:-1] + [self.goal]   
+            pathToReturn = pathFromStart + pathFromMeetingToGoal
+        pathToReturn = [self.start] + pathToReturn[1:-1] + [self.goal]
+        return pathToReturn
 
     def getCover(self):
         return list(self.obstaclesAtStartAndGoal)
