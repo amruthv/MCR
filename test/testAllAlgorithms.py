@@ -16,7 +16,8 @@ from mpl.common.configuration import Configuration
 
 
 algorithmNumberToStrategyMap = {0: 'MCR', 1: 'RRT', 2: 'BiRRT', 3: 'BiRRT ignore start and goal', 4: 'collision removal greedy', 5: 'collision removal probabilistic',
-                                    6: 'ignore all non-permanent non-self', 7: 'collision removal repeat not greedy'}
+                                    6: 'ignore all non-permanent non-self', 7: 'collision removal repeat not greedy',
+                                    8: 'collision greedy removal after normal birrt'}
 
 draw = False
 numTimesToRunEach = 200
@@ -106,7 +107,7 @@ def runAlgorithms(start, goal, helper, robot, world):
     if draw:
         sim = makeSim(world)
         drawProblemAndWait(sim, robot, obstacles, start, goal)
-    for algorithmNumber in range(8,9):
+    for algorithmNumber in range(9):
         algorithmSuccessCount = 0.
         computationTime = 0.
         pathCost = 0.
@@ -144,7 +145,7 @@ def writeTestResults(testName, results, robot):
     currTime = time.strftime("%m-%d-%y_%H-%M")
     f = open('test_results/{0}_{1}.csv'.format(testName, currTime), 'w')
     f.write("algorithm, success rate, avg time, avg path length, avg cover score\n")
-    for algorithmNumber in results:
+    for algorithmNumber in sorted(results.keys())`:
         algorithm = algorithmNumberToStrategyMap[algorithmNumber]
         successFrequency, averageTime, averagePathLength, averagCoverScore = results[algorithmNumber]
         f.write("{0}, {1}, {2}, {3}, {4}\n".format(algorithm, successFrequency, averageTime, averagePathLength, averagCoverScore))
