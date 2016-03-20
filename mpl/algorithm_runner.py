@@ -5,6 +5,7 @@ from mpl.algorithms.rrt_variants.birrt_ignore_start_goal_obstacles import birrt_
 from mpl.algorithms.rrt_variants.birrt_collision_based_removal import birrt_collision_based_removal as birrt_collision
 from mpl.algorithms.rrt_variants.birrt_ignore_all import birrt_ignore_all
 from mpl.algorithms.rrt_variants.collision_based_removal_repeat import collision_based_removal_repeat
+from mpl.algorithms.rrt_variants.birrt_search_then_collision_removal import search_then_collision_based_removal
 
 # start is a list/tuple of parameters specifying configuration
 # goal is a list/tuple of parameters specifying configuration
@@ -38,6 +39,9 @@ def runAlgorithm(start, goal, helper, algorithmNumber, useTLPObstacles = False):
     elif algorithmNumber == 7:
         print 'using birrt collision removal repeat'
         algorithm = collision_based_removal_repeat.RepetitiveCollisionRemovalSearcher(start, goal, helper, useTLPObstacles = useTLPObstacles, removalStrategy = 'not greedy')
+    elif algorithmNumber == 8:
+        print 'using search then collision removal greedy'
+        algorithm = search_then_collision_based_removal.SearchThenCollisionRemovalSearcher(start, goal, helper, useTLPObstacles = useTLPObstacles, removalStrategy = 'greedy')
     else:
         raise Exception("Unexpected algorithm")
     

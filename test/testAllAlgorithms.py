@@ -19,7 +19,7 @@ algorithmNumberToStrategyMap = {0: 'MCR', 1: 'RRT', 2: 'BiRRT', 3: 'BiRRT ignore
                                     6: 'ignore all non-permanent non-self', 7: 'collision removal repeat not greedy'}
 
 draw = False
-numTimesToRunEach = 20
+numTimesToRunEach = 200
 stepSize = 1150
 pi = math.pi
 piOver2 = math.pi / 2
@@ -106,7 +106,7 @@ def runAlgorithms(start, goal, helper, robot, world):
     if draw:
         sim = makeSim(world)
         drawProblemAndWait(sim, robot, obstacles, start, goal)
-    for algorithmNumber in range(8):
+    for algorithmNumber in range(8,9):
         algorithmSuccessCount = 0.
         computationTime = 0.
         pathCost = 0.
@@ -128,8 +128,6 @@ def runAlgorithms(start, goal, helper, robot, world):
                     assert(helper.nearEqual(interpolatedPath[-1], goal))
                 except:
                     pdb.set_trace()
-                # if coverOfPath.score == 0:
-                    # pdb.set_trace()
                 if draw:
                     drawPath(sim, obstacles, robot, interpolatedPath)
             else:
@@ -202,4 +200,6 @@ if __name__ == '__main__':
         runAllOnTwoSoda()
         runAllOnClutteredWorld()
         runAllOnTopLightClutteredWorld()
+
+
 
