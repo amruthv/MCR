@@ -15,7 +15,7 @@ from mpl.algorithms.rrt_variants.birrt_collision_based_removal.birrt_collision_b
 from mpl.common.configuration import Configuration
 
 draw = False
-numTimesToRunEach = 20
+numTimesToRunEach = 200
 stepSize = 1150
 pi = math.pi
 piOver2 = math.pi / 2
