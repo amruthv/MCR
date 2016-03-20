@@ -145,7 +145,7 @@ def writeTestResults(testName, results, robot):
     currTime = time.strftime("%m-%d-%y_%H-%M")
     f = open('test_results/{0}_{1}.csv'.format(testName, currTime), 'w')
     f.write("algorithm, success rate, avg time, avg path length, avg cover score\n")
-    for algorithmNumber in sorted(results.keys())`:
+    for algorithmNumber in sorted(results.keys()):
         algorithm = algorithmNumberToStrategyMap[algorithmNumber]
         successFrequency, averageTime, averagePathLength, averagCoverScore = results[algorithmNumber]
         f.write("{0}, {1}, {2}, {3}, {4}\n".format(algorithm, successFrequency, averageTime, averagePathLength, averagCoverScore))
