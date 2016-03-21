@@ -18,19 +18,15 @@ class SearchThenCollisionRemovalSearcher(object):
         self.helper = helper
         obstaclesAtStart = set(helper.collisionsAtQ(start))
         obstaclesAtGoal = helper.collisionsAtQ(goal)
-        obstaclesAtStartAndGoal = obstaclesAtStart.union(obstaclesAtGoal)
-        self.obstaclesToIgnore = obstaclesAtStartAndGoal
-        self.obstacleCollisionCounts = {}
-        self.RRT1 = RRTSearcher(start, goal, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts, extendBackwards = False)
-        self.RRT2 = RRTSearcher(goal, start, helper, self.obstaclesToIgnore, self.obstacleCollisionCounts, extendBackwards = True)
-        self.meetingPoint = None
+        self.obstaclesAtStartAndGoal = obstaclesAtStart.union(obstaclesAtGoal)
         self.useTLPObstacles = useTLPObstacles
         self.removalStrategy = removalStrategy
-        self.deletedObstacles = {}
         self.memoryFactor = memoryFactor
+        self.initializeForIteration()
 
     def run(self):
         for i in range(mplGlob.rrtIterFailLimit):
+            self.initializeForIteration()
             success = self.search()
             if success:
                 self.foundPath = True
@@ -38,13 +34,18 @@ class SearchThenCollisionRemovalSearcher(object):
         self.foundPath = False
         return False
 
+    def initializeForIteration(self):
+        self.obstaclesToIgnore = self.obstaclesAtStartAndGoal.union(set())
+        self.obstacleCollisionCounts = {}
+        self.RRT1 = RRTSearcher(self.start, self.goal, self.helper, self.obstaclesToIgnore, self.obstacleCollisionCounts, extendBackwards = False)
+        self.RRT2 = RRTSearcher(self.goal, self.start, self.helper, self.obstaclesToIgnore, self.obstacleCollisionCounts, extendBackwards = True)
+        self.deletedObstacles = {}
+        self.meetingPoint = None
+
     # want memoryFactor <= 1 used to discount previous weights since removing an obstacle opens up new space
-    def search(self, obstacleRemovalInterval = 40, memoryFactor = 0.5):
+    def search(self, obstacleRemovalInterval = 30, memoryFactor = 0.5):
         for iterNum in range(2 * mplGlob.rrtIterCount):
-            if iterNum % 50 == 0:
-                print iterNum
             if iterNum > mplGlob.rrtIterCount and iterNum % obstacleRemovalInterval == 0:
-                print 'trying to remove an obstacle'
                 self.selectObstacleToRemove(memoryFactor)
             qExtended = self.RRT1.runIteration()
             if qExtended is not None:
