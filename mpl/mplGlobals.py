@@ -1,2 +1,2 @@
 rrtIterFailLimit = 5
-rrtIterCount = 100
+rrtIterCount = 150

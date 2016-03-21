@@ -116,6 +116,7 @@ def runWorldWithDiscountFactor(start, goal, helper, robot, world, discountFactor
         sim = makeSim(world)
         drawProblemAndWait(sim, robot, obstacles, start, goal)
     for discountFactor in discountFactors:
+        print 'discountFactor', discountFactor
         algorithmSuccessCount = 0.
         computationTime = 0.
         pathCost = 0.
