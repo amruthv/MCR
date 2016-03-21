@@ -43,10 +43,10 @@ class BiRRTCollisionRemovalSearcher(object):
         self.meetingPoint = None
 
     # want memoryFactor <= 1 used to discount previous weights since removing an obstacle opens up new space
-    def search(self, obstacleRemovalInterval = 30, memoryFactor = 0.5):
+    def search(self, obstacleRemovalInterval = 40):
         for iterNum in range(mplGlob.rrtIterCount):
             if iterNum > 0 and iterNum % obstacleRemovalInterval == 0:
-                self.selectObstacleToRemove(memoryFactor)
+                self.selectObstacleToRemove()
             qExtended = self.RRT1.runIteration()
             if qExtended is not None:
                 self.RRT2.rebuildTreeIfNecessary()
@@ -64,13 +64,13 @@ class BiRRTCollisionRemovalSearcher(object):
                 self.RRT1, self.RRT2 = self.RRT2, self.RRT1
         return False
 
-    def selectObstacleToRemove(self, memoryFactor):
+    def selectObstacleToRemove(self):
         if self.useTLPObstacles:
-            self.removeTLPObstacle(memoryFactor)
+            self.removeTLPObstacle()
         else:
-            self.removeNonTLPObstacle(memoryFactor)
+            self.removeNonTLPObstacle()
 
-    def removeTLPObstacle(self, memoryFactor):
+    def removeTLPObstacle(self):
         obstacleRemoveScore = []
         for obstacle in self.obstacleCollisionCounts:
             # don't want to remove a immovable obstacle
@@ -101,9 +101,9 @@ class BiRRTCollisionRemovalSearcher(object):
                     [score for score, obstacle in obstacelRemoveScore if obstacle == companionShadow][0]
                 del self.obstacleCollisionCounts[companionShadow]
         for obstacle in self.obstacleCollisionCounts:
-            self.obstacleCollisionCounts[obstacle] *= memoryFactor
+            self.obstacleCollisionCounts[obstacle] *= self.memoryFactor
 
-    def removeNonTLPObstacle(self, memoryFactor):
+    def removeNonTLPObstacle(self):
         obstacleRemoveScore = []
         for obstacle in self.obstacleCollisionCounts:
             if obstacle.getWeight() == float('inf'):
@@ -121,7 +121,7 @@ class BiRRTCollisionRemovalSearcher(object):
         self.deletedObstacles[obstacleToRemove] = obstacleToRemoveWeight
         del self.obstacleCollisionCounts[obstacleToRemove]
         for obstacle in self.obstacleCollisionCounts:
-            self.obstacleCollisionCounts[obstacle] *= memoryFactor
+            self.obstacleCollisionCounts[obstacle] *= self.memoryFactor
 
     # there must be an obstacle in obstacleScores
     def greedyRemoval(self, obstacleScores):
