@@ -89,6 +89,18 @@ def get2DHandleAndTopLightClutteredWorld():
     world = World(500, 500, obstacles)
     return world, obstacles
 
+def getMemoryFactorWorld():
+    top1 = SimpleObstacle("top1", [(100,300), (250, 300), (250, 500), (100,500)], 1)
+    top2 = SimpleObstacle("top2", [(275,300), (350, 300), (350, 500), (275,500)], 1)
+    top3 = SimpleObstacle("top3", [(375,300), (450, 300), (450, 500), (375,500)], 1)
+    mid1 = SimpleObstacle("mid1", [(100, 200), (300, 200), (300, 275), (100, 275)], 1)
+    mid2 = SimpleObstacle("mid2", [(350, 200), (425, 200), (425, 275), (350, 275)], 1)
+    bot1 = SimpleObstacle("bot1", [(100, 0), (250, 0), (250, 175), (100, 175)], 1)
+    bot2 = SimpleObstacle("bot2", [(275, 0), (350, 0), (350, 175), (275, 175)], 1)
+    bot3 = SimpleObstacle("bot3", [(375, 0), (450, 0), (450, 175), (375, 175)], 1)
+    obstacles = [top1, top2, top3, mid1, mid2, bot1, bot2, bot3]
+    world = World(500, 500, obstacles)
+    return world, obstacles
 
 def getTest():
     robotBBox = SimpleObstacle("robot", [(41.389077013869496, 175.05698777063566), (246.69113553220637, 175.05698777063566), (246.69113553220637, 477.52548308292057), (41.389077013869496, 477.52548308292057)])

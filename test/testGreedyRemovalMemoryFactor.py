@@ -15,7 +15,7 @@ from mpl.algorithms.rrt_variants.birrt_collision_based_removal.birrt_collision_b
 from mpl.common.configuration import Configuration
 
 draw = False
-numTimesToRunEach = 200
+numTimesToRunEach = 50
 stepSize = 1150
 pi = math.pi
 piOver2 = math.pi / 2
@@ -97,9 +97,24 @@ def runOnTopLightClutteredWorld():
     testResults = runWorldWithDiscountFactor(start, goal, helper, robot, world, discountFactors)   
     writeTestResults('GreedyTopLightClutteredWorld', testResults, robot)
 
+def runOnMemoryFactorWorld():
+    world, obstacles = getMemoryFactorWorld()
+    links = []
+    links.append([0, [(25,275), (75,275), (75,325), (25,325)]])
+    heldObject = []
+    start = Configuration([25,275], [0])
+    goal = Configuration([440, 225], [0])
+    robot = MovableLinkRobotWithObject(links, heldObject, world)
+    helper = MPLHelper(robot, world, goal, stepSize)
+    testResults = runWorldWithDiscountFactor(start, goal, helper, robot, world, discountFactors)   
+    writeTestResults('GreedyMemoryFactorWorld', testResults, robot)
+
 def runWorldWithDiscountFactor(start, goal, helper, robot, world, discountFactors):
     testResults = {}
     obstacles = world.obstacles
+    if draw:
+        sim = makeSim(world)
+        drawProblemAndWait(sim, robot, obstacles, start, goal)
     for discountFactor in discountFactors:
         algorithmSuccessCount = 0.
         computationTime = 0.
@@ -176,10 +191,13 @@ if __name__ == '__main__':
             runOnClutteredWorld()
         elif arg == 4:
             runOnTopLightClutteredWorld()
+        elif arg == 5:
+            runOnMemoryFactorWorld()
     else:
         runOnEmptyWorld()
         runOnSomeObstaclesFeasibleWorld()
         runOnTwoSoda()
         runOnClutteredWorld()
         runOnTopLightClutteredWorld()
+        runOnMemoryFactorWorld()
 
