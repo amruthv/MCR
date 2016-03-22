@@ -1,4 +1,3 @@
-import heapq
 import numpy as np
 import math
 from scipy.spatial import KDTree
@@ -102,8 +101,11 @@ class BiRRTCollisionRemovalSearcher(object):
                 self.deletedObstacles[companionShadow] = \
                     [score for score, obstacle in obstacelRemoveScore if obstacle == companionShadow][0]
                 del self.obstacleCollisionCounts[companionShadow]
-        for obstacle in self.obstacleCollisionCounts:
-            self.obstacleCollisionCounts[obstacle] *= self.memoryFactor
+        if self.memoryFactor == 0:
+            self.obstacleCollisionCounts = {}
+        else:
+            for obstacle in self.obstacleCollisionCounts:
+                self.obstacleCollisionCounts[obstacle] *= self.memoryFactor
 
     def removeNonTLPObstacle(self):
         obstacleRemoveScore = []
@@ -123,8 +125,11 @@ class BiRRTCollisionRemovalSearcher(object):
         self.obstaclesToIgnore.add(obstacleToRemove)
         self.deletedObstacles[obstacleToRemove] = obstacleToRemoveWeight
         del self.obstacleCollisionCounts[obstacleToRemove]
-        for obstacle in self.obstacleCollisionCounts:
-            self.obstacleCollisionCounts[obstacle] *= self.memoryFactor
+        if self.memoryFactor == 0:
+            self.obstacleCollisionCounts = {}
+        else:
+            for obstacle in self.obstacleCollisionCounts:
+                self.obstacleCollisionCounts[obstacle] *= self.memoryFactor
 
     # there must be an obstacle in obstacleScores
     def greedyRemoval(self, obstacleScores):

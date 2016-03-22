@@ -1,4 +1,3 @@
-import heapq
 import numpy as np
 import math
 from scipy.spatial import KDTree
@@ -43,7 +42,7 @@ class SearchThenCollisionRemovalSearcher(object):
         self.meetingPoint = None
 
     # want memoryFactor <= 1 used to discount previous weights since removing an obstacle opens up new space
-    def search(self, obstacleRemovalInterval = 30):
+    def search(self, obstacleRemovalInterval = 40):
         for iterNum in range(2 * mplGlob.rrtIterCount):
             if iterNum > mplGlob.rrtIterCount and iterNum % obstacleRemovalInterval == 0:
                 self.selectObstacleToRemove()
@@ -100,8 +99,11 @@ class SearchThenCollisionRemovalSearcher(object):
                 self.deletedObstacles[companionShadow] = \
                     [score for score, obstacle in obstacelRemoveScore if obstacle == companionShadow][0]
                 del self.obstacleCollisionCounts[companionShadow]
-        for obstacle in self.obstacleCollisionCounts:
-            self.obstacleCollisionCounts[obstacle] *= self.memoryFactor
+        if self.memoryFactor == 0:
+            self.obstacleCollisionCounts = {}
+        else:
+            for obstacle in self.obstacleCollisionCounts:
+                self.obstacleCollisionCounts[obstacle] *= self.memoryFactor
 
     def removeNonTLPObstacle(self):
         obstacleRemoveScore = []
@@ -120,8 +122,11 @@ class SearchThenCollisionRemovalSearcher(object):
         self.obstaclesToIgnore.add(obstacleToRemove)
         self.deletedObstacles[obstacleToRemove] = obstacleToRemoveWeight
         del self.obstacleCollisionCounts[obstacleToRemove]
-        for obstacle in self.obstacleCollisionCounts:
-            self.obstacleCollisionCounts[obstacle] *= self.memoryFactor
+        if self.memoryFactor == 0:
+            self.obstacleCollisionCounts = {}
+        else:
+            for obstacle in self.obstacleCollisionCounts:
+                self.obstacleCollisionCounts[obstacle] *= self.memoryFactor
 
     # there must be an obstacle in obstacleScores
     def greedyRemoval(self, obstacleScores):

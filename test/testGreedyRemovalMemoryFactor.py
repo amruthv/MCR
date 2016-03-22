@@ -19,7 +19,7 @@ numTimesToRunEach = 50
 stepSize = 1150
 pi = math.pi
 piOver2 = math.pi / 2
-discountFactors = [0.1, 0.3, 0.5, 0.7, 0.9]
+discountFactors = [0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]
 
 
 def runOnEmptyWorld():
