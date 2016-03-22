@@ -26,6 +26,7 @@ class BiRRTCollisionRemovalSearcher(object):
 
     def run(self):
         for i in range(mplGlob.rrtIterFailLimit):
+            print 'attempt ', i
             self.initializeForIteration()
             success = self.search()
             if success:
@@ -47,6 +48,7 @@ class BiRRTCollisionRemovalSearcher(object):
         for iterNum in range(mplGlob.rrtIterCount):
             if iterNum > 0 and iterNum % obstacleRemovalInterval == 0:
                 self.selectObstacleToRemove()
+                print self.obstaclesToIgnore
             qExtended = self.RRT1.runIteration()
             if qExtended is not None:
                 self.RRT2.rebuildTreeIfNecessary()
@@ -117,6 +119,7 @@ class BiRRTCollisionRemovalSearcher(object):
         else:
             obstacleToRemove, obstacleToRemoveWeight = self.probabilisticRemoval(obstacleRemoveScore)
         assert(obstacleToRemove not in self.obstaclesToIgnore)
+        print 'removing', obstacleToRemove
         self.obstaclesToIgnore.add(obstacleToRemove)
         self.deletedObstacles[obstacleToRemove] = obstacleToRemoveWeight
         del self.obstacleCollisionCounts[obstacleToRemove]

@@ -107,7 +107,7 @@ def runAlgorithms(start, goal, helper, robot, world):
     if draw:
         sim = makeSim(world)
         drawProblemAndWait(sim, robot, obstacles, start, goal)
-    for algorithmNumber in range(9):
+    for algorithmNumber in range(4,5):
         algorithmSuccessCount = 0.
         computationTime = 0.
         pathCost = 0.
@@ -180,7 +180,7 @@ def computeLengthOfPath(path, robot):
 # runAllOnSomeObstaclesFeasibleWorld()
 # runAllOnTwoSoda()
 # runAllOnClutteredWorld()
-# runAllOnTopLightClutteredWorld()
+runAllOnTopLightClutteredWorld()
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
