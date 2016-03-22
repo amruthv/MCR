@@ -31,16 +31,6 @@ def getTwoObstaclesDifferentWeightWorld():
     world = World(500,500, obstacles)
     return world, obstacles
 
-def getManyObstaclesWeightedWorld():
-    obstacle1 = SimpleObstacle("obs1", [(70,0), (245,0), (270,100), (160,180), (45, 100)])
-    obstacle2 = SimpleObstacle("obs2", [(140, 385), (225,425), (140,480), (55,425)], 1)
-    obstacle3 = SimpleObstacle("obs3", [(280, 200), (350, 200), (350, 375), (280, 375)], 4)
-    obstacle4 = SimpleObstacle("obs4", [(375, 20), (480, 20), (480, 110), (375, 110)])
-    obstacle5 = SimpleObstacle("obs5", [(410, 350), (430, 350), (430, 450), (410, 450), (410, 420), (360, 400), (410, 380)])
-    obstacles = [obstacle1, obstacle2, obstacle3, obstacle4, obstacle5]
-    world = World(500,500, obstacles)
-    return world, obstacles
-
 def getManySmallObstaclesWorld():
     obstacle1 = SimpleObstacle("obs1", [(70, 80), (130, 80), (130, 180), (70, 180)])
     obstacle2 = SimpleObstacle("obs2", [(70, 220), (130, 220), (130, 300), (70, 300)])
@@ -57,6 +47,16 @@ def getManySmallObstaclesWorld():
     world = World(500,500, obstacles)
     return world, obstacles
 
+def getManyObstaclesUnfeasibleWorld():
+    obstacle1 = SimpleObstacle("obs1", [(100,0), (275,0), (300,100), (190,180), (75, 100)], 4)
+    obstacle2 = SimpleObstacle("obs2", [(140, 385), (225,425), (140,480), (55,425)], 1)
+    obstacle3 = SimpleObstacle("obs3", [(250, 220), (350, 220), (350, 410), (250, 410)], 20)
+    obstacle4 = SimpleObstacle("obs4", [(375, 50), (480, 50), (480, 120), (375, 120)])
+    obstacle5 = SimpleObstacle("obs5", [(410, 300), (500,300), (500, 350), (430, 350), (430, 450), (500, 450), (500, 475), (410, 475), (410, 420), (360, 400), (410, 380)])
+    obstacle6 = SimpleObstacle("obs6", [(375, 180), (415, 180), (415, 280), (375, 280)], 20)
+    obstacles = [obstacle1, obstacle2, obstacle3, obstacle4, obstacle6, obstacle5]
+    world = World(500,500, obstacles)
+    return world, obstacles
 
 def get2DHandleAndCansWorld():
     sodaTop = SimpleObstacle("soda top", [(340, 300), (400, 300), (400, 350), (340, 350)], 1)

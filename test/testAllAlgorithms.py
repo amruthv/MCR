@@ -56,6 +56,20 @@ def runAllOnSomeObstaclesFeasibleWorld():
     testResults = runAlgorithms(start, goal, helper, robot, world)    
     writeTestResults('SomeObstaclesFeasibleWorld', testResults, robot)
 
+def runAllOnManyObstaclesWorld():
+    world, obstacles = getManyObstaclesWorld()
+    links = []
+    links.append([0, [(20,200), (60,200), (60,220), (20,220)]])
+    links.append([0, [(60,200), (100,200), (100,220), (60,220)]])
+    links.append([0, [(100,200), (140,200), (140,220), (100,220)]])
+    heldObject = []
+    start = Configuration([20,200], [0, 0, 0])
+    goal = Configuration([450, 360], [0, piOver2, piOver2])
+    robot = MovableLinkRobotWithObject(links, heldObject, world)
+    helper = MPLHelper(robot, world, goal, stepSize)
+    testResults = runAlgorithms(start, goal, helper, robot, world)    
+    writeTestResults('ManyObstaclesWorld', testResults, robot)
+
 def runAllOnTwoSoda():
     world, obstacles = get2DHandleAndCansWorld()
     links = []
@@ -70,6 +84,20 @@ def runAllOnTwoSoda():
     helper = MPLHelper(robot, world, goal, stepSize)
     testResults = runAlgorithms(start, goal, helper, robot, world)    
     writeTestResults('TwoSodaHandle', testResults, robot)
+
+def runAllOnManyObstaclesUnfeasibleWorld():
+    world, obstacles = getManyObstaclesUnfeasibleWorld()
+    links = []
+    links.append([0, [(20,200), (60,200), (60,220), (20,220)]])
+    links.append([0, [(60,200), (100,200), (100,220), (60,220)]])
+    links.append([0, [(100,200), (140,200), (140,220), (100,220)]])
+    heldObject = []
+    start = Configuration([20,200], [0, 0, 0])
+    goal = Configuration([450, 360], [0, piOver2, piOver2])
+    robot = MovableLinkRobotWithObject(links, heldObject, world)
+    helper = MPLHelper(robot, world, goal, stepSize)
+    testResults = runAlgorithms(start, goal, helper, robot, world)    
+    writeTestResults('ManyObstaclesWorld', testResults, robot)
 
 def runAllOnClutteredWorld():
     world, obstacles = get2DHandleAndClutteredWorld()
@@ -130,7 +158,7 @@ def runAlgorithms(start, goal, helper, robot, world):
                 except:
                     pdb.set_trace()
                 if draw:
-                    drawPath(sim, obstacles, robot, interpolatedPath)
+                    drawPath(sim, obstacles, robot, path)
             else:
                 print 'no path ;('
         if algorithmSuccessCount == 0:
@@ -181,6 +209,8 @@ def computeLengthOfPath(path, robot):
 # runAllOnTwoSoda()
 # runAllOnClutteredWorld()
 # runAllOnTopLightClutteredWorld()
+# runAllOnManyObstaclesWorld()
+runAllOnManyObstaclesUnfeasibleWorld()
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -195,12 +225,19 @@ if __name__ == '__main__':
             runAllOnClutteredWorld()
         elif arg == 4:
             runAllOnTopLightClutteredWorld()
+        elif arg == 5:
+            runAllOnManyObstaclesWorld()
+        elif arg == 6:
+            runAllOnManyObstaclesUnfeasibleWorld()
     else:
         runAllOnEmptyWorld()
         runAllOnSomeObstaclesFeasibleWorld()
         runAllOnTwoSoda()
         runAllOnClutteredWorld()
         runAllOnTopLightClutteredWorld()
+        runAllOnManyObstaclesWorld()
+        runAllOnManyObstaclesUnfeasibleWorld()
+
 
 
 
