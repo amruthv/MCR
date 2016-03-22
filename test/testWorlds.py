@@ -72,7 +72,7 @@ def get2DHandleAndClutteredWorld():
     longLightBlock = SimpleObstacle("long light", [(50, 250), (80,250), (80, 425), (50, 425)], 5)
     massiveBlock = SimpleObstacle("massive block", [(420, 0), (500,0), (500, 130), (420, 130)], 50)
     triangleBlock = SimpleObstacle("triangle", [(190, 30), (260, 30), (225, 150)], 3)
-    smallBlock = SimpleObstacle("small block", [(120, 160), (230, 160), (230, 200), (120, 200)], 2)
+    smallBlock = SimpleObstacle("small block", [(210, 160), (280, 160), (280, 200), (210, 200)], 2)
     obstacles = [sodaTop, sodaBot, heavyBlock, longLightBlock, massiveBlock, triangleBlock, smallBlock]
     world = World(500, 500, obstacles)
     return world, obstacles
