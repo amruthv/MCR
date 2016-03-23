@@ -13,19 +13,25 @@ class BiRRTSearcher(object):
         self.start = start
         self.goal = goal
         self.helper = helper
-        self.RRT1 = RRTSearcher(start, goal, helper, extendBackwards = False)
-        self.RRT2 = RRTSearcher(goal, start, helper, extendBackwards = True)
+        self.initializeForIteration()
         self.foundPath = False
-        self.meetingPoint = None
 
     def run(self):
         for i in range(mplGlob.rrtIterFailLimit):
+            self.initializeForIteration()
             success = self.search()
+            print 't1', self.RRT1.treeSize()
+            print 't2', self.RRT2.treeSize()
             if success:
                 self.foundPath = True
                 return True
         self.foundPath = False
         return False
+
+    def initializeForIteration(self):
+        self.RRT1 = RRTSearcher(self.start, self.goal, self.helper, extendBackwards = False)
+        self.RRT2 = RRTSearcher(self.goal, self.start, self.helper, extendBackwards = True)
+        self.meetingPoint = None
 
     def search(self):
         for iterNum in range(mplGlob.rrtIterCount):

@@ -16,19 +16,23 @@ class BiRRTIgnoreObstaclesSearcher(object):
         self.start = start
         self.goal = goal
         self.helper = helper
-        self.RRT1 = RRTSearcher(start, goal, helper, useTLPObstacles, extendBackwards = False)
-        self.RRT2 = RRTSearcher(goal, start, helper, useTLPObstacles, extendBackwards = True)
-        self.meetingPoint = None
         self.useTLPObstacles = useTLPObstacles
+        self.initializeForIteration()
 
     def run(self):
         for i in range(mplGlob.rrtIterFailLimit):
+            self.initializeForIteration()
             success = self.search()
             if success:
                 self.foundPath = True
                 return True
         self.foundPath = False
         return False
+
+    def initializeForIteration(self):
+        self.RRT1 = RRTSearcher(self.start, self.goal, self.helper, self.useTLPObstacles, extendBackwards = False)
+        self.RRT2 = RRTSearcher(self.goal, self.start, self.helper, self.useTLPObstacles, extendBackwards = True)
+        self.meetingPoint = None
 
 
     # want memoryFactor <= 1 used to discount previous weights since removing an obstacle opens up new space

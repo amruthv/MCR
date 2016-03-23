@@ -4,7 +4,7 @@ import numpy as np
 import math
 
 class RRTSearcher(object):
-    def __init__(self, start, goal, helper, obstaclesToIgnore = set(), shouldDraw = False):
+    def __init__(self, start, goal, helper, obstaclesToIgnore = set(), extendBackwards):
         self.start = start
         self.goal = goal
         self.helper = helper
@@ -13,7 +13,7 @@ class RRTSearcher(object):
         self.auxillaryArrayThreshold = 50
         self.cameFrom = {}
         self.obstaclesToIgnore = obstaclesToIgnore
-        self.shouldDraw = shouldDraw
+        self.extendBackwards = extendBackwards
         self.primitiveToConfigurationDict = {start.toPrimitive() : start}
 
     def runIteration(self):
@@ -64,9 +64,13 @@ class RRTSearcher(object):
 
     def extendToward(self, closest, sample):
         qPrime = self.helper.stepTowards(closest, sample)
-        if set(self.helper.collisionsAtQ(qPrime)) != self.obstaclesToIgnore:
+        if not all(collision in self.obstaclesToIgnore for collision in set(self.helper.collisionsAtQ(qPrime))):
             return None
-        for configuration in self.helper.generateInBetweenConfigs(closest, qPrime):
+        if self.extendBackwards:
+            generator = self.helper.generateInBetweenConfigs(qPrime, closest)
+        else:
+            generator = self.helper.generateInBetweenConfigs(closest, qPrime)
+        for configuration in generator:
             collisionsAtConfiguration = self.helper.collisionsAtQ(configuration)
             for obstacle in collisionsAtConfiguration:
                 if obstacle not in self.obstaclesToIgnore:

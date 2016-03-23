@@ -14,13 +14,12 @@ class BiRRTIgnoreStartGoalObstacleSearcher(object):
         obstaclesAtStart = set(helper.collisionsAtQ(start))
         obstaclesAtGoal = helper.collisionsAtQ(goal)
         self.obstaclesAtStartAndGoal = obstaclesAtStart.union(obstaclesAtGoal)
-        self.RRT1 = RRTSearcher(start, goal, helper, self.obstaclesAtStartAndGoal)
-        self.RRT2 = RRTSearcher(goal, start, helper, self.obstaclesAtStartAndGoal)
         self.foundPath = False
-        self.meetingPoint  = None
+        self.initializeForIteration()
 
     def run(self):
         for i in range(mplGlob.rrtIterFailLimit):
+            self.initializeForIteration()
             success = self.search()
             if success:
                 self.foundPath = True
@@ -28,6 +27,10 @@ class BiRRTIgnoreStartGoalObstacleSearcher(object):
         self.foundPath = False
         return False
 
+    def initializeForIteration(self):
+        self.RRT1 = RRTSearcher(self.start, self.goal, self.helper, self.obstaclesAtStartAndGoal, extendBackwards = False)
+        self.RRT2 = RRTSearcher(self.goal, self.start, self.helper, self.obstaclesAtStartAndGoal, extendBackwards = True)
+        self.meetingPoint = None
 
     def search(self):
         for iterNum in range(mplGlob.rrtIterCount):
