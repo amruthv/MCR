@@ -210,7 +210,7 @@ def computeLengthOfPath(path, robot):
 # runAllOnClutteredWorld()
 # runAllOnTopLightClutteredWorld()
 # runAllOnManyObstaclesWorld()
-runAllOnManyObstaclesUnfeasibleWorld()
+# runAllOnManyObstaclesUnfeasibleWorld()
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
