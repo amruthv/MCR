@@ -11,6 +11,7 @@ class BiRRTIgnoreStartGoalObstacleSearcher(object):
     def __init__(self, start, goal, helper):
         self.start = start
         self.goal = goal
+        self.helper = helper
         obstaclesAtStart = set(helper.collisionsAtQ(start))
         obstaclesAtGoal = helper.collisionsAtQ(goal)
         self.obstaclesAtStartAndGoal = obstaclesAtStart.union(obstaclesAtGoal)
