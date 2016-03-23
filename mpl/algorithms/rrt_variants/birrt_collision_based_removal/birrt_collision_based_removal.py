@@ -102,7 +102,7 @@ class BiRRTCollisionRemovalSearcher(object):
                     [score for score, obstacle in obstacelRemoveScore if obstacle == companionShadow][0]
                 del self.obstacleCollisionCounts[companionShadow]
         if self.memoryFactor == 0:
-            self.obstacleCollisionCounts = {}
+            self.obstacleCollisionCounts.clear()
         else:
             for obstacle in self.obstacleCollisionCounts:
                 self.obstacleCollisionCounts[obstacle] *= self.memoryFactor
@@ -126,7 +126,7 @@ class BiRRTCollisionRemovalSearcher(object):
         self.deletedObstacles[obstacleToRemove] = obstacleToRemoveWeight
         del self.obstacleCollisionCounts[obstacleToRemove]
         if self.memoryFactor == 0:
-            self.obstacleCollisionCounts = {}
+            self.obstacleCollisionCounts.clear()
         else:
             for obstacle in self.obstacleCollisionCounts:
                 self.obstacleCollisionCounts[obstacle] *= self.memoryFactor
