@@ -4,7 +4,7 @@ import numpy as np
 import math
 
 class RRTSearcher(object):
-    def __init__(self, start, goal, helper, obstaclesToIgnore = set(), extendBackwards):
+    def __init__(self, start, goal, helper, obstaclesToIgnore, extendBackwards):
         self.start = start
         self.goal = goal
         self.helper = helper
