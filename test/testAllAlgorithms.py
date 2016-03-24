@@ -97,7 +97,7 @@ def runAllOnManyObstaclesUnfeasibleWorld():
     robot = MovableLinkRobotWithObject(links, heldObject, world)
     helper = MPLHelper(robot, world, goal, stepSize)
     testResults = runAlgorithms(start, goal, helper, robot, world)    
-    writeTestResults('ManyObstaclesWorld', testResults, robot)
+    writeTestResults('ManyObstaclesUnfeasibleWorld', testResults, robot)
 
 def runAllOnClutteredWorld():
     world, obstacles = get2DHandleAndClutteredWorld()
@@ -135,7 +135,7 @@ def runAlgorithms(start, goal, helper, robot, world):
     if draw:
         sim = makeSim(world)
         drawProblemAndWait(sim, robot, obstacles, start, goal)
-    for algorithmNumber in range(9):
+    for algorithmNumber in range(1,9):
         algorithmSuccessCount = 0.
         computationTime = 0.
         pathCost = 0.
