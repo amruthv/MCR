@@ -1,0 +1,9 @@
+algorithm, success rate, avg time, avg path length, avg cover score
+RRT, 0, 0.0, 0, 0
+BiRRT, 0, 0.0, 0, 0
+BiRRT ignore start and goal, 0, 0.0, 0, 0
+collision removal greedy, 100.0, 3.70837773204, 5270.01172836, 25.15
+collision removal probabilistic, 100.0, 5.0936675334, 5471.48993714, 24.375
+ignore all non-permanent non-self, 100.0, 1.34890112042, 5426.94881785, 60.55
+collision removal repeat not greedy, 100.0, 50.3732655263, 5901.0050943, 14.8
+collision greedy removal after normal birrt, 100.0, 9.0320684135, 5248.61933641, 25.2
