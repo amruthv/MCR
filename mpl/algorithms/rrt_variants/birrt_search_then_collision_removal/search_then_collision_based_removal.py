@@ -11,7 +11,7 @@ import pdb
 
 #bi rrt implementation that determines obstacles with interest of removing.
 class SearchThenCollisionRemovalSearcher(object):
-    def __init__(self, start, goal, helper, useTLPObstacles, removalStrategy, memoryFactor = 0.5):
+    def __init__(self, start, goal, helper, useTLPObstacles, removalStrategy, memoryFactor = 0.0):
         self.start = start
         self.goal = goal
         self.helper = helper
