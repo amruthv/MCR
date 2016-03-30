@@ -70,13 +70,6 @@ class BiRRTSearcher(object):
             pathFromMeetingToGoal = pathFromMeetingToGoal[:-1] + [self.goal]   
             pathToReturn = pathFromStart + pathFromMeetingToGoal
         pathToReturn = [self.start] + pathToReturn[1:-1] + [self.goal]
-
-        for i in range(len(pathToReturn) - 1):
-            for config in self.helper.generateInBetweenConfigs(pathToReturn[i], pathToReturn[i+1]):
-                collisions = self.helper.collisionsAtQ(config)
-                if len(collisions) != 0:
-                    print 'somehow had collisions when there should be none'
-                    pdb.set_trace()
         return pathToReturn
 
 

@@ -37,8 +37,6 @@ class RRTSearcher(object):
         return qExtended
 
     def updateRRTWithNewNode(self, qNear, qExtended):
-        if qNear == qExtended:
-            pdb.set_trace()
         if qExtended is not None:
             self.cameFrom[qExtended] = qNear
             self.auxillaryArray.append(qExtended)

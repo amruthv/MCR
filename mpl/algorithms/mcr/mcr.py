@@ -116,17 +116,8 @@ class MCRPlanner():
                 # if its within the extendable distance
                 qq = self.helper.stepTowards(neighbor, q)
                 if self.helper.nearEqual(q, qq):
-                # if self.helper.stepTowards(neighbor, q) == q: # and totalCover.score <= k:
                     addedEdge = True
                     G.addEdge(neighbor, q)
-                # else:
-                #     if neighbor == self.goal:
-                #         pdb.set_trace()
-            try:
-                assert(addedEdge == True) # should be true since the closestEdge should be within distance of stepSize
-            except:
-                pdb.set_trace()
-                print 'something went wrong'
 
     def closest(self, G, k, sampleConfig):
         GKReachableNodes = []

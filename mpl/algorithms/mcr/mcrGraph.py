@@ -9,17 +9,11 @@ class MCRGraph():
         self.localVertexCovers = {}
     
     def addVertex(self, vertex):
-        assert(vertex not in self.V)
-        assert(vertex not in self.E)
         self.V.add(vertex)
         self.E[vertex] = [] 
 
     #undirected graph so add edge from both points to other point
     def addEdge(self, point1, point2):
-        assert(point1 in self.V)
-        assert(point2 in self.V)
-        assert(point1 in self.E)
-        assert(point2 in self.E)
         self.E[point1].append(point2)
         self.E[point2].append(point1)
 

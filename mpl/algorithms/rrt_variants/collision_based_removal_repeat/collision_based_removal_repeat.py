@@ -28,10 +28,7 @@ class RepetitiveCollisionRemovalSearcher(object):
             if searcher.run():
                 iterationPath = searcher.getPath()
                 iterationCover = searcher.getCover()
-                try:
-                    coverObj = cover.Cover(set(iterationCover), self.useTLPObstacles)
-                except: 
-                    pdb.set_trace()
+                coverObj = cover.Cover(set(iterationCover), self.useTLPObstacles)
                 if iterationPath != [] and (bestCover is None or bestCover.score > coverObj.score):
                     bestPath = iterationPath
                     bestCover = coverObj

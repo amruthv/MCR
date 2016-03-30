@@ -88,7 +88,6 @@ class BiRRTCollisionRemovalSearcher(object):
         else:
             obstacleToRemove, obstacleToRemoveWeight = self.probabilisticRemoval(obstacleRemoveScore)
         isObstacle = obstacleToRemove.find('shadow') == -1
-        assert(obstacleToRemove not in self.obstaclesToIgnore)
         self.obstaclesToIgnore.add(obstacleToRemove)
         self.deletedObstacles[obstacleToRemove] = obstacleToRemoveWeight
         del self.obstacleCollisionCounts[obstacleToRemove]
@@ -118,8 +117,6 @@ class BiRRTCollisionRemovalSearcher(object):
             obstacleToRemove, obstacleToRemoveWeight = self.greedyRemoval(obstacleRemoveScore)
         else:
             obstacleToRemove, obstacleToRemoveWeight = self.probabilisticRemoval(obstacleRemoveScore)
-        assert(obstacleToRemove not in self.obstaclesToIgnore)
-        print 'removing', obstacleToRemove
         self.obstaclesToIgnore.add(obstacleToRemove)
         self.deletedObstacles[obstacleToRemove] = obstacleToRemoveWeight
         del self.obstacleCollisionCounts[obstacleToRemove]
@@ -174,12 +171,7 @@ class BiRRTCollisionRemovalSearcher(object):
         for i in range(len(trajectory) - 1):
             edgeCoverInclusive = cc.edgeCover(trajectory[i], trajectory[i+1])
             pathCover = pathCover.mergeWith(edgeCoverInclusive)
-            if any([obstacle not in self.obstaclesToIgnore for obstacle in pathCover.cover]):
-                pdb.set_trace()
-        for obstacle in pathCover.cover:
-            if obstacle not in self.obstaclesToIgnore:
-                print 'gg'
-                pdb.set_trace()
+
         if self.useTLPObstacles:
             return list(pathCover.cover)
         else:
