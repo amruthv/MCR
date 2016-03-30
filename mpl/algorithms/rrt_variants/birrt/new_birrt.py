@@ -20,8 +20,6 @@ class BiRRTSearcher(object):
         for i in range(mplGlob.rrtIterFailLimit):
             self.initializeForIteration()
             success = self.search()
-            print 't1', self.RRT1.treeSize()
-            print 't2', self.RRT2.treeSize()
             if success:
                 self.foundPath = True
                 return True

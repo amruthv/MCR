@@ -17,7 +17,7 @@ from mpl.algorithms.rrt_variants.birrt_search_then_collision_removal import sear
 # 4 collision based rrt
 def runAlgorithm(start, goal, helper, algorithmNumber, useTLPObstacles = False):
     if algorithmNumber == 0:
-        algorithm = mcr.MCRPlanner(start, goal, helper, useTLPObstacles = useTLPObstacles, verbose = True)
+        algorithm = mcr.MCRPlanner(start, goal, helper, useTLPObstacles = useTLPObstacles, verbose = False)
     elif algorithmNumber == 1:
         print 'using just rrt'
         algorithm = rrt.RRTSearcher(start, goal, helper)
