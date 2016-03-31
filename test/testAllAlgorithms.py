@@ -136,35 +136,37 @@ def runAlgorithms(start, goal, helper, robot, world):
         sim = makeSim(world)
         drawProblemAndWait(sim, robot, obstacles, start, goal)
     for algorithmNumber in [4,5,7,8]:#range(1,9):
-        algorithmSuccessCount = 0.
-        computationTime = 0.
+        successTime = 0.
+        successCount = 0.
+        failureTime = 0.
+        failureCount = 0.
         pathCost = 0.
         coverCost = 0.
         for i in range(numTimesToRunEach):
             t = time.time()
             path, cover = runner.runAlgorithm(start, goal, helper, algorithmNumber, False)
             if len(path) != 0:
-                algorithmSuccessCount += 1
                 pathCost += computeLengthOfPath(path, robot)
                 coverOfPath = Cover(cover, False)
                 coverCost += coverOfPath.score
-                computationTime += time.time() - t
+                successTime += time.time() - t
+                successCount += 1
                 print 'path =', path
                 print 'cover = ', cover
                 interpolatedPath = generateInterpolatedPath(path, helper)
-                try:
-                    assert(helper.nearEqual(interpolatedPath[0], start))
-                    assert(helper.nearEqual(interpolatedPath[-1], goal))
-                except:
-                    pdb.set_trace()
                 if draw:
                     drawPath(sim, obstacles, robot, path)
             else:
                 print 'no path ;('
-        if algorithmSuccessCount == 0:
-            testResults[algorithmNumber] = (0, computationTime / numTimesToRunEach, 0, 0)
+                failureTime += time.time() - t
+                failureCount += 1
+        if successCount == 0:
+            testResults[algorithmNumber] = (0, failureTime / failureCount, 0, 0, 0)
+        elif failureCount == 0:
+            testResults[algorithmNumber] = (100, 0, successTime / successCount, pathCost / successCount, coverCost / successCount)
         else:
-            testResults[algorithmNumber] = (100 * algorithmSuccessCount / numTimesToRunEach, computationTime / numTimesToRunEach, pathCost / algorithmSuccessCount, coverCost / algorithmSuccessCount)
+            testResults[algorithmNumber] = (100 * successCount / numTimesToRunEach, failureTime / failureCount, successTime / successCount,
+                                            pathCost / successCount, coverCost / successCount)
     return testResults
 
 
@@ -172,7 +174,7 @@ def writeTestResults(testName, results, robot):
     import time
     currTime = time.strftime("%m-%d-%y_%H-%M")
     f = open('test_results/{0}_{1}.csv'.format(testName, currTime), 'w')
-    f.write("algorithm, success rate, avg time, avg path length, avg cover score\n")
+    f.write("algorithm, success rate, avg fail time, avg success time, avg path length, avg cover score\n")
     for algorithmNumber in sorted(results.keys()):
         algorithm = algorithmNumberToStrategyMap[algorithmNumber]
         successFrequency, averageTime, averagePathLength, averagCoverScore = results[algorithmNumber]
