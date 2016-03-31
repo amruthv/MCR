@@ -6,6 +6,7 @@ from mpl.algorithms.rrt_variants.birrt_collision_based_removal import birrt_coll
 from mpl.algorithms.rrt_variants.birrt_ignore_all import birrt_ignore_all
 from mpl.algorithms.rrt_variants.collision_based_removal_repeat import collision_based_removal_repeat
 from mpl.algorithms.rrt_variants.birrt_search_then_collision_removal import search_then_collision_based_removal
+from mpl.algorithms.rrt_variants.hpn_like_removal import hpn_like_removal
 
 # start is a list/tuple of parameters specifying configuration
 # goal is a list/tuple of parameters specifying configuration
@@ -42,6 +43,9 @@ def runAlgorithm(start, goal, helper, algorithmNumber, useTLPObstacles = False):
     elif algorithmNumber == 8:
         print 'using search then collision removal greedy'
         algorithm = search_then_collision_based_removal.SearchThenCollisionRemovalSearcher(start, goal, helper, useTLPObstacles = useTLPObstacles, removalStrategy = 'greedy')
+    elif algorithmNumber == 9:
+        print 'using hpn like removal'
+        algorithm = hpn_like_removal.HPNLikeRemovalSearcher(start, goal, helper, useTLPObstacles = useTLPObstacles, removalStrategy = 'greedy', removeInterval = 40)
     else:
         raise Exception("Unexpected algorithm")
     

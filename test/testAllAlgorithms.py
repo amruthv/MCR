@@ -15,9 +15,9 @@ import mpl.algorithm_runner as runner
 from mpl.common.configuration import Configuration
 
 
-algorithmNumberToStrategyMap = {0: 'MCR', 1: 'RRT', 2: 'BiRRT', 3: 'BiRRT ignore start and goal', 4: 'collision removal greedy', 5: 'collision removal probabilistic',
-                                    6: 'ignore all non-permanent non-self', 7: 'collision removal repeat not greedy',
-                                    8: 'collision greedy removal after normal birrt'}
+algorithmNumberToStrategyMap = {0: 'MCR', 1: 'RRT', 2: 'BiRRT', 3: 'TLP MCR', 4: 'Greedy Removal', 5: 'Probabilistic Removal',
+                                    6: 'Ignore Non-Permanent', 7: 'Repeat Probabilistic Removal',
+                                    8: 'Search Then Greedy Removal', 9: 'HPN Like Removal'}
 
 draw = False
 numTimesToRunEach = 200
@@ -135,7 +135,7 @@ def runAlgorithms(start, goal, helper, robot, world):
     if draw:
         sim = makeSim(world)
         drawProblemAndWait(sim, robot, obstacles, start, goal)
-    for algorithmNumber in [4,5,7,8]:#range(1,9):
+    for algorithmNumber in range(10):
         successTime = 0.
         successCount = 0.
         failureTime = 0.
