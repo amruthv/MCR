@@ -178,7 +178,7 @@ def writeTestResults(testName, results, robot):
     for algorithmNumber in sorted(results.keys()):
         algorithm = algorithmNumberToStrategyMap[algorithmNumber]
         successFrequency, avgFailureTime, avgSuccessTime, averagePathLength, averagCoverScore = results[algorithmNumber]
-        f.write("{0}, {1}, {2}, {3}, {4}\n".format(algorithm, successFrequency, avgFailureTime,
+        f.write("{0}, {1}, {2}, {3}, {4}, {5}\n".format(algorithm, successFrequency, avgFailureTime,
                     avgSuccessTime, averagePathLength, averagCoverScore))
     f.close()
 
