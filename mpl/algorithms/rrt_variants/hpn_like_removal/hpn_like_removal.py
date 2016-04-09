@@ -24,8 +24,8 @@ class HPNLikeRemovalSearcher(object):
         self.removeInterval = removeInterval
         self.obstacleCollisionCounts = {}
         self.deletedObstacles = {}
-        self.initializeForIteration()
         self.obstaclesToIgnore = self.obstaclesAtStartAndGoal.union(set())
+        self.initializeForIteration()
 
     def run(self):
         for i in range(mplGlob.rrtIterFailLimit):
