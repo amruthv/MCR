@@ -21,11 +21,15 @@ class HPNLikeRemovalSearcher(object):
         self.useTLPObstacles = useTLPObstacles
         self.removalStrategy = removalStrategy
         self.memoryFactor = memoryFactor
-        self.removeInterval = 40
+        self.removeInterval = removeInterval
+        self.obstacleCollisionCounts = {}
+        self.deletedObstacles = {}
         self.initializeForIteration()
+        self.obstaclesToIgnore = self.obstaclesAtStartAndGoal.union(set())
 
     def run(self):
         for i in range(mplGlob.rrtIterFailLimit):
+            self.initializeForIteration()
             success = self.search(removeObstacles = False)
             if success:
                 self.foundPath = True
@@ -35,11 +39,8 @@ class HPNLikeRemovalSearcher(object):
         return self.foundPath
 
     def initializeForIteration(self):
-        self.obstaclesToIgnore = self.obstaclesAtStartAndGoal.union(set())
-        self.obstacleCollisionCounts = {}
         self.RRT1 = RRTSearcher(self.start, self.goal, self.helper, self.obstaclesToIgnore, self.obstacleCollisionCounts, extendBackwards = False)
         self.RRT2 = RRTSearcher(self.goal, self.start, self.helper, self.obstaclesToIgnore, self.obstacleCollisionCounts, extendBackwards = True)
-        self.deletedObstacles = {}
         self.meetingPoint = None
 
     def search(self, removeObstacles):
