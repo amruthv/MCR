@@ -135,7 +135,7 @@ def runAlgorithms(start, goal, helper, robot, world):
     if draw:
         sim = makeSim(world)
         drawProblemAndWait(sim, robot, obstacles, start, goal)
-    for algorithmNumber in range(9,10):
+    for algorithmNumber in range(10):
         successTime = 0.
         successCount = 0.
         failureTime = 0.
