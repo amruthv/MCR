@@ -49,11 +49,12 @@ def getManySmallObstaclesWorld():
 
 def getManyObstaclesUnfeasibleWorld():
     obstacle1 = SimpleObstacle("obs1", [(100,0), (275,0), (300,100), (190,180), (75, 100)], 4)
-    obstacle2 = SimpleObstacle("obs2", [(140, 385), (225,425), (140,480), (55,425)], 1)
+    obstacle2 = SimpleObstacle("obs2", [(160, 350), (320,425), (160,480), (130,425)], 1)
     obstacle3 = SimpleObstacle("obs3", [(250, 200), (350, 200), (350, 375), (250, 375)], 20)
     obstacle4 = SimpleObstacle("obs4", [(375, 50), (480, 50), (480, 140), (375, 140)])
-    obstacle5 = SimpleObstacle("obs5", [(410, 300), (500,300), (500, 350), (430, 350), (430, 450), (500, 450), (500, 475), (410, 475), (410, 420), (360, 400), (410, 380)])
-    obstacles = [obstacle1, obstacle2, obstacle3, obstacle4, obstacle5]
+    obstacle5 = SimpleObstacle("obs5", [(410, 350), (430, 350), (430, 450), (410, 450), (410, 420), (360, 400), (410, 380)])
+    obstacle6 = SimpleObstacle("obs6", [(220, 150), (280, 150), (280, 200), (220, 200)])
+    obstacles = [obstacle1, obstacle2, obstacle3, obstacle4, obstacle5, obstacle6]
     world = World(500,500, obstacles)
     return world, obstacles
 
