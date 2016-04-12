@@ -31,6 +31,7 @@ class SearchThenCollisionRemovalSearcher(object):
                 self.foundPath = True
                 return True
             newCounts = {}
+            self.obstacleCollisionCounts = newCounts
             self.RRT1.obstacleCollisionCounts = newCounts
             self.RRT2.obstacleCollisionCounts = newCounts
             success = self.search(removeObstacles = True)
@@ -51,6 +52,8 @@ class SearchThenCollisionRemovalSearcher(object):
     # want memoryFactor <= 1 used to discount previous weights since removing an obstacle opens up new space
     def search(self, removeObstacles, obstacleRemovalInterval = 40):
         for iterNum in range(mplGlob.rrtIterCount):
+            # if removeObstacles:
+            #     print self.obstacleCollisionCounts
             if removeObstacles and iterNum % obstacleRemovalInterval == 0:
                 self.selectObstacleToRemove()
             qExtended = self.RRT1.runIteration()
