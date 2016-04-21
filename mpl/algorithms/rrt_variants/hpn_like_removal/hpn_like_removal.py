@@ -34,6 +34,11 @@ class HPNLikeRemovalSearcher(object):
             if success:
                 self.foundPath = True
                 return True
+        print 'failed to find collision free path'
+        newCounts = {}
+        self.obstacleCollisionCounts = newCounts
+        self.RRT1.obstacleCollisionCounts = newCounts
+        self.RRT2.obstacleCollisionCounts = newCounts
         self.foundPath = self.search(removeObstacles = True)
         assert(self.foundPath == True)
         return self.foundPath
@@ -49,6 +54,7 @@ class HPNLikeRemovalSearcher(object):
             if not removeObstacles and iterCount > mplGlob.rrtIterCount:
                 return False
             if removeObstacles and iterCount > 0 and iterCount % self.removeInterval == 0:
+                print self.obstacleCollisionCounts
                 self.selectObstacleToRemove()
             qExtended = self.RRT1.runIteration()
             if qExtended is not None:

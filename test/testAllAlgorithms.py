@@ -19,7 +19,7 @@ algorithmNumberToStrategyMap = {0: 'MCR', 1: 'RRT', 2: 'BiRRT', 3: 'TLP MCR', 4:
                                     6: 'Ignore Non-Permanent', 7: 'Repeat Probabilistic Removal',
                                     8: 'Search Then Greedy Removal', 9: 'HPN Like Removal'}
 
-draw = False
+draw = True
 numTimesToRunEach = 200
 stepSize = 1150
 pi = math.pi
@@ -135,7 +135,7 @@ def runAlgorithms(start, goal, helper, robot, world):
     if draw:
         sim = makeSim(world)
         drawProblemAndWait(sim, robot, obstacles, start, goal)
-    for algorithmNumber in range(10):
+    for algorithmNumber in [6, 9]: #range(10):
         successTime = 0.
         successCount = 0.
         failureTime = 0.
