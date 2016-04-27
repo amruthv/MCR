@@ -19,7 +19,7 @@ algorithmNumberToStrategyMap = {0: 'MCR', 1: 'RRT', 2: 'BiRRT', 3: 'TLP MCR', 4:
                                     6: 'Ignore Non-Permanent', 7: 'Repeat Probabilistic Removal',
                                     8: 'Search Then Greedy Removal', 9: 'HPN Like Removal'}
 
-draw = True
+draw = False
 numTimesToRunEach = 200
 stepSize = 1150
 pi = math.pi
@@ -38,7 +38,8 @@ def runAllOnEmptyWorld():
     goal = Configuration([50, 50], [0, piOver2, -piOver2])
     robot = MovableLinkRobotWithObject(links, heldObject, world)
     helper = MPLHelper(robot, world, goal, stepSize)
-    testResults = runAlgorithms(start, goal, helper, robot, world)   
+    testResults, history = runAlgorithms(start, goal, helper, robot, world) 
+    pickleHistory('EmptyWorld', history)  
     writeTestResults('EmptyWorld', testResults, robot)
 
 def runAllOnSomeObstaclesFeasibleWorld():
@@ -53,7 +54,8 @@ def runAllOnSomeObstaclesFeasibleWorld():
     goal = Configuration([50, 50], [0, piOver2, -piOver2])
     robot = MovableLinkRobotWithObject(links, heldObject, world)
     helper = MPLHelper(robot, world, goal, stepSize)
-    testResults = runAlgorithms(start, goal, helper, robot, world)    
+    testResults, history = runAlgorithms(start, goal, helper, robot, world)    
+    pickleHistory('SomeObstaclesFeasibleWorld', history)
     writeTestResults('SomeObstaclesFeasibleWorld', testResults, robot)
 
 def runAllOnManyObstaclesWorld():
@@ -67,7 +69,8 @@ def runAllOnManyObstaclesWorld():
     goal = Configuration([450, 360], [0, piOver2, piOver2])
     robot = MovableLinkRobotWithObject(links, heldObject, world)
     helper = MPLHelper(robot, world, goal, stepSize)
-    testResults = runAlgorithms(start, goal, helper, robot, world)    
+    testResults, history = runAlgorithms(start, goal, helper, robot, world)
+    pickleHistory('ManyObstaclesWorld', history)  
     writeTestResults('ManyObstaclesWorld', testResults, robot)
 
 def runAllOnTwoSoda():
@@ -82,7 +85,8 @@ def runAllOnTwoSoda():
     goal = Configuration([50, 50], [0, piOver2, -piOver2])
     robot = MovableLinkRobotWithObject(links, heldObject, world)
     helper = MPLHelper(robot, world, goal, stepSize)
-    testResults = runAlgorithms(start, goal, helper, robot, world)    
+    testResults, history = runAlgorithms(start, goal, helper, robot, world) 
+    pickleHistory('TwoSodaHandle', history)   
     writeTestResults('TwoSodaHandle', testResults, robot)
 
 def runAllOnManyObstaclesUnfeasibleWorld():
@@ -96,7 +100,8 @@ def runAllOnManyObstaclesUnfeasibleWorld():
     goal = Configuration([450, 360], [0, piOver2, piOver2])
     robot = MovableLinkRobotWithObject(links, heldObject, world)
     helper = MPLHelper(robot, world, goal, stepSize)
-    testResults = runAlgorithms(start, goal, helper, robot, world)    
+    testResults, history = runAlgorithms(start, goal, helper, robot, world)    
+    pickleHistory('ManyObstaclesUnfeasibleWorld', history)
     writeTestResults('ManyObstaclesUnfeasibleWorld', testResults, robot)
 
 def runAllOnClutteredWorld():
@@ -111,7 +116,8 @@ def runAllOnClutteredWorld():
     goal = Configuration([70, 0], [piOver2, 0, -piOver2])
     robot = MovableLinkRobotWithObject(links, heldObject, world)
     helper = MPLHelper(robot, world, goal, stepSize)
-    testResults = runAlgorithms(start, goal, helper, robot, world)    
+    testResults, history = runAlgorithms(start, goal, helper, robot, world) 
+    pickleHistory('ClutteredWorld', history)   
     writeTestResults('ClutteredWorld', testResults, robot)
 
 def runAllOnTopLightClutteredWorld():
@@ -126,22 +132,25 @@ def runAllOnTopLightClutteredWorld():
     goal = Configuration([70, 0], [piOver2, 0, -piOver2])
     robot = MovableLinkRobotWithObject(links, heldObject, world)
     helper = MPLHelper(robot, world, goal, stepSize)
-    testResults = runAlgorithms(start, goal, helper, robot, world)    
+    testResults, history = runAlgorithms(start, goal, helper, robot, world)  
+    pickleHistory('TopLightClutteredWorld', history)  
     writeTestResults('TopLightClutteredWorld', testResults, robot)
 
 def runAlgorithms(start, goal, helper, robot, world):
     testResults = {}
+    history = {}
     obstacles = world.obstacles
     if draw:
         sim = makeSim(world)
         drawProblemAndWait(sim, robot, obstacles, start, goal)
-    for algorithmNumber in [6, 9]: #range(10):
+    for algorithmNumber in range(10):
         successTime = 0.
         successCount = 0.
         failureTime = 0.
         failureCount = 0.
         pathCost = 0.
         coverCost = 0.
+        history[algorithmNumber] = []
         for i in range(numTimesToRunEach):
             t = time.time()
             path, cover = runner.runAlgorithm(start, goal, helper, algorithmNumber, False)
@@ -151,15 +160,16 @@ def runAlgorithms(start, goal, helper, robot, world):
                 coverCost += coverOfPath.score
                 successTime += time.time() - t
                 successCount += 1
+                history[algorithmNumber].append((pathCost, coverCost, successTime))
                 print 'path =', path
                 print 'cover = ', cover
-                interpolatedPath = generateInterpolatedPath(path, helper)
                 if draw:
                     drawPath(sim, obstacles, robot, path)
             else:
                 print 'no path ;('
                 failureTime += time.time() - t
                 failureCount += 1
+                history[algorithmNumber].append((failureTime,))
         if successCount == 0:
             testResults[algorithmNumber] = (0, failureTime / failureCount, 0, 0, 0)
         elif failureCount == 0:
@@ -167,8 +177,13 @@ def runAlgorithms(start, goal, helper, robot, world):
         else:
             testResults[algorithmNumber] = (100 * successCount / numTimesToRunEach, failureTime / failureCount, successTime / successCount,
                                             pathCost / successCount, coverCost / successCount)
-    return testResults
+    return testResults, history
 
+def pickleHistory(testName, history):
+    import cPickle, gzip
+    f = gzip.open("test_results/history/" + testName + ".pkl.gz", 'wb')
+    cPickle.dump(history, f)  
+    f.close()
 
 def writeTestResults(testName, results, robot):
     import time
@@ -199,13 +214,6 @@ def computeLengthOfPath(path, robot):
     for i in range(len(path) - 1):
         dist += robot.distance(path[i], path[i+1])
     return dist
-
-
-
-# world, obstacles = getTest()
-# sim = makeSim(world)
-# sim.drawObstacles(obstacles)
-
 
 # runAllOnEmptyWorld()
 # runAllOnSomeObstaclesFeasibleWorld()
