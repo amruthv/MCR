@@ -22,12 +22,10 @@ def analyzeHistory(fileName):
         fig = plt.figure(algorithmNumber, figsize=(8,10))
         fig = plt.figure(algorithmNumber)
         fig.subplots_adjust(hspace = 0.5)
-        if algorithmNumber == 7:
-            pdb.set_trace()
         if len(coverHistory) != 0:
             plt.subplot(311)
             n, bins, patches = plt.hist(coverHistory, bins = range(int(max(coverHistory) + 2)), normed = 1, facecolor='green', alpha=0.5, align = 'left')
-            # print 'bins', bins
+            print 'bins', bins
             plt.title("Cover Histogram for " + fileName + " for algorithm " + algorithmNumberToStrategyMap[algorithmNumber])
         if len(successTimeHistory) != 0:
             plt.subplot(312)
@@ -37,7 +35,8 @@ def analyzeHistory(fileName):
             plt.subplot(313)
             plt.hist(failureTimeHistory, facecolor='green', alpha= 0.5)
             plt.title("Failure Time Histogram for " + fileName + " for algorithm " + algorithmNumberToStrategyMap[algorithmNumber])
-    plt.show()
+        pdb.set_trace()
+        plt.show()
     
 
 def readPickledHistory(fileName):
@@ -49,5 +48,13 @@ def readPickledHistory(fileName):
     
 
 fileNames = ['SomeObstaclesFeasibleWorld', 'ManyObstaclesWorld', 'TwoSodaHandle', 'ClutteredWorld', 'TopLightClutteredWorld']
-for fileName in fileNames:
-    analyzeHistory(fileName)
+
+analyzeHistory(fileNames[0])
+# analyzeHistory(fileNames[1])
+# analyzeHistory(fileNames[2])
+# analyzeHistory(fileNames[3])
+
+
+# for fileName in fileNames:
+    # analyzeHistory(fileName)
+# 

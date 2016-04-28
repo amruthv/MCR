@@ -148,35 +148,38 @@ def runAlgorithms(start, goal, helper, robot, world):
         successCount = 0.
         failureTime = 0.
         failureCount = 0.
-        pathCost = 0.
-        coverCost = 0.
+        totalPathCost = 0.
+        totalCoverCost = 0.
         history[algorithmNumber] = []
         for i in range(numTimesToRunEach):
             t = time.time()
             path, cover = runner.runAlgorithm(start, goal, helper, algorithmNumber, False)
             if len(path) != 0:
-                pathCost += computeLengthOfPath(path, robot)
-                coverOfPath = Cover(cover, False)
-                coverCost += coverOfPath.score
-                successTime += time.time() - t
+                pathLength = computeLengthOfPath(path, robot)
+                totalPathCost += computeLengthOfPath(path, robot)
+                coverOfPath = Cover(cover, False).score
+                totalCoverCost += coverOfPath
+                iterationTime = time.time() -t
+                successTime += iterationTime
                 successCount += 1
-                history[algorithmNumber].append((pathCost, coverCost, successTime))
+                history[algorithmNumber].append((pathLength, coverOfPath, iterationTime))
                 print 'path =', path
                 print 'cover = ', cover
                 if draw:
                     drawPath(sim, obstacles, robot, path)
             else:
                 print 'no path ;('
-                failureTime += time.time() - t
+                iterationTime = time.time() - t
+                failureTime += iterationTime
                 failureCount += 1
-                history[algorithmNumber].append((failureTime,))
+                history[algorithmNumber].append((iterationTime,))
         if successCount == 0:
             testResults[algorithmNumber] = (0, failureTime / failureCount, 0, 0, 0)
         elif failureCount == 0:
-            testResults[algorithmNumber] = (100, 0, successTime / successCount, pathCost / successCount, coverCost / successCount)
+            testResults[algorithmNumber] = (100, 0, successTime / successCount, totalPathCost / successCount, totalCoverCost / successCount)
         else:
             testResults[algorithmNumber] = (100 * successCount / numTimesToRunEach, failureTime / failureCount, successTime / successCount,
-                                            pathCost / successCount, coverCost / successCount)
+                                            totalPathCost / successCount, totalCoverCost / successCount)
     return testResults, history
 
 def pickleHistory(testName, history):
